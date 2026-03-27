@@ -199,7 +199,7 @@ export function LibraryManager({
     setVersionInfoDialogOpen(true)
   }
 
-  const handleExportLibrary = () => {
+  const handleExportLibrary = async () => {
     if (!selectedLibraryId) return
     
     const library = libraries.find(lib => lib.id === selectedLibraryId)
@@ -236,26 +236,52 @@ export function LibraryManager({
 
       const jsonString = JSON.stringify(exportData, null, 2)
       const blob = new Blob([jsonString], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
       const safeFileName = library.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()
-      a.download = `bibliotheque_${safeFileName}_v${newVersion}_${Date.now()}.json`
-      document.body.appendChild(a)
-      a.click()
-      
-      setTimeout(() => {
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-      }, 100)
+      const suggestedFileName = `bibliotheque_${safeFileName}_v${newVersion}_${Date.now()}.json`
+
+      if ('showSaveFilePicker' in window) {
+        try {
+          const fileHandle = await (window as any).showSaveFilePicker({
+            suggestedName: suggestedFileName,
+            types: [{
+              description: 'Fichier de bibliothèque JSON',
+              accept: { 'application/json': ['.json'] },
+            }],
+          })
+          
+          const writable = await fileHandle.createWritable()
+          await writable.write(blob)
+          await writable.close()
+          
+          toast.success(`Bibliothèque "${library.name}" exportée avec succès (v${newVersion})`)
+        } catch (err: any) {
+          if (err.name === 'AbortError') {
+            toast.info('Export annulé')
+            return
+          }
+          throw err
+        }
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = suggestedFileName
+        document.body.appendChild(a)
+        a.click()
+        
+        setTimeout(() => {
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+        }, 100)
+        
+        toast.success(`Bibliothèque "${library.name}" exportée avec succès (v${newVersion})`)
+      }
 
       setExportDialogOpen(false)
       setSelectedLibraryId(null)
       setExportChangelog('')
       setExportAuthor('')
       setExportVersionType('patch')
-      
-      toast.success(`Bibliothèque "${library.name}" exportée avec succès (v${newVersion})`)
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Erreur lors de l\'exportation de la bibliothèque')
