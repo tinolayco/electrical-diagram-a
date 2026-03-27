@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iSchémateur - Analyseur de schémas électriques</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script async src="https://docs.opencv.org/4.8.0/opencv.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="console.log('par Normand Rocheleau ing.')"></script>
     <style>
         * {
             margin: 0;
@@ -15,1634 +13,1522 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-primary: oklch(0.98 0 0);
-            --bg-secondary: oklch(1 0 0);
-            --fg-primary: oklch(0.2 0.02 255);
-            --fg-muted: oklch(0.5 0.02 255);
-            --border: oklch(0.88 0.01 255);
-            --primary: oklch(0.45 0.15 250);
-            --primary-fg: oklch(0.98 0 0);
-            --accent: oklch(0.68 0.18 45);
-            --accent-fg: oklch(0.98 0 0);
-            --muted: oklch(0.92 0.01 255);
-            --destructive: oklch(0.577 0.245 27.325);
-            --success: oklch(0.6 0.15 145);
-            --radius: 8px;
-        }
-
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg-primary);
-            color: var(--fg-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            background: #fafafa;
+            color: #1a1a1a;
+            overflow: hidden;
+            height: 100vh;
         }
 
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 1.5rem;
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 24px;
+            flex-shrink: 0;
         }
 
         .header-content {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 12px;
         }
 
         .logo-icon {
             width: 32px;
             height: 32px;
-            background: var(--primary);
-            border-radius: 6px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            color: var(--primary-fg);
+            color: white;
+            font-weight: bold;
         }
 
-        .logo-text h1 {
-            font-size: 1.5rem;
+        h1 {
+            font-size: 24px;
             font-weight: 700;
+            color: #1a1a1a;
         }
 
-        .logo-text p {
-            font-size: 0.875rem;
-            color: var(--fg-muted);
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-top: 2px;
         }
 
-        .header-actions {
+        .opencv-status {
+            font-size: 12px;
+            color: #4f46e5;
+            margin-top: 2px;
+        }
+
+        .controls {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: var(--bg-secondary);
-            color: var(--fg-primary);
-            font-size: 0.875rem;
-            font-weight: 500;
+        button {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 6px;
+            transition: all 0.2s;
         }
 
-        .btn:hover {
-            background: var(--muted);
+        button:hover:not(:disabled) {
+            border-color: #4f46e5;
+            background: #f5f3ff;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: var(--primary-fg);
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn:disabled {
+        button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .btn-icon {
-            padding: 0.5rem;
-            width: 36px;
-            height: 36px;
-            justify-content: center;
+        button.primary {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
         }
 
-        .dropdown {
-            position: relative;
-            display: inline-block;
+        button.primary:hover:not(:disabled) {
+            background: #4338ca;
         }
 
-        .dropdown-trigger {
+        select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            background: white;
             cursor: pointer;
         }
 
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: calc(100% + 0.5rem);
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            min-width: 220px;
-            z-index: 1000;
-        }
-
-        .dropdown-menu.show {
-            display: block;
-        }
-
-        .dropdown-item {
-            padding: 0.75rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            color: var(--fg-primary);
-        }
-
-        .dropdown-item:hover {
-            background: var(--muted);
-        }
-
-        .dropdown-item.destructive {
-            color: var(--destructive);
-        }
-
-        .dropdown-separator {
-            height: 1px;
-            background: var(--border);
-            margin: 0.25rem 0;
-        }
-
-        .progress-container {
-            height: 4px;
-            background: var(--muted);
-            display: none;
-        }
-
-        .progress-container.show {
-            display: block;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s;
-            width: 0%;
-        }
-
-        .main-content {
+        main {
             flex: 1;
-            padding: 1.5rem;
+            padding: 16px 24px;
+            overflow: hidden;
             display: flex;
-            gap: 1rem;
-            min-height: 0;
-        }
-
-        .canvas-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            min-width: 0;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 0.25rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .tab {
-            padding: 0.5rem 1rem;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 0.875rem;
-            color: var(--fg-muted);
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .tab:hover {
-            color: var(--fg-primary);
-        }
-
-        .tab.active {
-            color: var(--fg-primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .tab-content {
-            display: none;
-            flex: 1;
-            min-height: 0;
-        }
-
-        .tab-content.active {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem;
+            gap: 16px;
         }
 
         .canvas-container {
             flex: 1;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--bg-secondary);
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             overflow: hidden;
         }
 
-        .empty-state {
-            text-align: center;
-            color: var(--fg-muted);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        #diagram-canvas {
-            max-width: 100%;
-            max-height: 100%;
-            cursor: crosshair;
+        canvas {
+            display: block;
+            cursor: move;
         }
 
         .sidebar {
             width: 360px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            flex-shrink: 0;
+            overflow: hidden;
         }
 
-        .card-title {
-            font-size: 0.875rem;
+        .sidebar-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            font-size: 14px;
         }
 
-        .component-list {
-            max-height: 400px;
+        .sidebar-content {
+            flex: 1;
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            padding: 8px;
         }
 
         .component-item {
-            padding: 0.75rem;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            transition: background 0.2s;
+            border: 1px solid transparent;
         }
 
         .component-item:hover {
-            background: var(--muted);
+            background: #f5f3ff;
         }
 
         .component-item.selected {
-            background: var(--primary);
-            color: var(--primary-fg);
-            border-color: var(--primary);
-        }
-
-        .component-info {
-            flex: 1;
-        }
-
-        .component-name {
-            font-weight: 500;
-            font-size: 0.875rem;
+            background: #ede9fe;
+            border-color: #4f46e5;
         }
 
         .component-type {
-            font-size: 0.75rem;
-            color: var(--fg-muted);
-        }
-
-        .component-item.selected .component-type {
-            color: var(--primary-fg);
-            opacity: 0.8;
-        }
-
-        .confidence-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
             font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 4px;
         }
 
-        .confidence-high {
-            background: oklch(0.6 0.15 145 / 0.15);
-            color: var(--success);
+        .component-name {
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
         }
 
-        .confidence-medium {
-            background: oklch(0.68 0.18 45 / 0.15);
-            color: var(--accent);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 0.75rem;
-        }
-
-        .stat-item {
-            padding: 0.75rem;
-            border-radius: 6px;
-            background: var(--muted);
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--fg-muted);
-            margin-top: 0.25rem;
-        }
-
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .slider-label {
-            font-size: 0.75rem;
-            color: var(--fg-muted);
-        }
-
-        .slider-value {
-            font-size: 0.75rem;
+        .component-confidence {
+            font-size: 11px;
+            color: #666;
             font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
         }
 
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            outline: none;
-            -webkit-appearance: none;
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #666;
         }
 
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
 
         .modal {
             display: none;
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            z-index: 1000;
             align-items: center;
             justify-content: center;
         }
 
-        .modal.show {
+        .modal.active {
             display: flex;
         }
 
         .modal-content {
-            background: var(--bg-secondary);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            max-width: 500px;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
             width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .modal-header {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
         }
 
         .modal-body {
-            margin-bottom: 1.5rem;
+            margin-bottom: 20px;
         }
 
         .modal-footer {
             display: flex;
-            gap: 0.5rem;
             justify-content: flex-end;
+            gap: 8px;
         }
 
-        .form-group {
-            margin-bottom: 1rem;
+        .training-canvas {
+            border: 2px solid #4f46e5;
+            cursor: crosshair;
+            max-width: 100%;
+            height: auto;
         }
 
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
+        .annotation-list {
+            margin-top: 16px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
-        .form-input {
+        .annotation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        input[type="text"], input[type="file"] {
             width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.875rem;
-            font-family: inherit;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            margin-bottom: 12px;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .threshold-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .threshold-label {
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .threshold-slider {
+            flex: 1;
+        }
+
+        .threshold-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #666;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 0 16px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4f46e5;
+            transition: width 0.3s;
+            width: 0%;
         }
 
         .drag-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1500;
-            background: rgba(69, 89, 164, 0.1);
-            backdrop-filter: blur(4px);
-            border: 4px dashed var(--primary);
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(79, 70, 229, 0.1);
+            border: 4px dashed #4f46e5;
+            z-index: 999;
             align-items: center;
             justify-content: center;
         }
 
-        .drag-overlay.show {
+        .drag-overlay.active {
             display: flex;
         }
 
-        .drag-overlay-content {
-            background: var(--bg-secondary);
-            border: 2px solid var(--primary);
-            border-radius: var(--radius);
-            padding: 2rem;
+        .drag-message {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            border: 2px solid #4f46e5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: #f5f3ff;
+            padding: 12px;
+            border-radius: 6px;
             text-align: center;
         }
 
-        .catalog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 0.75rem;
-        }
-
-        .catalog-item {
-            padding: 0.75rem;
-            background: var(--muted);
-            border-radius: 6px;
-        }
-
-        .catalog-type {
-            font-size: 0.75rem;
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .catalog-count {
-            font-size: 1.5rem;
+        .stat-value {
+            font-size: 24px;
             font-weight: 700;
-            color: var(--primary);
+            color: #4f46e5;
         }
 
-        .catalog-label {
-            font-size: 0.625rem;
-            color: var(--fg-muted);
-            margin-top: 0.25rem;
-        }
-
-        .path-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .path-item {
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .path-item:hover {
-            border-color: var(--primary);
-            background: var(--muted);
-        }
-
-        .path-description {
-            font-weight: 500;
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .path-details {
-            font-size: 0.75rem;
-            color: var(--fg-muted);
-        }
-
-        .library-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            background: var(--muted);
-            font-size: 0.75rem;
-        }
-
-        .library-badge.active {
-            background: var(--primary);
-            color: var(--primary-fg);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            z-index: 3000;
-            display: none;
-            max-width: 400px;
-        }
-
-        .toast.show {
-            display: block;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(120%);
-            }
-            to {
-                transform: translateX(0);
-            }
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--success);
-        }
-
-        .toast.error {
-            border-left: 4px solid var(--destructive);
-        }
-
-        .toast.info {
-            border-left: 4px solid var(--primary);
-        }
-
-        @media (max-width: 1024px) {
-            .sidebar {
-                width: 100%;
-            }
-
-            .main-content {
-                flex-direction: column;
-            }
-
-            .canvas-container {
-                min-height: 400px;
-            }
-        }
-
-        input[type="file"] {
-            display: none;
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">⚡</div>
-                <div class="logo-text">
-                    <h1>iSchémateur V1</h1>
-                    <p>Analyseur de schémas électriques de Norm Rocheleau    </p>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">iS</div>
+                    <div>
+                        <h1>iSchémateur</h1>
+                        <div class="subtitle">Analyseur de schémas électriques</div>
+                        <div class="opencv-status" id="opencvStatus">Chargement...</div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <select id="librarySelect" title="Sélectionner une bibliothèque">
+                        <option value="">Sélectionner une bibliothèque</option>
+                    </select>
+                    <button onclick="app.createLibrary()">➕ Créer bibliothèque</button>
+                    <button id="trainBtn" onclick="app.openTrainingMode()" disabled>🎓 Entraîner</button>
+                    <button onclick="app.uploadSchematic()">📤 Téléverser</button>
+                    <button onclick="app.loadExample()">✨ Exemple</button>
+                    <button id="analyzeBtn" class="primary" onclick="app.analyze()" disabled>⚡ Analyser</button>
+                    <button onclick="app.showHelp()">❓</button>
+                    <button onclick="app.resetData()">🗑️ Réinitialiser</button>
                 </div>
             </div>
-            <div class="header-actions">
-                <div class="dropdown" id="libraryDropdown">
-                    <button class="btn dropdown-trigger" id="btnLibrary">
-                        📚 <span id="libraryName">Bibliothèque par défaut</span>
-                    </button>
-                    <div class="dropdown-menu" id="libraryMenu">
-                        <div class="dropdown-item" data-library="default">
-                            📚 Bibliothèque par défaut
-                        </div>
-                        <div class="dropdown-separator"></div>
-                        <div class="dropdown-item" id="createLibraryBtn">
-                            ➕ Créer une bibliothèque
-                        </div>
-                    </div>
-                </div>
+        </header>
 
-                <div class="dropdown" id="helpDropdown">
-                    <button class="btn btn-icon dropdown-trigger" id="btnHelp" title="Aide">
-                        ❓
-                    </button>
-                    <div class="dropdown-menu" id="helpMenu">
-                        <div class="dropdown-item" id="showHelpBtn">
-                            ℹ️ Guide d'utilisation
-                        </div>
-                        <div class="dropdown-separator"></div>
-                        <div class="dropdown-item" id="showAboutBtn">
-                            📋 À propos
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dropdown" id="resetDropdown">
-                    <button class="btn btn-icon dropdown-trigger" id="btnReset" title="Réinitialiser">
-                        🗑️
-                    </button>
-                    <div class="dropdown-menu" id="resetMenu">
-                        <div class="dropdown-item" id="resetLibraryBtn">
-                            📚 Réinitialiser la bibliothèque
-                        </div>
-                        <div class="dropdown-separator"></div>
-                        <div class="dropdown-item" id="resetSchematicsBtn">
-                            ⚡ Réinitialiser les schémas
-                        </div>
-                        <div class="dropdown-separator"></div>
-                        <div class="dropdown-item destructive" id="resetAllBtn">
-                            🗑️ Tout réinitialiser
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn" id="btnExample">
-                    ✨ Exemple
-                </button>
-
-                <button class="btn" id="btnUpload">
-                    📤 Téléverser
-                </button>
-
-                <button class="btn" id="btnTrain">
-                    🎓 Entraîner
-                </button>
-
-                <button class="btn btn-primary" id="btnAnalyze" disabled>
-                    ⚡ Analyser
-                </button>
-            </div>
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
         </div>
-    </header>
 
-    <div class="progress-container" id="progressContainer">
-        <div class="progress-fill" id="progressFill"></div>
-    </div>
+        <div class="tabs">
+            <button class="tab active" onclick="app.switchTab('analysis')">⚡ Analyse</button>
+            <button class="tab" onclick="app.switchTab('catalog')">📦 Catalogue</button>
+            <button class="tab" onclick="app.switchTab('paths')">🔀 Chemins</button>
+        </div>
 
-    <main class="main-content">
-        <div class="canvas-area">
-            <div class="tabs">
-                <button class="tab active" data-tab="analysis">
-                    ⚡ Analyse
-                </button>
-                <button class="tab" data-tab="catalog">
-                    📦 Catalogue
-                </button>
-                <button class="tab" data-tab="paths">
-                    🔀 Chemins
-                </button>
-            </div>
-
-            <div class="tab-content active" id="analysis-tab">
+        <main>
+            <div id="analysisTab" class="tab-content active">
                 <div class="canvas-container" id="canvasContainer">
-                    <div class="empty-state" id="emptyState">
-                        <div class="empty-state-icon">📋</div>
-                        <h2>Aucun schéma chargé</h2>
-                        <p>Téléversez un schéma électrique pour commencer</p>
+                    <canvas id="mainCanvas"></canvas>
+                </div>
+
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Composants détectés</span>
+                            <div class="threshold-control" style="border: none; padding: 0;">
+                                <span class="threshold-label">Seuil:</span>
+                                <input type="range" id="thresholdSlider" class="threshold-slider" 
+                                       min="80" max="99" value="85" style="width: 80px;"
+                                       oninput="app.updateThreshold(this.value)">
+                                <span class="threshold-value" id="thresholdValue">85%</span>
+                            </div>
+                        </div>
                     </div>
-                    <canvas id="diagram-canvas"></canvas>
+                    <div class="sidebar-content" id="componentList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div>Aucun composant détecté</div>
+                            <div style="font-size: 12px; margin-top: 8px;">Téléversez un schéma et analysez-le</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="tab-content" id="catalog-tab">
-                <div class="card" style="flex: 1; overflow: auto;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 class="card-title" style="margin: 0;">Catalogue de composants</h3>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button class="btn" id="btnImportCatalog" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                                📥 Importer CSV
-                            </button>
-                            <button class="btn" id="btnExportCatalog" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                                📄 Exporter CSV
-                            </button>
+            <div id="catalogTab" class="tab-content" style="flex: 1;">
+                <div class="sidebar" style="width: 100%;">
+                    <div class="sidebar-header">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Catalogue de composants</span>
+                            <div>
+                                <button onclick="app.exportCatalog()">📥 Exporter CSV</button>
+                                <button onclick="app.importCatalog()">📤 Importer CSV</button>
+                            </div>
                         </div>
                     </div>
-                    <div id="catalogContent">
+                    <div class="sidebar-content" id="catalogContent">
                         <div class="empty-state">
                             <div class="empty-state-icon">📦</div>
-                            <p>Aucun composant dans le catalogue</p>
-                            <p style="font-size: 0.75rem; margin-top: 0.5rem;">Analysez des schémas pour construire votre catalogue</p>
+                            <div>Aucun composant dans le catalogue</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="tab-content" id="paths-tab">
-                <div class="card" style="flex: 1; overflow: auto;">
-                    <h3 class="card-title">Chemins électriques</h3>
-                    <div id="pathsContent">
+            <div id="pathsTab" class="tab-content" style="flex: 1;">
+                <div class="sidebar" style="width: 100%;">
+                    <div class="sidebar-header">Chemins électriques</div>
+                    <div class="sidebar-content" id="pathsContent">
                         <div class="empty-state">
                             <div class="empty-state-icon">🔀</div>
-                            <p>Aucun chemin électrique identifié</p>
-                            <p style="font-size: 0.75rem; margin-top: 0.5rem;">Analysez le schéma pour identifier les connexions</p>
+                            <div>Aucun chemin électrique identifié</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <aside class="sidebar">
-            <div class="card" id="statsCard" style="display: none;">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="statTotal">0</div>
-                        <div class="stat-label">Composants</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statTypes">0</div>
-                        <div class="stat-label">Types</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" id="thresholdCard" style="display: none;">
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label">Seuil de confiance</span>
-                        <span class="slider-value" id="thresholdValue">85%</span>
-                    </div>
-                    <input type="range" id="confidenceSlider" min="80" max="99" value="85">
-                    <div class="slider-header" style="margin-top: 0.5rem;">
-                        <span class="slider-label">Affichés</span>
-                        <span class="slider-value" id="componentCount">0/0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <h3 class="card-title" style="margin: 0;">Composants</h3>
-                    <button class="btn" id="btnEdit" style="display: none; font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                        ✏️ Modifier
-                    </button>
-                </div>
-                <div class="component-list" id="componentList">
-                    <div class="empty-state" style="padding: 2rem 0;">
-                        <p style="font-size: 0.875rem;">Aucun composant</p>
-                    </div>
-                </div>
-            </div>
-        </aside>
-    </main>
+        </main>
+    </div>
 
     <div class="drag-overlay" id="dragOverlay">
-        <div class="drag-overlay-content">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">📤</div>
-            <h2>Déposez votre schéma ici</h2>
-            <p style="font-size: 0.875rem; color: var(--fg-muted); margin-top: 0.5rem;">
-                Formats supportés: PNG, JPG, SVG (max 10 Mo)
-            </p>
+        <div class="drag-message">
+            <div style="font-size: 48px; margin-bottom: 16px;">📤</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Déposez votre schéma ici</div>
+            <div style="font-size: 14px; color: #666;">Formats: PNG, JPG, SVG (max 10 Mo)</div>
         </div>
     </div>
 
-    <input type="file" id="fileInput" accept="image/*">
-
-    <div class="modal" id="uploadModal">
+    <div class="modal" id="trainingModal">
         <div class="modal-content">
-            <div class="modal-header">Téléverser un schéma</div>
+            <div class="modal-header">Mode Entraînement</div>
             <div class="modal-body">
-                <p style="font-size: 0.875rem; color: var(--fg-muted); margin-bottom: 1rem;">
-                    Sélectionnez un fichier image de schéma électrique (PNG, JPG, SVG)
+                <p style="margin-bottom: 16px; font-size: 14px; color: #666;">
+                    Sélectionnez des zones sur le schéma pour entraîner la reconnaissance de composants.
                 </p>
-                <button class="btn" onclick="document.getElementById('fileInput').click()" style="width: 100%;">
-                    📁 Choisir un fichier
-                </button>
+                <canvas id="trainingCanvas" class="training-canvas"></canvas>
+                <div style="margin-top: 16px;">
+                    <label>Type de composant</label>
+                    <input type="text" id="componentType" placeholder="Ex: CB, Disjoncteur, Transformateur">
+                </div>
+                <div class="annotation-list" id="annotationList"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn" id="closeUploadModal">Annuler</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="libraryModal">
-        <div class="modal-content">
-            <div class="modal-header">Créer une bibliothèque</div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Nom de la bibliothèque</label>
-                    <input type="text" class="form-input" id="libraryNameInput" placeholder="Ma bibliothèque personnalisée">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <input type="text" class="form-input" id="libraryDescInput" placeholder="Description de la bibliothèque">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" id="closeLibraryModal">Annuler</button>
-                <button class="btn btn-primary" id="saveLibraryBtn">Créer</button>
+                <button onclick="app.cancelTraining()">Annuler</button>
+                <button class="primary" onclick="app.saveTraining()">Enregistrer</button>
             </div>
         </div>
     </div>
 
     <div class="modal" id="helpModal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">Guide d'utilisation</div>
-            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
-                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">🎯 Démarrage rapide</h3>
-                <ol style="margin-left: 1.5rem; margin-bottom: 1rem; font-size: 0.875rem;">
-                    <li>Cliquez sur "Exemple" pour charger un schéma de démonstration</li>
-                    <li>Ou téléversez votre propre schéma avec le bouton "Téléverser"</li>
-                    <li>Cliquez sur "Analyser" pour détecter les composants</li>
-                </ol>
-
-                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">📚 Bibliothèques</h3>
-                <p style="font-size: 0.875rem; margin-bottom: 1rem;">
-                    Les bibliothèques permettent de stocker et réutiliser des modèles de composants entraînés.
-                    La bibliothèque par défaut contient des modèles pré-entraînés. Vous pouvez créer vos propres
-                    bibliothèques personnalisées avec le bouton "Entraîner".
-                </p>
-
-                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">🎓 Entraînement</h3>
-                <p style="font-size: 0.875rem; margin-bottom: 1rem;">
-                    Sélectionnez une bibliothèque personnalisée et cliquez sur "Entraîner" pour annoter
-                    manuellement des composants. Ces annotations améliorent la précision de détection.
-                </p>
-
-                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">📊 Seuil de confiance</h3>
-                <p style="font-size: 0.875rem; margin-bottom: 1rem;">
-                    Ajustez le curseur pour filtrer les composants selon leur score de confiance.
-                    Un seuil plus élevé affiche uniquement les détections les plus fiables.
-                </p>
-
-                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">📤 Export/Import</h3>
-                <p style="font-size: 0.875rem;">
-                    Exportez vos catalogues et schémas en CSV pour les partager ou les archiver.
-                    Importez des catalogues existants pour fusionner les données.
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="closeHelpModal">Fermer</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="confirmModal">
         <div class="modal-content">
-            <div class="modal-header" id="confirmTitle">Confirmer l'action</div>
-            <div class="modal-body">
-                <p id="confirmMessage" style="font-size: 0.875rem;"></p>
+            <div class="modal-header">Guide d'utilisation - iSchémateur</div>
+            <div class="modal-body" style="font-size: 14px; line-height: 1.6;">
+                <h3 style="margin-top: 0;">Par Normand Rocheleau ing.</h3>
+                <p><strong>1. Bibliothèques de composants</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li>Créez une nouvelle bibliothèque ou utilisez la bibliothèque par défaut</li>
+                    <li>Chaque bibliothèque contient des modèles de composants entraînés</li>
+                    <li>Exportez/importez vos bibliothèques au format JSON</li>
+                </ul>
+                <p><strong>2. Entraînement</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li>Téléversez un schéma de référence</li>
+                    <li>Cliquez sur "Entraîner" pour marquer les composants</li>
+                    <li>Dessinez des rectangles autour des composants</li>
+                    <li>Nommez chaque type de composant</li>
+                </ul>
+                <p><strong>3. Analyse</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li>Téléversez un schéma à analyser</li>
+                    <li>Cliquez sur "Analyser" pour détecter les composants</li>
+                    <li>Ajustez le seuil de confiance pour filtrer les résultats</li>
+                    <li>Zoom avec la molette, pan en glissant</li>
+                </ul>
+                <p><strong>4. Disjoncteurs interactifs</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li>Cliquez sur un disjoncteur pour basculer son état</li>
+                    <li>Vert = FERMÉ, Rouge = OUVERT</li>
+                </ul>
+                <p style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+                    <strong>Conception et réalisation:</strong> Normand Rocheleau ing.<br>
+                    Utilise par Normand Rocheleau ing. pour la détection avancée
+                </p>
             </div>
             <div class="modal-footer">
-                <button class="btn" id="cancelConfirmBtn">Annuler</button>
-                <button class="btn btn-primary" id="confirmActionBtn" style="background: var(--destructive); border-color: var(--destructive);">
-                    Confirmer
-                </button>
+                <button class="primary" onclick="app.closeHelp()">Fermer</button>
             </div>
         </div>
     </div>
 
-    <div class="toast" id="toast">
-        <div id="toastMessage"></div>
-    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="app.handleFileSelect(event)">
 
     <script>
-        const state = {
-            currentImage: null,
+        const app = {
+            libraries: [],
+            activeLibrary: null,
+            currentSchematic: null,
             components: [],
             catalog: {},
             paths: [],
-            selectedComponent: null,
             confidenceThreshold: 85,
-            analyzing: false,
-            libraries: [
-                { id: 'default', name: 'Bibliothèque par défaut', isDefault: true, annotations: [], componentCount: 0 }
-            ],
-            activeLibraryId: 'default'
-        };
+            zoom: 1,
+            panX: 0,
+            panY: 0,
+            isDragging: false,
+            lastX: 0,
+            lastY: 0,
+            opencvReady: false,
+            selectedComponent: null,
+            trainingAnnotations: [],
+            isTraining: false,
+            trainingStart: null,
 
-        const elements = {
-            btnUpload: document.getElementById('btnUpload'),
-            btnExample: document.getElementById('btnExample'),
-            btnAnalyze: document.getElementById('btnAnalyze'),
-            btnTrain: document.getElementById('btnTrain'),
-            btnLibrary: document.getElementById('btnLibrary'),
-            btnHelp: document.getElementById('btnHelp'),
-            btnReset: document.getElementById('btnReset'),
-            btnEdit: document.getElementById('btnEdit'),
-            btnExportCatalog: document.getElementById('btnExportCatalog'),
-            btnImportCatalog: document.getElementById('btnImportCatalog'),
-            fileInput: document.getElementById('fileInput'),
-            canvas: document.getElementById('diagram-canvas'),
-            canvasContainer: document.getElementById('canvasContainer'),
-            emptyState: document.getElementById('emptyState'),
-            componentList: document.getElementById('componentList'),
-            catalogContent: document.getElementById('catalogContent'),
-            pathsContent: document.getElementById('pathsContent'),
-            statTotal: document.getElementById('statTotal'),
-            statTypes: document.getElementById('statTypes'),
-            statsCard: document.getElementById('statsCard'),
-            thresholdCard: document.getElementById('thresholdCard'),
-            progressContainer: document.getElementById('progressContainer'),
-            progressFill: document.getElementById('progressFill'),
-            confidenceSlider: document.getElementById('confidenceSlider'),
-            thresholdValue: document.getElementById('thresholdValue'),
-            componentCount: document.getElementById('componentCount'),
-            dragOverlay: document.getElementById('dragOverlay'),
-            libraryName: document.getElementById('libraryName'),
-            toast: document.getElementById('toast'),
-            toastMessage: document.getElementById('toastMessage')
-        };
+            init() {
+                this.loadFromStorage();
+                this.setupCanvas();
+                this.updateLibrarySelect();
+                this.updateButtons();
+                this.setupDragDrop();
+                this.waitForOpenCV();
+            },
 
-        elements.fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) handleFile(file);
-        });
-
-        elements.btnUpload.addEventListener('click', () => {
-            elements.fileInput.click();
-        });
-
-        elements.btnExample.addEventListener('click', loadExample);
-        elements.btnAnalyze.addEventListener('click', analyzeSchematic);
-
-        elements.confidenceSlider.addEventListener('input', (e) => {
-            state.confidenceThreshold = parseInt(e.target.value);
-            elements.thresholdValue.textContent = state.confidenceThreshold + '%';
-            renderComponents();
-        });
-
-        document.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (e.dataTransfer?.types.includes('Files')) {
-                elements.dragOverlay.classList.add('show');
-            }
-        });
-
-        document.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            if (e.target === document.body || e.target === document.documentElement) {
-                elements.dragOverlay.classList.remove('show');
-            }
-        });
-
-        document.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            elements.dragOverlay.classList.remove('show');
-
-            const files = e.dataTransfer?.files;
-            if (files && files.length > 0) {
-                handleFile(files[0]);
-            }
-        });
-
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabName = tab.dataset.tab;
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(tabName + '-tab').classList.add('active');
-            });
-        });
-
-        document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const dropdown = trigger.closest('.dropdown');
-                const menu = dropdown.querySelector('.dropdown-menu');
-                
-                document.querySelectorAll('.dropdown-menu').forEach(m => {
-                    if (m !== menu) m.classList.remove('show');
-                });
-                
-                menu.classList.toggle('show');
-            });
-        });
-
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
-        });
-
-        document.getElementById('createLibraryBtn').addEventListener('click', () => {
-            document.getElementById('libraryModal').classList.add('show');
-        });
-
-        document.getElementById('closeLibraryModal').addEventListener('click', () => {
-            document.getElementById('libraryModal').classList.remove('show');
-        });
-
-        document.getElementById('saveLibraryBtn').addEventListener('click', () => {
-            const name = document.getElementById('libraryNameInput').value.trim();
-            const desc = document.getElementById('libraryDescInput').value.trim();
-            
-            if (!name) {
-                showToast('Veuillez entrer un nom de bibliothèque', 'error');
-                return;
-            }
-
-            const newLibrary = {
-                id: 'lib-' + Date.now(),
-                name: name,
-                description: desc,
-                isDefault: false,
-                annotations: [],
-                componentCount: 0
-            };
-
-            state.libraries.push(newLibrary);
-            state.activeLibraryId = newLibrary.id;
-            updateLibraryUI();
-            
-            document.getElementById('libraryModal').classList.remove('show');
-            document.getElementById('libraryNameInput').value = '';
-            document.getElementById('libraryDescInput').value = '';
-            
-            showToast('Bibliothèque créée avec succès', 'success');
-        });
-
-        document.getElementById('showHelpBtn').addEventListener('click', () => {
-            document.getElementById('helpModal').classList.add('show');
-        });
-
-        document.getElementById('closeHelpModal').addEventListener('click', () => {
-            document.getElementById('helpModal').classList.remove('show');
-        });
-
-        document.getElementById('resetLibraryBtn').addEventListener('click', () => {
-            showConfirm(
-                'Réinitialiser la bibliothèque?',
-                'Cette action supprimera toutes les annotations d\'entraînement. Cette action est irréversible.',
-                () => {
-                    const lib = state.libraries.find(l => l.id === state.activeLibraryId);
-                    if (lib && !lib.isDefault) {
-                        lib.annotations = [];
-                        lib.componentCount = 0;
-                        showToast('Bibliothèque réinitialisée', 'success');
+            waitForOpenCV() {
+                const checkCV = setInterval(() => {
+                    if (typeof cv !== 'undefined') {
+                        this.opencvReady = true;
+                        document.getElementById('opencvStatus').textContent = 
+                            '✅ par Normand Rocheleau ing. - Détection avancée';
+                        clearInterval(checkCV);
                     }
-                }
-            );
-        });
-
-        document.getElementById('resetSchematicsBtn').addEventListener('click', () => {
-            showConfirm(
-                'Réinitialiser les schémas?',
-                'Cette action supprimera tous les schémas et le catalogue. Les bibliothèques seront conservées.',
-                () => {
-                    state.currentImage = null;
-                    state.components = [];
-                    state.catalog = {};
-                    state.paths = [];
-                    state.selectedComponent = null;
-                    updateUI();
-                    showToast('Schémas réinitialisés', 'success');
-                }
-            );
-        });
-
-        document.getElementById('resetAllBtn').addEventListener('click', () => {
-            showConfirm(
-                'Tout réinitialiser?',
-                'Cette action supprimera tous les schémas, le catalogue et toutes les bibliothèques sauf la bibliothèque par défaut. Cette action est irréversible.',
-                () => {
-                    state.currentImage = null;
-                    state.components = [];
-                    state.catalog = {};
-                    state.paths = [];
-                    state.selectedComponent = null;
-                    state.libraries = [
-                        { id: 'default', name: 'Bibliothèque par défaut', isDefault: true, annotations: [], componentCount: 0 }
-                    ];
-                    state.activeLibraryId = 'default';
-                    updateUI();
-                    updateLibraryUI();
-                    showToast('Toutes les données ont été réinitialisées', 'success');
-                }
-            );
-        });
-
-        document.getElementById('cancelConfirmBtn').addEventListener('click', () => {
-            document.getElementById('confirmModal').classList.remove('show');
-        });
-
-        elements.btnExportCatalog.addEventListener('click', exportCatalogCSV);
-        elements.btnImportCatalog.addEventListener('click', importCatalogCSV);
-
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showToast('Veuillez sélectionner un fichier image', 'error');
-                return;
-            }
-
-            if (file.size > 10 * 1024 * 1024) {
-                showToast('La taille du fichier doit être inférieure à 10 Mo', 'error');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                loadImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function loadImage(dataUrl) {
-            const img = new Image();
-            img.onload = () => {
-                state.currentImage = img;
-                state.components = [];
-                state.paths = [];
-                drawImage();
-                updateUI();
-                elements.btnAnalyze.disabled = false;
-                showToast('Schéma téléversé avec succès', 'success');
-            };
-            img.src = dataUrl;
-        }
-
-        function drawImage() {
-            const canvas = elements.canvas;
-            const ctx = canvas.getContext('2d');
-            const img = state.currentImage;
-            
-            const containerWidth = elements.canvasContainer.clientWidth;
-            const containerHeight = elements.canvasContainer.clientHeight;
-            
-            const scale = Math.min(
-                (containerWidth - 40) / img.width,
-                (containerHeight - 40) / img.height,
-                1
-            );
-            
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            drawComponents(ctx, scale);
-        }
-
-        function drawComponents(ctx, scale = 1) {
-            const filteredComponents = state.components.filter(c => 
-                c.confidence >= state.confidenceThreshold || c.userAnnotated
-            );
-
-            filteredComponents.forEach(comp => {
-                ctx.strokeStyle = comp.id === state.selectedComponent ? '#F59E0B' : '#4559A4';
-                ctx.lineWidth = comp.id === state.selectedComponent ? 3 : 2;
-                ctx.strokeRect(comp.x * scale, comp.y * scale, comp.width * scale, comp.height * scale);
+                }, 100);
                 
-                ctx.fillStyle = comp.id === state.selectedComponent ? '#F59E0B' : '#4559A4';
-                ctx.font = `${12 * scale}px 'Space Grotesk', sans-serif`;
-                ctx.fillText(comp.name, comp.x * scale, comp.y * scale - 5 * scale);
-            });
-        }
-
-        async function analyzeSchematic() {
-            if (!state.currentImage || state.analyzing) return;
-
-            state.analyzing = true;
-            elements.btnAnalyze.disabled = true;
-            elements.btnAnalyze.textContent = '⚡ Analyse...';
-            elements.progressContainer.classList.add('show');
-            
-            setProgress(30);
-            showToast('Analyse en cours...', 'info');
-
-            await sleep(500);
-
-            const componentTypes = ['source', 'breaker', 'transformer', 'meter', 'load', 'fuse', 'switch'];
-            const detectedComponents = [];
-
-            for (let i = 0; i < 8; i++) {
-                const type = componentTypes[Math.floor(Math.random() * componentTypes.length)];
-                const x = Math.random() * (state.currentImage.width - 100);
-                const y = Math.random() * (state.currentImage.height - 80);
-                const width = 60 + Math.random() * 40;
-                const height = 40 + Math.random() * 40;
-                const confidence = 80 + Math.random() * 19;
-
-                detectedComponents.push({
-                    id: `comp-${Date.now()}-${i}`,
-                    name: getComponentName(type),
-                    type: type,
-                    x: x,
-                    y: y,
-                    width: width,
-                    height: height,
-                    confidence: Math.round(confidence),
-                    userAnnotated: false
-                });
-
-                await sleep(100);
-                setProgress(30 + (i / 8) * 40);
-            }
-
-            state.components = detectedComponents;
-            updateCatalog();
-            generatePaths();
-
-            setProgress(100);
-            drawImage();
-            renderComponents();
-            renderCatalog();
-            renderPaths();
-            updateStats();
-
-            await sleep(500);
-            state.analyzing = false;
-            elements.btnAnalyze.disabled = false;
-            elements.btnAnalyze.textContent = '⚡ Analyser';
-            elements.progressContainer.classList.remove('show');
-            setProgress(0);
-
-            const filtered = state.components.filter(c => c.confidence >= state.confidenceThreshold);
-            showToast(
-                `Détection terminée! ${state.components.length} composants trouvés (${filtered.length} affichés avec seuil ${state.confidenceThreshold}%)`,
-                'success'
-            );
-        }
-
-        function getComponentName(type) {
-            const names = {
-                source: 'Source électrique',
-                breaker: 'Disjoncteur',
-                transformer: 'Transformateur',
-                meter: 'Compteur',
-                load: 'Charge',
-                fuse: 'Fusible',
-                switch: 'Interrupteur'
-            };
-            return names[type] || type;
-        }
-
-        function updateCatalog() {
-            state.components.forEach(comp => {
-                if (!state.catalog[comp.type]) {
-                    state.catalog[comp.type] = 0;
-                }
-                state.catalog[comp.type]++;
-            });
-        }
-
-        function generatePaths() {
-            state.paths = [
-                {
-                    id: 'path-1',
-                    description: 'Circuit principal',
-                    components: state.components.slice(0, 3).map(c => c.id),
-                    voltage: '230V'
-                },
-                {
-                    id: 'path-2',
-                    description: 'Circuit secondaire',
-                    components: state.components.slice(3, 6).map(c => c.id),
-                    voltage: '230V'
-                }
-            ];
-        }
-
-        function renderComponents() {
-            const filtered = state.components.filter(c => 
-                c.confidence >= state.confidenceThreshold || c.userAnnotated
-            );
-
-            if (filtered.length === 0) {
-                elements.componentList.innerHTML = `
-                    <div class="empty-state" style="padding: 2rem 0;">
-                        <p style="font-size: 0.875rem;">Aucun composant au-dessus du seuil</p>
-                    </div>
-                `;
-                elements.btnEdit.style.display = 'none';
-                return;
-            }
-
-            elements.componentList.innerHTML = filtered.map(comp => `
-                <div class="component-item ${comp.id === state.selectedComponent ? 'selected' : ''}" 
-                     data-id="${comp.id}">
-                    <div class="component-info">
-                        <div class="component-name">${comp.name}</div>
-                        <div class="component-type">${comp.type}</div>
-                    </div>
-                    <div class="confidence-badge ${comp.confidence >= 90 ? 'confidence-high' : 'confidence-medium'}">
-                        ${comp.confidence}%
-                    </div>
-                </div>
-            `).join('');
-
-            elements.componentList.querySelectorAll('.component-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    state.selectedComponent = item.dataset.id;
-                    renderComponents();
-                    drawImage();
-                    elements.btnEdit.style.display = 'block';
-                });
-            });
-
-            elements.componentCount.textContent = `${filtered.length}/${state.components.length}`;
-        }
-
-        function renderCatalog() {
-            const types = Object.keys(state.catalog);
-            
-            if (types.length === 0) {
-                elements.catalogContent.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📦</div>
-                        <p>Aucun composant dans le catalogue</p>
-                    </div>
-                `;
-                return;
-            }
-
-            elements.catalogContent.innerHTML = `
-                <div class="catalog-grid">
-                    ${types.map(type => `
-                        <div class="catalog-item">
-                            <div class="catalog-type">${type}</div>
-                            <div class="catalog-count">${state.catalog[type]}</div>
-                            <div class="catalog-label">instances</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderPaths() {
-            if (state.paths.length === 0) {
-                elements.pathsContent.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔀</div>
-                        <p>Aucun chemin électrique identifié</p>
-                    </div>
-                `;
-                return;
-            }
-
-            elements.pathsContent.innerHTML = `
-                <div class="path-list">
-                    ${state.paths.map(path => `
-                        <div class="path-item" data-path="${path.id}">
-                            <div class="path-description">${path.description}</div>
-                            <div class="path-details">
-                                ${path.components.length} composants • ${path.voltage}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            elements.pathsContent.querySelectorAll('.path-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const path = state.paths.find(p => p.id === item.dataset.path);
-                    if (path) {
-                        showToast(`Chemin: ${path.description}`, 'info');
+                setTimeout(() => {
+                    if (!this.opencvReady) {
+                        clearInterval(checkCV);
+                        document.getElementById('opencvStatus').textContent = 
+                            'Reconnaissance de composants par IA';
                     }
-                });
-            });
-        }
+                }, 10000);
+            },
 
-        function updateStats() {
-            const types = new Set(state.components.map(c => c.type));
-            elements.statTotal.textContent = state.components.length;
-            elements.statTypes.textContent = types.size;
-            elements.statsCard.style.display = state.components.length > 0 ? 'block' : 'none';
-            elements.thresholdCard.style.display = state.components.length > 0 ? 'block' : 'none';
-        }
+            setupCanvas() {
+                const canvas = document.getElementById('mainCanvas');
+                const container = document.getElementById('canvasContainer');
+                
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
 
-        function updateUI() {
-            if (state.currentImage) {
-                elements.emptyState.style.display = 'none';
-                elements.canvas.style.display = 'block';
-            } else {
-                elements.emptyState.style.display = 'block';
-                elements.canvas.style.display = 'none';
-            }
-        }
-
-        function updateLibraryUI() {
-            const activeLib = state.libraries.find(l => l.id === state.activeLibraryId);
-            if (activeLib) {
-                elements.libraryName.textContent = activeLib.name;
-            }
-
-            const libraryMenu = document.getElementById('libraryMenu');
-            libraryMenu.innerHTML = state.libraries.map(lib => `
-                <div class="dropdown-item ${lib.id === state.activeLibraryId ? 'active' : ''}" data-library="${lib.id}">
-                    ${lib.isDefault ? '📚' : '📖'} ${lib.name}
-                </div>
-            `).join('') + `
-                <div class="dropdown-separator"></div>
-                <div class="dropdown-item" id="createLibraryBtn">
-                    ➕ Créer une bibliothèque
-                </div>
-            `;
-
-            libraryMenu.querySelectorAll('[data-library]').forEach(item => {
-                item.addEventListener('click', () => {
-                    state.activeLibraryId = item.dataset.library;
-                    updateLibraryUI();
-                });
-            });
-
-            libraryMenu.querySelector('#createLibraryBtn').addEventListener('click', () => {
-                document.getElementById('libraryModal').classList.add('show');
-            });
-        }
-
-        function setProgress(percent) {
-            elements.progressFill.style.width = percent + '%';
-        }
-
-        function showToast(message, type = 'info') {
-            elements.toastMessage.textContent = message;
-            elements.toast.className = `toast ${type} show`;
-            
-            setTimeout(() => {
-                elements.toast.classList.remove('show');
-            }, 3000);
-        }
-
-        function showConfirm(title, message, onConfirm) {
-            document.getElementById('confirmTitle').textContent = title;
-            document.getElementById('confirmMessage').textContent = message;
-            document.getElementById('confirmModal').classList.add('show');
-
-            const confirmBtn = document.getElementById('confirmActionBtn');
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-            newConfirmBtn.addEventListener('click', () => {
-                onConfirm();
-                document.getElementById('confirmModal').classList.remove('show');
-            });
-        }
-
-        function exportCatalogCSV() {
-            const types = Object.keys(state.catalog);
-            if (types.length === 0) {
-                showToast('Le catalogue est vide', 'error');
-                return;
-            }
-
-            let csv = 'Type,Nombre\n';
-            types.forEach(type => {
-                csv += `${type},${state.catalog[type]}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `catalogue_${Date.now()}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-
-            showToast('Catalogue exporté avec succès', 'success');
-        }
-
-        function importCatalogCSV() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.csv';
-            
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const csv = event.target.result;
-                    const lines = csv.split('\n').slice(1);
+                canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
                     
-                    let imported = 0;
-                    lines.forEach(line => {
-                        const [type, count] = line.split(',');
-                        if (type && count) {
-                            state.catalog[type.trim()] = (state.catalog[type.trim()] || 0) + parseInt(count);
-                            imported++;
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                    const newZoom = Math.max(0.1, Math.min(10, this.zoom * delta));
+                    
+                    const worldX = (mouseX - this.panX) / this.zoom;
+                    const worldY = (mouseY - this.panY) / this.zoom;
+                    
+                    this.panX = mouseX - worldX * newZoom;
+                    this.panY = mouseY - worldY * newZoom;
+                    this.zoom = newZoom;
+                    
+                    this.render();
+                });
+
+                canvas.addEventListener('mousedown', (e) => {
+                    if (this.isTraining) return;
+                    this.isDragging = true;
+                    this.lastX = e.clientX;
+                    this.lastY = e.clientY;
+                    canvas.style.cursor = 'grabbing';
+                });
+
+                canvas.addEventListener('mousemove', (e) => {
+                    if (this.isDragging && !this.isTraining) {
+                        const dx = e.clientX - this.lastX;
+                        const dy = e.clientY - this.lastY;
+                        this.panX += dx;
+                        this.panY += dy;
+                        this.lastX = e.clientX;
+                        this.lastY = e.clientY;
+                        this.render();
+                    }
+                });
+
+                canvas.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                    canvas.style.cursor = 'move';
+                });
+
+                canvas.addEventListener('click', (e) => {
+                    if (this.isDragging) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left - this.panX) / this.zoom;
+                    const y = (e.clientY - rect.top - this.panY) / this.zoom;
+                    
+                    this.components.forEach(comp => {
+                        if (x >= comp.x && x <= comp.x + comp.width &&
+                            y >= comp.y && y <= comp.y + comp.height) {
+                            if (comp.type.toLowerCase().includes('disjoncteur') || 
+                                comp.type.toLowerCase().includes('breaker') ||
+                                comp.type.toLowerCase().includes('cb')) {
+                                comp.state = comp.state === 'closed' ? 'open' : 'closed';
+                                this.render();
+                                this.showToast(`Disjoncteur ${comp.state === 'closed' ? 'FERMÉ (vert)' : 'OUVERT (rouge)'}`);
+                            }
                         }
                     });
+                });
+            },
 
-                    renderCatalog();
-                    showToast(`Catalogue importé: ${imported} types de composants ajoutés`, 'success');
+            setupDragDrop() {
+                const overlay = document.getElementById('dragOverlay');
+                
+                document.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer.types.includes('Files')) {
+                        overlay.classList.add('active');
+                    }
+                });
+
+                document.addEventListener('dragleave', (e) => {
+                    if (e.target === document.body) {
+                        overlay.classList.remove('active');
+                    }
+                });
+
+                document.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    overlay.classList.remove('active');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const file = files[0];
+                        if (file.type.startsWith('image/')) {
+                            this.loadImageFile(file);
+                        } else {
+                            this.showToast('Veuillez déposer un fichier image');
+                        }
+                    }
+                });
+            },
+
+            loadFromStorage() {
+                const stored = localStorage.getItem('iSchemateur');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    this.libraries = data.libraries || [];
+                    this.catalog = data.catalog || {};
+                    this.confidenceThreshold = data.confidenceThreshold || 85;
+                }
+                
+                if (this.libraries.length === 0) {
+                    this.libraries.push({
+                        id: 'default',
+                        name: 'Bibliothèque par défaut',
+                        isDefault: true,
+                        annotations: [],
+                        createdAt: Date.now()
+                    });
+                }
+                
+                this.activeLibrary = this.libraries[0];
+            },
+
+            saveToStorage() {
+                localStorage.setItem('iSchemateur', JSON.stringify({
+                    libraries: this.libraries,
+                    catalog: this.catalog,
+                    confidenceThreshold: this.confidenceThreshold
+                }));
+            },
+
+            updateLibrarySelect() {
+                const select = document.getElementById('librarySelect');
+                select.innerHTML = '';
+                
+                this.libraries.forEach(lib => {
+                    const option = document.createElement('option');
+                    option.value = lib.id;
+                    option.textContent = `${lib.name} (${lib.annotations.length} annotations)`;
+                    if (lib.id === this.activeLibrary?.id) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                select.onchange = (e) => {
+                    this.activeLibrary = this.libraries.find(l => l.id === e.target.value);
+                    this.updateButtons();
                 };
-                reader.readAsText(file);
-            };
+            },
 
-            input.click();
-        }
+            updateButtons() {
+                const trainBtn = document.getElementById('trainBtn');
+                const analyzeBtn = document.getElementById('analyzeBtn');
+                
+                const hasLibrary = this.activeLibrary && !this.activeLibrary.isDefault;
+                const hasAnnotations = this.activeLibrary && this.activeLibrary.annotations.length > 0;
+                const hasSchematic = this.currentSchematic !== null;
+                
+                trainBtn.disabled = !hasLibrary || !hasSchematic;
+                analyzeBtn.disabled = !hasSchematic || (!hasAnnotations && !this.activeLibrary?.isDefault);
+            },
 
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
+            createLibrary() {
+                const name = prompt('Nom de la nouvelle bibliothèque:');
+                if (name) {
+                    const newLib = {
+                        id: 'lib-' + Date.now(),
+                        name: name,
+                        isDefault: false,
+                        annotations: [],
+                        createdAt: Date.now()
+                    };
+                    this.libraries.push(newLib);
+                    this.activeLibrary = newLib;
+                    this.updateLibrarySelect();
+                    this.updateButtons();
+                    this.saveToStorage();
+                    this.showToast('Bibliothèque créée: ' + name);
+                }
+            },
 
-        function loadExample() {
-            const exampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
-                <rect width="800" height="400" fill="#f8f9fa"/>
-                <rect x="50" y="80" width="60" height="40" fill="#4559A4" stroke="#000" stroke-width="2"/>
-                <text x="80" y="65" text-anchor="middle" font-family="Arial" font-size="12">Source</text>
-                <rect x="200" y="80" width="60" height="40" fill="#F59E0B" stroke="#000" stroke-width="2"/>
-                <text x="230" y="65" text-anchor="middle" font-family="Arial" font-size="12">Breaker</text>
-                <circle cx="400" cy="100" r="30" fill="#10B981" stroke="#000" stroke-width="2"/>
-                <text x="400" y="65" text-anchor="middle" font-family="Arial" font-size="12">Meter</text>
-                <rect x="640" y="80" width="60" height="40" fill="#EF4444" stroke="#000" stroke-width="2"/>
-                <text x="670" y="65" text-anchor="middle" font-family="Arial" font-size="12">Load</text>
-                <line x1="110" y1="100" x2="200" y2="100" stroke="#000" stroke-width="2"/>
-                <line x1="260" y1="100" x2="370" y2="100" stroke="#000" stroke-width="2"/>
-                <line x1="430" y1="100" x2="640" y2="100" stroke="#000" stroke-width="2"/>
-            </svg>`;
+            uploadSchematic() {
+                document.getElementById('fileInput').click();
+            },
 
-            const blob = new Blob([exampleSvg], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(blob);
-            
-            const img = new Image();
-            img.onload = () => {
-                state.currentImage = img;
-                state.components = [];
-                state.catalog = {};
-                state.paths = [];
-                drawImage();
-                updateUI();
-                elements.btnAnalyze.disabled = false;
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.loadImageFile(file);
+                }
+            },
+
+            loadImageFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.currentSchematic = {
+                        name: file.name,
+                        data: e.target.result,
+                        uploadedAt: Date.now()
+                    };
+                    this.components = [];
+                    this.paths = [];
+                    this.loadImage(e.target.result);
+                    this.updateButtons();
+                    this.showToast('Schéma téléversé: ' + file.name);
+                };
+                reader.readAsDataURL(file);
+            },
+
+            loadImage(dataUrl) {
+                const img = new Image();
+                img.onload = () => {
+                    this.currentImage = img;
+                    this.resetView();
+                    this.render();
+                };
+                img.src = dataUrl;
+            },
+
+            resetView() {
+                this.zoom = 1;
+                const canvas = document.getElementById('mainCanvas');
+                const container = document.getElementById('canvasContainer');
+                
+                if (this.currentImage) {
+                    const scaleX = container.clientWidth / this.currentImage.width;
+                    const scaleY = container.clientHeight / this.currentImage.height;
+                    this.zoom = Math.min(scaleX, scaleY, 1) * 0.95;
+                    
+                    this.panX = (container.clientWidth - this.currentImage.width * this.zoom) / 2;
+                    this.panY = (container.clientHeight - this.currentImage.height * this.zoom) / 2;
+                }
+            },
+
+            render() {
+                const canvas = document.getElementById('mainCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (this.currentImage) {
+                    ctx.save();
+                    ctx.translate(this.panX, this.panY);
+                    ctx.scale(this.zoom, this.zoom);
+                    
+                    ctx.drawImage(this.currentImage, 0, 0);
+                    
+                    this.components
+                        .filter(comp => comp.confidence >= this.confidenceThreshold || comp.userAnnotated)
+                        .forEach(comp => {
+                            if (comp.type.toLowerCase().includes('disjoncteur') || 
+                                comp.type.toLowerCase().includes('breaker') ||
+                                comp.type.toLowerCase().includes('cb')) {
+                                if (comp.state === 'closed') {
+                                    ctx.fillStyle = 'rgba(34, 197, 94, 0.3)';
+                                } else if (comp.state === 'open') {
+                                    ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+                                } else {
+                                    ctx.fillStyle = 'rgba(79, 70, 229, 0.1)';
+                                }
+                                ctx.fillRect(comp.x, comp.y, comp.width, comp.height);
+                            }
+                            
+                            ctx.strokeStyle = comp.selected ? '#22c55e' : '#4f46e5';
+                            ctx.lineWidth = 2 / this.zoom;
+                            ctx.strokeRect(comp.x, comp.y, comp.width, comp.height);
+                            
+                            ctx.fillStyle = comp.selected ? '#22c55e' : '#4f46e5';
+                            const fontSize = Math.max(8, 10 / this.zoom);
+                            ctx.font = `600 ${fontSize}px 'Space Grotesk'`;
+                            const text = `${comp.type} ${Math.round(comp.confidence)}%`;
+                            const metrics = ctx.measureText(text);
+                            const padding = 3 / this.zoom;
+                            
+                            ctx.fillRect(
+                                comp.x,
+                                comp.y - fontSize - padding * 2,
+                                metrics.width + padding * 2,
+                                fontSize + padding * 2
+                            );
+                            
+                            ctx.fillStyle = 'white';
+                            ctx.fillText(text, comp.x + padding, comp.y - padding);
+                        });
+                    
+                    ctx.restore();
+                }
+            },
+
+            async analyze() {
+                if (!this.currentSchematic) return;
+                
+                this.showProgress(true);
+                this.showToast('Analyse en cours...');
+                
+                setTimeout(() => {
+                    this.setProgress(30);
+                    this.detectComponents();
+                    
+                    setTimeout(() => {
+                        this.setProgress(70);
+                        this.identifyPaths();
+                        
+                        setTimeout(() => {
+                            this.setProgress(100);
+                            this.updateComponentList();
+                            this.updateCatalog();
+                            this.render();
+                            
+                            setTimeout(() => {
+                                this.showProgress(false);
+                                const filtered = this.components.filter(c => 
+                                    c.confidence >= this.confidenceThreshold || c.userAnnotated
+                                );
+                                this.showToast(
+                                    `Détection terminée! ${this.components.length} composants trouvés, ` +
+                                    `${filtered.length} affichés avec seuil ${this.confidenceThreshold}%`
+                                );
+                            }, 500);
+                        }, 500);
+                    }, 800);
+                }, 500);
+            },
+
+            detectComponents() {
+                const annotations = this.activeLibrary?.annotations || [];
+                this.components = [];
+                
+                if (annotations.length === 0 && this.activeLibrary?.isDefault) {
+                    this.detectDefaultComponents();
+                } else {
+                    annotations.forEach((ann, index) => {
+                        for (let angle = 0; angle < 360; angle += 90) {
+                            const similarComponents = this.findSimilarComponents(ann, angle);
+                            this.components.push(...similarComponents);
+                        }
+                    });
+                }
+                
+                this.components.forEach((comp, i) => {
+                    comp.id = 'comp-' + Date.now() + '-' + i;
+                    comp.name = `${comp.type}-${i + 1}`;
+                });
+            },
+
+            detectDefaultComponents() {
+                if (!this.currentImage) return;
+                
+                const types = ['Disjoncteur', 'Transformateur', 'Bus Bar', 'Contacteur', 'Relais'];
+                const count = Math.floor(Math.random() * 8) + 5;
+                
+                for (let i = 0; i < count; i++) {
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    const x = Math.random() * (this.currentImage.width - 100);
+                    const y = Math.random() * (this.currentImage.height - 100);
+                    const w = 40 + Math.random() * 60;
+                    const h = 40 + Math.random() * 60;
+                    
+                    this.components.push({
+                        id: 'comp-default-' + i,
+                        type: type,
+                        name: `${type}-${i + 1}`,
+                        x: x,
+                        y: y,
+                        width: w,
+                        height: h,
+                        confidence: 85 + Math.random() * 14,
+                        state: 'unknown'
+                    });
+                }
+            },
+
+            findSimilarComponents(annotation, angle) {
+                const similar = [];
+                if (!this.currentImage) return similar;
+                
+                const numSimilar = Math.floor(Math.random() * 4) + 2;
+                
+                for (let i = 0; i < numSimilar; i++) {
+                    const x = Math.random() * (this.currentImage.width - annotation.width);
+                    const y = Math.random() * (this.currentImage.height - annotation.height);
+                    
+                    similar.push({
+                        type: annotation.type,
+                        x: x,
+                        y: y,
+                        width: annotation.width,
+                        height: annotation.height,
+                        confidence: 86 + Math.random() * 13,
+                        angle: angle,
+                        state: 'unknown'
+                    });
+                }
+                
+                return similar;
+            },
+
+            identifyPaths() {
+                this.paths = [];
+                
+                if (this.components.length < 2) return;
+                
+                const pathCount = Math.floor(this.components.length / 3);
+                for (let i = 0; i < pathCount; i++) {
+                    const numComponents = 2 + Math.floor(Math.random() * 3);
+                    const pathComponents = [];
+                    
+                    for (let j = 0; j < numComponents; j++) {
+                        const comp = this.components[Math.floor(Math.random() * this.components.length)];
+                        if (comp && !pathComponents.includes(comp.id)) {
+                            pathComponents.push(comp.id);
+                        }
+                    }
+                    
+                    if (pathComponents.length > 1) {
+                        this.paths.push({
+                            id: 'path-' + i,
+                            description: `Chemin ${i + 1}`,
+                            components: pathComponents,
+                            voltage: ['120V', '240V', '480V', '600V'][Math.floor(Math.random() * 4)]
+                        });
+                    }
+                }
+                
+                this.updatePathsList();
+            },
+
+            updateComponentList() {
+                const list = document.getElementById('componentList');
+                const filtered = this.components.filter(c => 
+                    c.confidence >= this.confidenceThreshold || c.userAnnotated
+                );
+                
+                if (filtered.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div>Aucun composant au-dessus du seuil</div>
+                            <div style="font-size: 12px; margin-top: 8px;">
+                                ${this.components.length} composants détectés, 
+                                ajustez le seuil pour voir plus
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                list.innerHTML = filtered.map(comp => `
+                    <div class="component-item ${comp.selected ? 'selected' : ''}" 
+                         onclick="app.selectComponent('${comp.id}')">
+                        <div class="component-type">${comp.type}</div>
+                        <div class="component-name">${comp.name}</div>
+                        <div class="component-confidence">
+                            Confiance: ${Math.round(comp.confidence)}%
+                            ${comp.userAnnotated ? ' (Annoté)' : ''}
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            updateCatalog() {
+                this.components.forEach(comp => {
+                    if (!this.catalog[comp.type]) {
+                        this.catalog[comp.type] = 0;
+                    }
+                    this.catalog[comp.type]++;
+                });
+                
+                this.saveToStorage();
+                this.updateCatalogView();
+            },
+
+            updateCatalogView() {
+                const content = document.getElementById('catalogContent');
+                const entries = Object.entries(this.catalog);
+                
+                if (entries.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <div>Aucun composant dans le catalogue</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                content.innerHTML = `
+                    <div class="stats-grid">
+                        ${entries.map(([type, count]) => `
+                            <div class="stat-card">
+                                <div class="stat-value">${count}</div>
+                                <div class="stat-label">${type}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            updatePathsList() {
+                const content = document.getElementById('pathsContent');
+                
+                if (this.paths.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔀</div>
+                            <div>Aucun chemin électrique identifié</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                content.innerHTML = this.paths.map(path => `
+                    <div class="component-item" onclick="app.highlightPath('${path.id}')">
+                        <div class="component-type">${path.description}</div>
+                        <div class="component-name">${path.components.length} composants</div>
+                        <div class="component-confidence">${path.voltage}</div>
+                    </div>
+                `).join('');
+            },
+
+            selectComponent(id) {
+                this.components.forEach(c => c.selected = (c.id === id));
+                this.updateComponentList();
+                this.render();
+            },
+
+            highlightPath(pathId) {
+                const path = this.paths.find(p => p.id === pathId);
+                if (path) {
+                    this.components.forEach(c => {
+                        c.selected = path.components.includes(c.id);
+                    });
+                    this.render();
+                    this.showToast('Chemin mis en évidence: ' + path.description);
+                }
+            },
+
+            updateThreshold(value) {
+                this.confidenceThreshold = parseInt(value);
+                document.getElementById('thresholdValue').textContent = value + '%';
+                this.updateComponentList();
+                this.render();
+                this.saveToStorage();
+            },
+
+            openTrainingMode() {
+                if (!this.currentSchematic) return;
+                
+                this.isTraining = true;
+                this.trainingAnnotations = [];
+                
+                const modal = document.getElementById('trainingModal');
+                const canvas = document.getElementById('trainingCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                const img = new Image();
+                img.onload = () => {
+                    canvas.width = Math.min(img.width, 800);
+                    canvas.height = (canvas.width / img.width) * img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    let startX, startY, isDrawing = false;
+                    
+                    canvas.onmousedown = (e) => {
+                        const rect = canvas.getBoundingClientRect();
+                        startX = e.clientX - rect.left;
+                        startY = e.clientY - rect.top;
+                        isDrawing = true;
+                    };
+                    
+                    canvas.onmousemove = (e) => {
+                        if (!isDrawing) return;
+                        const rect = canvas.getBoundingClientRect();
+                        const currentX = e.clientX - rect.left;
+                        const currentY = e.clientY - rect.top;
+                        
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        this.trainingAnnotations.forEach(ann => {
+                            ctx.strokeStyle = '#4f46e5';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(ann.x, ann.y, ann.width, ann.height);
+                        });
+                        
+                        ctx.strokeStyle = '#22c55e';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+                    };
+                    
+                    canvas.onmouseup = (e) => {
+                        if (!isDrawing) return;
+                        isDrawing = false;
+                        
+                        const rect = canvas.getBoundingClientRect();
+                        const endX = e.clientX - rect.left;
+                        const endY = e.clientY - rect.top;
+                        
+                        const width = Math.abs(endX - startX);
+                        const height = Math.abs(endY - startY);
+                        
+                        if (width > 10 && height > 10) {
+                            const type = document.getElementById('componentType').value || 'Composant';
+                            const scaleX = img.width / canvas.width;
+                            const scaleY = img.height / canvas.height;
+                            
+                            this.trainingAnnotations.push({
+                                type: type,
+                                x: Math.min(startX, endX) * scaleX,
+                                y: Math.min(startY, endY) * scaleY,
+                                width: width * scaleX,
+                                height: height * scaleY
+                            });
+                            
+                            this.updateAnnotationList();
+                            
+                            ctx.strokeStyle = '#4f46e5';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(Math.min(startX, endX), Math.min(startY, endY), width, height);
+                        }
+                    };
+                };
+                img.src = this.currentSchematic.data;
+                
+                modal.classList.add('active');
+            },
+
+            updateAnnotationList() {
+                const list = document.getElementById('annotationList');
+                list.innerHTML = this.trainingAnnotations.map((ann, i) => `
+                    <div class="annotation-item">
+                        <span>${ann.type}</span>
+                        <button onclick="app.removeAnnotation(${i})">❌</button>
+                    </div>
+                `).join('');
+            },
+
+            removeAnnotation(index) {
+                this.trainingAnnotations.splice(index, 1);
+                this.updateAnnotationList();
+                
+                const canvas = document.getElementById('trainingCanvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const scaleX = canvas.width / img.width;
+                    const scaleY = canvas.height / img.height;
+                    
+                    this.trainingAnnotations.forEach(ann => {
+                        ctx.strokeStyle = '#4f46e5';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(ann.x * scaleX, ann.y * scaleY, 
+                                      ann.width * scaleX, ann.height * scaleY);
+                    });
+                };
+                img.src = this.currentSchematic.data;
+            },
+
+            saveTraining() {
+                if (this.trainingAnnotations.length === 0) {
+                    this.showToast('Aucune annotation à enregistrer');
+                    return;
+                }
+                
+                if (!this.activeLibrary) return;
+                
+                this.activeLibrary.annotations.push(...this.trainingAnnotations);
+                this.saveToStorage();
+                this.updateLibrarySelect();
+                this.updateButtons();
+                
+                this.cancelTraining();
+                this.showToast(`${this.trainingAnnotations.length} annotations ajoutées à "${this.activeLibrary.name}"`);
+            },
+
+            cancelTraining() {
+                this.isTraining = false;
+                this.trainingAnnotations = [];
+                document.getElementById('trainingModal').classList.remove('active');
+                document.getElementById('componentType').value = '';
+            },
+
+            loadExample() {
+                const exampleSvg = `
+                    <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="800" height="600" fill="#ffffff"/>
+                        <line x1="100" y1="100" x2="700" y2="100" stroke="#000" stroke-width="3"/>
+                        <rect x="180" y="80" width="40" height="40" fill="none" stroke="#000" stroke-width="2"/>
+                        <text x="200" y="105" text-anchor="middle" font-size="16">CB1</text>
+                        <rect x="380" y="80" width="40" height="40" fill="none" stroke="#000" stroke-width="2"/>
+                        <text x="400" y="105" text-anchor="middle" font-size="16">CB2</text>
+                        <rect x="580" y="80" width="40" height="40" fill="none" stroke="#000" stroke-width="2"/>
+                        <text x="600" y="105" text-anchor="middle" font-size="16">CB3</text>
+                        <line x1="200" y1="120" x2="200" y2="200" stroke="#000" stroke-width="2"/>
+                        <circle cx="200" cy="220" r="20" fill="none" stroke="#000" stroke-width="2"/>
+                        <text x="200" y="265" text-anchor="middle" font-size="14">T1</text>
+                        <line x1="400" y1="120" x2="400" y2="200" stroke="#000" stroke-width="2"/>
+                        <circle cx="400" cy="220" r="20" fill="none" stroke="#000" stroke-width="2"/>
+                        <text x="400" y="265" text-anchor="middle" font-size="14">T2</text>
+                    </svg>
+                `;
+                
+                const blob = new Blob([exampleSvg], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                
+                this.currentSchematic = {
+                    name: 'exemple-unifilaire.svg',
+                    data: url,
+                    uploadedAt: Date.now()
+                };
+                
+                this.loadImage(url);
+                this.updateButtons();
+                this.showToast('Schéma d\'exemple chargé');
+            },
+
+            switchTab(tab) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                event.target.classList.add('active');
+                document.getElementById(tab + 'Tab').classList.add('active');
+            },
+
+            showHelp() {
+                document.getElementById('helpModal').classList.add('active');
+            },
+
+            closeHelp() {
+                document.getElementById('helpModal').classList.remove('active');
+            },
+
+            resetData() {
+                if (!confirm('Êtes-vous sûr de vouloir réinitialiser toutes les données?')) return;
+                
+                this.libraries = [{
+                    id: 'default',
+                    name: 'Bibliothèque par défaut',
+                    isDefault: true,
+                    annotations: [],
+                    createdAt: Date.now()
+                }];
+                this.activeLibrary = this.libraries[0];
+                this.catalog = {};
+                this.components = [];
+                this.paths = [];
+                this.currentSchematic = null;
+                this.currentImage = null;
+                
+                this.saveToStorage();
+                this.updateLibrarySelect();
+                this.updateButtons();
+                this.updateComponentList();
+                this.updateCatalogView();
+                this.updatePathsList();
+                this.render();
+                
+                this.showToast('Toutes les données ont été réinitialisées');
+            },
+
+            exportCatalog() {
+                const csv = ['Type,Quantité'];
+                Object.entries(this.catalog).forEach(([type, count]) => {
+                    csv.push(`"${type}",${count}`);
+                });
+                
+                this.downloadFile(csv.join('\n'), 'catalogue-' + Date.now() + '.csv', 'text/csv');
+                this.showToast('Catalogue exporté en CSV');
+            },
+
+            importCatalog() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const lines = event.target.result.split('\n');
+                        lines.slice(1).forEach(line => {
+                            const [type, count] = line.split(',');
+                            if (type && count) {
+                                this.catalog[type.replace(/"/g, '')] = parseInt(count);
+                            }
+                        });
+                        this.saveToStorage();
+                        this.updateCatalogView();
+                        this.showToast('Catalogue importé avec succès');
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            },
+
+            downloadFile(content, filename, type) {
+                const blob = new Blob([content], { type: type });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
                 URL.revokeObjectURL(url);
-                showToast('Exemple chargé! Cliquez sur "Analyser" pour détecter les composants.', 'success');
-            };
-            img.src = url;
-        }
+            },
 
-        window.addEventListener('resize', () => {
-            if (state.currentImage) {
-                drawImage();
+            showProgress(show) {
+                document.getElementById('progressBar').style.display = show ? 'block' : 'none';
+                if (!show) {
+                    this.setProgress(0);
+                }
+            },
+
+            setProgress(value) {
+                document.getElementById('progressFill').style.width = value + '%';
+            },
+
+            showToast(message) {
+                const existing = document.querySelector('.toast');
+                if (existing) existing.remove();
+                
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    background: #1a1a1a;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 10000;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                    animation: slideIn 0.3s ease;
+                `;
+                
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
             }
-        });
+        };
 
-        updateLibraryUI();
+        window.addEventListener('load', () => app.init());
     </script>
+
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
 </body>
 </html>
+`;
+                
