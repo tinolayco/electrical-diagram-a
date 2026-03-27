@@ -163,7 +163,6 @@ export function getComponentColor(type: ComponentType): string {
     'transformer': '#3B82F6',
     'bus-bar': '#F59E0B',
     'switch': '#8B5CF6',
-    'disconnect': '#EC4899',
     'fuse': '#DC2626',
     'relay': '#10B981',
     'meter': '#14B8A6',
@@ -183,7 +182,6 @@ export function getComponentLabel(type: ComponentType): string {
     'transformer': 'Transformer',
     'bus-bar': 'Bus Bar',
     'switch': 'Switch',
-    'disconnect': 'Disconnect',
     'fuse': 'Fuse',
     'relay': 'Relay',
     'meter': 'Meter',
@@ -289,59 +287,72 @@ async function findSimilarComponents(
   const templateHeight = template.height
   const threshold = confidenceThreshold / 100
   
+  const rotatedTemplates = [
+    { data: template.data, width: templateWidth, height: templateHeight, angle: 0 },
+    ...rotateTemplate(template, 90),
+    ...rotateTemplate(template, 180),
+    ...rotateTemplate(template, 270)
+  ]
+  
   const stepSize = Math.max(15, Math.floor(templateWidth / 3))
   
-  for (let y = 0; y < imageHeight - templateHeight; y += stepSize) {
-    for (let x = 0; x < imageWidth - templateWidth; x += stepSize) {
-      if (Math.abs(x - originalBox.x) < 15 && Math.abs(y - originalBox.y) < 15) {
-        continue
-      }
-      
-      const similarity = calculateTemplateSimilarity(
-        fullImage.data,
-        template.data,
-        x,
-        y,
-        templateWidth,
-        templateHeight,
-        imageWidth
-      )
-      
-      if (similarity > threshold) {
-        const percentBox: BoundingBox = {
-          x: (x / imageWidth) * 100,
-          y: (y / imageHeight) * 100,
-          width: (templateWidth / imageWidth) * 100,
-          height: (templateHeight / imageHeight) * 100
+  for (const rotated of rotatedTemplates) {
+    const currentWidth = rotated.width
+    const currentHeight = rotated.height
+    
+    for (let y = 0; y < imageHeight - currentHeight; y += stepSize) {
+      for (let x = 0; x < imageWidth - currentWidth; x += stepSize) {
+        if (Math.abs(x - originalBox.x) < 15 && Math.abs(y - originalBox.y) < 15) {
+          continue
         }
         
-        const hasOverlap = similarComponents.some(existing => {
-          const xOverlap = Math.abs(existing.boundingBox.x - percentBox.x) < 2
-          const yOverlap = Math.abs(existing.boundingBox.y - percentBox.y) < 2
-          return xOverlap && yOverlap
-        })
+        const similarity = calculateTemplateSimilarity(
+          fullImage.data,
+          rotated.data,
+          x,
+          y,
+          currentWidth,
+          currentHeight,
+          imageWidth
+        )
         
-        if (!hasOverlap && similarComponents.length < 20) {
-          const confidence = Math.round(similarity * 100)
-          
-          const newComponent: Component = {
-            id: `comp-similar-${Date.now()}-${Math.random()}`,
-            type: componentType,
-            name: `${componentType.toUpperCase()}-auto`,
-            boundingBox: percentBox,
-            confidence,
-            connections: [],
-            metadata: { 
-              source: 'template-matching',
-              similarity: similarity.toFixed(3),
-              templateBased: 'true'
-            }
+        if (similarity > threshold) {
+          const percentBox: BoundingBox = {
+            x: (x / imageWidth) * 100,
+            y: (y / imageHeight) * 100,
+            width: (currentWidth / imageWidth) * 100,
+            height: (currentHeight / imageHeight) * 100
           }
           
-          similarComponents.push(newComponent)
+          const hasOverlap = similarComponents.some(existing => {
+            const xOverlap = Math.abs(existing.boundingBox.x - percentBox.x) < 2
+            const yOverlap = Math.abs(existing.boundingBox.y - percentBox.y) < 2
+            return xOverlap && yOverlap
+          })
           
-          if (onComponentFound) {
-            onComponentFound(newComponent)
+          if (!hasOverlap && similarComponents.length < 20) {
+            const confidence = Math.round(similarity * 100)
+            
+            const newComponent: Component = {
+              id: `comp-similar-${Date.now()}-${Math.random()}`,
+              type: componentType,
+              name: `${componentType.toUpperCase()}-auto`,
+              boundingBox: percentBox,
+              confidence,
+              connections: [],
+              metadata: { 
+                source: 'template-matching',
+                similarity: similarity.toFixed(3),
+                templateBased: 'true',
+                rotation: `${rotated.angle}°`
+              }
+            }
+            
+            similarComponents.push(newComponent)
+            
+            if (onComponentFound) {
+              onComponentFound(newComponent)
+            }
           }
         }
       }
@@ -349,6 +360,41 @@ async function findSimilarComponents(
   }
   
   return similarComponents.sort((a, b) => (b.confidence || 0) - (a.confidence || 0)).slice(0, 15)
+}
+
+function rotateTemplate(template: ImageData, degrees: number): Array<{ data: Uint8ClampedArray, width: number, height: number, angle: number }> {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return []
+  
+  const tempCanvas = document.createElement('canvas')
+  const tempCtx = tempCanvas.getContext('2d')
+  if (!tempCtx) return []
+  
+  tempCanvas.width = template.width
+  tempCanvas.height = template.height
+  tempCtx.putImageData(template, 0, 0)
+  
+  if (degrees === 90 || degrees === 270) {
+    canvas.width = template.height
+    canvas.height = template.width
+  } else {
+    canvas.width = template.width
+    canvas.height = template.height
+  }
+  
+  ctx.translate(canvas.width / 2, canvas.height / 2)
+  ctx.rotate((degrees * Math.PI) / 180)
+  ctx.drawImage(tempCanvas, -tempCanvas.width / 2, -tempCanvas.height / 2)
+  
+  const rotatedImageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  
+  return [{
+    data: rotatedImageData.data,
+    width: canvas.width,
+    height: canvas.height,
+    angle: degrees
+  }]
 }
 
 function calculateTemplateSimilarity(

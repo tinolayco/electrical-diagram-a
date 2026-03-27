@@ -177,10 +177,10 @@ async function detectDisconnects(
   for (const rect of smallRects) {
     if (isNearTopOfDiagram(rect, height) && !hasWhiteInteriorRectangle(data, width, rect)) {
       detections.push({
-        type: 'disconnect',
+        type: 'switch',
         confidence: 80,
         boundingBox: rect,
-        name: `DS${detections.filter(d => d.type === 'disconnect').length + 1}`,
+        name: `SW${detections.filter(d => d.type === 'switch').length + 1}`,
         features: {
           detected: 'small-rectangle-top',
           position: 'upstream'

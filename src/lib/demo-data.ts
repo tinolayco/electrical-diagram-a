@@ -14,8 +14,8 @@ export async function loadDemoSchematic(): Promise<Schematic> {
       const demoComponents: Component[] = [
         {
           id: 'demo-comp-10',
-          type: 'disconnect',
-          name: 'DS1 - Main Disconnect',
+          type: 'switch',
+          name: 'SW1 - Main Switch',
           boundingBox: { x: 4, y: 19, width: 3, height: 6 },
           confidence: 88,
           voltage: '13.8kV',

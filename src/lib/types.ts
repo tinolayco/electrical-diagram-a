@@ -3,7 +3,6 @@ export type ComponentType =
   | 'transformer'
   | 'bus-bar'
   | 'switch'
-  | 'disconnect'
   | 'fuse'
   | 'relay'
   | 'meter'

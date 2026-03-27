@@ -19,7 +19,6 @@ const COMPONENT_TYPES: { value: ComponentType; label: string }[] = [
   { value: 'bus-bar', label: 'Barre de bus' },
   { value: 'transformer', label: 'Transformateur' },
   { value: 'switch', label: 'Interrupteur' },
-  { value: 'disconnect', label: 'Sectionneur' },
   { value: 'fuse', label: 'Fusible' },
   { value: 'relay', label: 'Relais' },
   { value: 'meter', label: 'Compteur' },
