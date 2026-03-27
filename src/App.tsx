@@ -102,6 +102,18 @@ function App() {
     })
   }, [])
 
+  useEffect(() => {
+    const handleGlobalWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('[data-component-sidebar]')) {
+        e.preventDefault()
+      }
+    }
+
+    document.addEventListener('wheel', handleGlobalWheel, { passive: false })
+    return () => document.removeEventListener('wheel', handleGlobalWheel)
+  }, [])
+
   const filteredComponents = useMemo(() => {
     if (!currentSchematic) return []
     return currentSchematic.components.filter(comp => {
@@ -636,7 +648,7 @@ function App() {
                   />
                 </Card>
 
-                <div className="flex flex-col gap-3 min-h-0" data-allow-scroll>
+                <div className="flex flex-col gap-3 min-h-0">
                   {filteredComponents.length > 0 && (
                     <DetectionStats 
                       components={filteredComponents} 
@@ -644,7 +656,7 @@ function App() {
                     />
                   )}
                   
-                  <Card className="flex-1 flex flex-col overflow-hidden min-h-0">
+                  <Card className="flex-1 flex flex-col overflow-hidden min-h-0" data-component-sidebar>
                     <div className="p-3 border-b border-border flex items-center justify-between flex-shrink-0">
                       <h3 className="font-semibold text-sm">Composants</h3>
                       {selectedComponent && (

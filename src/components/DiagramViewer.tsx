@@ -38,7 +38,7 @@ export function DiagramViewer({
   const handleWheel = (e: React.WheelEvent) => {
     const target = e.target as HTMLElement
     
-    if (target.closest('[data-allow-scroll]')) {
+    if (target.closest('[data-component-sidebar]')) {
       return
     }
     
