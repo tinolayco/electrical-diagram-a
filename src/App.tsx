@@ -351,6 +351,11 @@ function App() {
     })
   }
 
+  const handleLibraryImport = (library: ComponentLibrary) => {
+    setLibraries(current => [...(current || []), library])
+    setActiveLibraryId(library.id)
+  }
+
   const handleResetClick = (type: 'all' | 'library' | 'schematics') => {
     setResetType(type)
     setResetDialogOpen(true)
@@ -442,6 +447,7 @@ function App() {
                 onLibraryCreate={handleLibraryCreate}
                 onLibraryUpdate={handleLibraryUpdate}
                 onLibraryDelete={handleLibraryDelete}
+                onLibraryImport={handleLibraryImport}
               />
               
               <Button

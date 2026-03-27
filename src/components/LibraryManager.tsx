@@ -31,7 +31,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, TrashSimple, Books, PencilSimple } from '@phosphor-icons/react'
+import { Plus, TrashSimple, Books, PencilSimple, DownloadSimple, UploadSimple } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface LibraryManagerProps {
@@ -41,6 +41,7 @@ interface LibraryManagerProps {
   onLibraryCreate: (library: Omit<ComponentLibrary, 'id' | 'createdAt' | 'lastModified' | 'componentCount'>) => void
   onLibraryUpdate: (libraryId: string, updates: Partial<ComponentLibrary>) => void
   onLibraryDelete: (libraryId: string) => void
+  onLibraryImport?: (library: ComponentLibrary) => void
 }
 
 export function LibraryManager({
@@ -50,6 +51,7 @@ export function LibraryManager({
   onLibraryCreate,
   onLibraryUpdate,
   onLibraryDelete,
+  onLibraryImport,
 }: LibraryManagerProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -142,6 +144,74 @@ export function LibraryManager({
     setDeleteDialogOpen(true)
   }
 
+  const handleExportLibrary = (libraryId: string) => {
+    const library = libraries.find(lib => lib.id === libraryId)
+    if (!library) {
+      toast.error('Bibliothèque introuvable')
+      return
+    }
+
+    const exportData = {
+      version: '1.0',
+      exportedAt: Date.now(),
+      library: library
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${library.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Bibliothèque exportée avec succès')
+  }
+
+  const handleImportLibrary = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      try {
+        const text = await file.text()
+        const data = JSON.parse(text)
+        
+        if (!data.library || !data.version) {
+          toast.error('Format de fichier invalide')
+          return
+        }
+
+        const importedLibrary: ComponentLibrary = {
+          ...data.library,
+          id: `library-${Date.now()}`,
+          createdAt: Date.now(),
+          lastModified: Date.now(),
+          isDefault: false
+        }
+
+        if (onLibraryImport) {
+          onLibraryImport(importedLibrary)
+        } else {
+          onLibraryCreate(importedLibrary)
+        }
+
+        toast.success(`Bibliothèque "${importedLibrary.name}" importée avec succès`)
+      } catch (error) {
+        console.error('Import error:', error)
+        toast.error('Erreur lors de l\'importation de la bibliothèque')
+      }
+    }
+
+    input.click()
+  }
+
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-2 min-w-[280px]">
@@ -176,9 +246,33 @@ export function LibraryManager({
           size="icon"
           onClick={() => setCreateDialogOpen(true)}
           className="h-8 w-8"
+          title="Créer une nouvelle bibliothèque"
         >
           <Plus size={16} />
         </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleImportLibrary}
+          className="h-8 w-8"
+          title="Importer une bibliothèque"
+        >
+          <UploadSimple size={16} />
+        </Button>
+
+        {activeLibrary && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleExportLibrary(activeLibrary.id)}
+            className="h-8 w-8"
+            title="Exporter la bibliothèque active"
+            disabled={activeLibrary.componentCount === 0}
+          >
+            <DownloadSimple size={16} />
+          </Button>
+        )}
 
         {activeLibrary && !activeLibrary.isDefault && (
           <>
@@ -187,6 +281,7 @@ export function LibraryManager({
               size="icon"
               onClick={() => openEditDialog(activeLibrary.id)}
               className="h-8 w-8"
+              title="Modifier la bibliothèque"
             >
               <PencilSimple size={16} />
             </Button>
@@ -195,6 +290,7 @@ export function LibraryManager({
               size="icon"
               onClick={() => openDeleteDialog(activeLibrary.id)}
               className="h-8 w-8 text-destructive hover:text-destructive"
+              title="Supprimer la bibliothèque"
             >
               <TrashSimple size={16} />
             </Button>
