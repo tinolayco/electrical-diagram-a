@@ -47,8 +47,10 @@ import {
   Sparkle,
   GraduationCap,
   Sliders,
-  TrashSimple
+  TrashSimple,
+  FileCsv
 } from '@phosphor-icons/react'
+import { exportSchematicToCSV, downloadFile } from '@/lib/export-formats'
 
 function App() {
   const [schematics, setSchematics] = useKV<Schematic[]>('schematics', [])
@@ -429,6 +431,26 @@ function App() {
     setResetType(null)
   }
 
+  const handleExportSchematicCSV = async () => {
+    if (!currentSchematic) return
+    
+    try {
+      const csvContent = exportSchematicToCSV(currentSchematic)
+      const safeFileName = currentSchematic.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+      const fileName = `schema_${safeFileName}_${Date.now()}.csv`
+      
+      await downloadFile(csvContent, fileName, 'text/csv')
+      toast.success(`Schéma "${currentSchematic.name}" exporté en CSV avec succès`)
+    } catch (error: any) {
+      if (error.message === 'CANCELLED') {
+        toast.info('Export annulé')
+        return
+      }
+      console.error('Export error:', error)
+      toast.error('Erreur lors de l\'exportation du schéma')
+    }
+  }
+
   const selectedComponentData = filteredComponents.find(
     c => c.id === selectedComponent
   )
@@ -617,28 +639,42 @@ function App() {
                 </TabsTrigger>
               </TabsList>
 
-              {currentSchematic && currentSchematic.components.length > 0 && (
-                <Card className="px-3 py-1.5 flex items-center gap-3">
-                  <Sliders size={14} className="text-muted-foreground" />
-                  <div className="flex flex-col gap-0.5 min-w-[120px]">
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-[10px] font-medium">Seuil</Label>
-                      <span className="text-[10px] font-mono text-muted-foreground">{confidenceThreshold !== undefined ? confidenceThreshold : 85}%</span>
-                    </div>
-                    <Slider
-                      value={[confidenceThreshold !== undefined ? confidenceThreshold : 85]}
-                      onValueChange={(value) => setConfidenceThreshold(value[0])}
-                      min={80}
-                      max={99}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="text-[10px] text-muted-foreground border-l pl-2 font-mono">
-                    {filteredComponents.length}/{currentSchematic.components.length}
-                  </div>
-                </Card>
-              )}
+              <div className="flex items-center gap-2">
+                {currentSchematic && currentSchematic.components.length > 0 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportSchematicCSV}
+                      className="h-8 text-xs"
+                    >
+                      <FileCsv size={14} className="mr-1.5" />
+                      Exporter CSV
+                    </Button>
+                    
+                    <Card className="px-3 py-1.5 flex items-center gap-3">
+                      <Sliders size={14} className="text-muted-foreground" />
+                      <div className="flex flex-col gap-0.5 min-w-[120px]">
+                        <div className="flex items-center justify-between gap-2">
+                          <Label className="text-[10px] font-medium">Seuil</Label>
+                          <span className="text-[10px] font-mono text-muted-foreground">{confidenceThreshold !== undefined ? confidenceThreshold : 85}%</span>
+                        </div>
+                        <Slider
+                          value={[confidenceThreshold !== undefined ? confidenceThreshold : 85]}
+                          onValueChange={(value) => setConfidenceThreshold(value[0])}
+                          min={80}
+                          max={99}
+                          step={1}
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="text-[10px] text-muted-foreground border-l pl-2 font-mono">
+                        {filteredComponents.length}/{currentSchematic.components.length}
+                      </div>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
 
             <TabsContent value="analysis" className="flex-1 min-h-0 m-0">

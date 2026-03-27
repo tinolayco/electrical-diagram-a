@@ -3,35 +3,96 @@ import type { ComponentLibrary, Schematic, Component, TrainingAnnotation, Compon
 export function exportLibraryToCSV(library: ComponentLibrary): string {
   const lines: string[] = []
   
-  lines.push('Bibliothèque,Version,Description,Auteur,Étiquettes,Date de création,Dernière modification,Nombre de composants')
-  lines.push([
-    escapeCSV(library.name),
-    escapeCSV(library.version || '1.0.0'),
-    escapeCSV(library.description || ''),
-    escapeCSV(library.author || ''),
-    escapeCSV(library.tags?.join(';') || ''),
-    new Date(library.createdAt).toLocaleString('fr-FR'),
-    new Date(library.lastModified).toLocaleString('fr-FR'),
-    library.componentCount.toString()
-  ].join(','))
+  lines.push('=== INFORMATIONS DE LA BIBLIOTHÈQUE ===')
+  lines.push('')
+  lines.push('Champ,Valeur')
+  lines.push(`Nom,${escapeCSV(library.name)}`)
+  lines.push(`Version,${escapeCSV(library.version || '1.0.0')}`)
+  lines.push(`Description,${escapeCSV(library.description || 'Aucune description')}`)
+  lines.push(`Auteur,${escapeCSV(library.author || 'Non spécifié')}`)
+  lines.push(`Étiquettes,${escapeCSV(library.tags?.join('; ') || 'Aucune')}`)
+  lines.push(`Date de création,${new Date(library.createdAt).toLocaleString('fr-FR')}`)
+  lines.push(`Dernière modification,${new Date(library.lastModified).toLocaleString('fr-FR')}`)
+  lines.push(`Nombre de composants entraînés,${library.componentCount}`)
+  lines.push(`Bibliothèque par défaut,${library.isDefault ? 'Oui' : 'Non'}`)
   
   lines.push('')
-  lines.push('ID,Type,Position X,Position Y,Largeur,Hauteur,Angle,Image Data (tronqué)')
+  lines.push('')
+  lines.push('=== STATISTIQUES PAR TYPE DE COMPOSANT ===')
+  lines.push('')
   
+  const typeStats = new Map<string, number>()
   library.annotations.forEach((annotation: TrainingAnnotation) => {
+    const count = typeStats.get(annotation.correctType) || 0
+    typeStats.set(annotation.correctType, count + 1)
+  })
+  
+  lines.push('Type de composant,Nombre d\'annotations,Pourcentage')
+  const sortedTypes = Array.from(typeStats.entries()).sort((a, b) => b[1] - a[1])
+  sortedTypes.forEach(([type, count]) => {
+    const percentage = ((count / library.componentCount) * 100).toFixed(1)
+    lines.push(`${escapeCSV(getComponentTypeLabel(type))},${count},${percentage}%`)
+  })
+  
+  lines.push('')
+  lines.push('')
+  lines.push('=== DÉTAILS DES ANNOTATIONS ===')
+  lines.push('')
+  lines.push('N°,ID Annotation,Type de composant,Position X,Position Y,Largeur,Hauteur,Aire (px²),Ratio L/H,Centre X,Centre Y,ID Schéma,Vérifié,Date de création')
+  
+  library.annotations.forEach((annotation: TrainingAnnotation, index) => {
+    const area = annotation.boundingBox.width * annotation.boundingBox.height
+    const ratio = (annotation.boundingBox.width / annotation.boundingBox.height).toFixed(2)
+    const centerX = (annotation.boundingBox.x + annotation.boundingBox.width / 2).toFixed(1)
+    const centerY = (annotation.boundingBox.y + annotation.boundingBox.height / 2).toFixed(1)
+    
     lines.push([
+      (index + 1).toString(),
       escapeCSV(annotation.id),
-      escapeCSV(annotation.correctType),
-      annotation.boundingBox.x.toString(),
-      annotation.boundingBox.y.toString(),
-      annotation.boundingBox.width.toString(),
-      annotation.boundingBox.height.toString(),
-      '0',
-      escapeCSV(annotation.schematicId.substring(0, 50))
+      escapeCSV(getComponentTypeLabel(annotation.correctType)),
+      annotation.boundingBox.x.toFixed(1),
+      annotation.boundingBox.y.toFixed(1),
+      annotation.boundingBox.width.toFixed(1),
+      annotation.boundingBox.height.toFixed(1),
+      area.toFixed(0),
+      ratio,
+      centerX,
+      centerY,
+      escapeCSV(annotation.schematicId.substring(0, 30)),
+      annotation.userVerified ? 'Oui' : 'Non',
+      new Date(annotation.createdAt).toLocaleString('fr-FR')
     ].join(','))
   })
   
+  lines.push('')
+  lines.push('')
+  lines.push('=== INFORMATIONS D\'EXPORT ===')
+  lines.push('')
+  lines.push('Exporté le,' + new Date().toLocaleString('fr-FR'))
+  lines.push('Format,CSV pour analyse Excel')
+  lines.push('Application,iSchémateur - Analyseur de schémas électriques')
+  lines.push('Compatible avec,Microsoft Excel, Google Sheets, LibreOffice Calc')
+  
   return lines.join('\n')
+}
+
+function getComponentTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    'breaker': 'Disjoncteur',
+    'transformer': 'Transformateur',
+    'bus-bar': 'Barre omnibus',
+    'switch': 'Interrupteur',
+    'fuse': 'Fusible',
+    'relay': 'Relais',
+    'meter': 'Compteur',
+    'capacitor': 'Condensateur',
+    'inductor': 'Inductance',
+    'generator': 'Générateur',
+    'motor': 'Moteur',
+    'load': 'Charge',
+    'unknown': 'Inconnu'
+  }
+  return labels[type] || type
 }
 
 export function exportLibraryToXML(library: ComponentLibrary): string {
@@ -84,45 +145,131 @@ export function exportLibraryToXML(library: ComponentLibrary): string {
 export function exportSchematicToCSV(schematic: Schematic): string {
   const lines: string[] = []
   
-  lines.push('Schéma,Date de téléversement,Nombre de composants,Nombre de chemins')
-  lines.push([
-    escapeCSV(schematic.name),
-    new Date(schematic.uploadedAt).toLocaleString('fr-FR'),
-    schematic.components.length.toString(),
-    schematic.paths.length.toString()
-  ].join(','))
+  lines.push('=== INFORMATIONS DU SCHÉMA ===')
+  lines.push('')
+  lines.push('Champ,Valeur')
+  lines.push(`Nom du schéma,${escapeCSV(schematic.name)}`)
+  lines.push(`ID,${escapeCSV(schematic.id)}`)
+  lines.push(`Date de téléversement,${new Date(schematic.uploadedAt).toLocaleString('fr-FR')}`)
+  lines.push(`Nombre total de composants,${schematic.components.length}`)
+  lines.push(`Nombre de chemins électriques,${schematic.paths.length}`)
   
   lines.push('')
-  lines.push('ID,Type,Position X,Position Y,Largeur,Hauteur,Confiance,Annoté par utilisateur,Connexions')
+  lines.push('')
+  lines.push('=== STATISTIQUES PAR TYPE DE COMPOSANT ===')
+  lines.push('')
   
+  const typeStats = new Map<string, { count: number; avgConfidence: number; userAnnotated: number }>()
   schematic.components.forEach((component: Component) => {
+    const stats = typeStats.get(component.type) || { count: 0, avgConfidence: 0, userAnnotated: 0 }
+    stats.count += 1
+    stats.avgConfidence += component.confidence || 0
+    if (component.metadata?.userAnnotated === 'true') {
+      stats.userAnnotated += 1
+    }
+    typeStats.set(component.type, stats)
+  })
+  
+  lines.push('Type de composant,Nombre,Confiance moyenne,Annotés manuellement,Auto-détectés')
+  const sortedTypes = Array.from(typeStats.entries()).sort((a, b) => b[1].count - a[1].count)
+  sortedTypes.forEach(([type, stats]) => {
+    const avgConf = stats.count > 0 ? (stats.avgConfidence / stats.count).toFixed(1) : '0'
+    const autoDetected = stats.count - stats.userAnnotated
+    lines.push(`${escapeCSV(getComponentTypeLabel(type))},${stats.count},${avgConf}%,${stats.userAnnotated},${autoDetected}`)
+  })
+  
+  lines.push('')
+  lines.push('')
+  lines.push('=== DÉTAILS DES COMPOSANTS DÉTECTÉS ===')
+  lines.push('')
+  lines.push('N°,ID,Type,Nom,Position X,Position Y,Largeur,Hauteur,Aire (px²),Centre X,Centre Y,Confiance (%),Source,Tension,Puissance,Fabricant,Connexions')
+  
+  schematic.components.forEach((component: Component, index) => {
+    const area = component.boundingBox.width * component.boundingBox.height
+    const centerX = (component.boundingBox.x + component.boundingBox.width / 2).toFixed(1)
+    const centerY = (component.boundingBox.y + component.boundingBox.height / 2).toFixed(1)
+    const source = component.metadata?.userAnnotated === 'true' ? 'Manuel' : 'Auto-détecté'
+    
     lines.push([
+      (index + 1).toString(),
       escapeCSV(component.id),
-      escapeCSV(component.type),
-      component.boundingBox.x.toString(),
-      component.boundingBox.y.toString(),
-      component.boundingBox.width.toString(),
-      component.boundingBox.height.toString(),
-      component.confidence?.toString() || '',
-      component.metadata?.userAnnotated === 'true' ? 'Oui' : 'Non',
-      escapeCSV(component.connections?.join(';') || '')
+      escapeCSV(getComponentTypeLabel(component.type)),
+      escapeCSV(component.name || ''),
+      component.boundingBox.x.toFixed(1),
+      component.boundingBox.y.toFixed(1),
+      component.boundingBox.width.toFixed(1),
+      component.boundingBox.height.toFixed(1),
+      area.toFixed(0),
+      centerX,
+      centerY,
+      component.confidence?.toFixed(1) || '',
+      source,
+      escapeCSV(component.voltage || ''),
+      escapeCSV(component.rating || ''),
+      escapeCSV(component.manufacturer || ''),
+      escapeCSV(component.connections?.join('; ') || '')
     ].join(','))
   })
   
   if (schematic.paths.length > 0) {
     lines.push('')
-    lines.push('ID Chemin,Description,Tension,Nombre de composants,Composants')
+    lines.push('')
+    lines.push('=== CHEMINS ÉLECTRIQUES IDENTIFIÉS ===')
+    lines.push('')
+    lines.push('N°,ID Chemin,Description,Tension,Nombre de composants,Liste des composants (IDs)')
     
-    schematic.paths.forEach(path => {
+    schematic.paths.forEach((path, index) => {
       lines.push([
+        (index + 1).toString(),
         escapeCSV(path.id),
         escapeCSV(path.description),
-        escapeCSV(path.voltage || ''),
+        escapeCSV(path.voltage || 'Non spécifié'),
         path.components.length.toString(),
-        escapeCSV(path.components.join(';'))
+        escapeCSV(path.components.join(' → '))
       ].join(','))
     })
+    
+    lines.push('')
+    lines.push('')
+    lines.push('=== MATRICE DE CONNEXIONS ===')
+    lines.push('')
+    
+    const componentMap = new Map(schematic.components.map(c => [c.id, c]))
+    const connectionPairs = new Set<string>()
+    
+    schematic.components.forEach(comp => {
+      comp.connections?.forEach(connId => {
+        const pair = [comp.id, connId].sort().join('|')
+        connectionPairs.add(pair)
+      })
+    })
+    
+    if (connectionPairs.size > 0) {
+      lines.push('Composant A,Type A,Composant B,Type B')
+      connectionPairs.forEach(pair => {
+        const [idA, idB] = pair.split('|')
+        const compA = componentMap.get(idA)
+        const compB = componentMap.get(idB)
+        if (compA && compB) {
+          lines.push([
+            escapeCSV(compA.name || idA),
+            escapeCSV(getComponentTypeLabel(compA.type)),
+            escapeCSV(compB.name || idB),
+            escapeCSV(getComponentTypeLabel(compB.type))
+          ].join(','))
+        }
+      })
+    }
   }
+  
+  lines.push('')
+  lines.push('')
+  lines.push('=== INFORMATIONS D\'EXPORT ===')
+  lines.push('')
+  lines.push('Exporté le,' + new Date().toLocaleString('fr-FR'))
+  lines.push('Format,CSV pour analyse Excel')
+  lines.push('Application,iSchémateur - Analyseur de schémas électriques')
+  lines.push('Compatible avec,Microsoft Excel, Google Sheets, LibreOffice Calc')
   
   return lines.join('\n')
 }
@@ -217,25 +364,53 @@ export function importLibraryFromCSV(csvContent: string): ComponentLibrary | nul
       throw new Error('Fichier CSV invalide: trop peu de lignes')
     }
     
-    const headerLine = lines[1]
-    const headerValues = parseCSVLine(headerLine)
+    let name = 'Bibliothèque importée'
+    let version = '1.0.0'
+    let description = ''
+    let author = ''
+    let tags: string[] | undefined = undefined
     
-    if (headerValues.length < 8) {
-      throw new Error('Fichier CSV invalide: en-tête incomplet')
+    const metadataSection = lines.findIndex(line => line.includes('=== INFORMATIONS DE LA BIBLIOTHÈQUE ==='))
+    
+    if (metadataSection !== -1) {
+      for (let i = metadataSection + 2; i < lines.length; i++) {
+        const line = lines[i]
+        if (line.startsWith('===') || !line.includes(',')) break
+        
+        const values = parseCSVLine(line)
+        if (values.length < 2) continue
+        
+        const field = values[0].toLowerCase()
+        const value = values[1]
+        
+        if (field === 'nom') name = value
+        else if (field === 'version') version = value
+        else if (field === 'description') description = value
+        else if (field === 'auteur') author = value
+        else if (field === 'étiquettes') {
+          tags = value.split(';').map(t => t.trim()).filter(Boolean)
+        }
+      }
+    } else {
+      const headerLine = lines[1]
+      const headerValues = parseCSVLine(headerLine)
+      
+      if (headerValues.length >= 8) {
+        name = headerValues[0]
+        version = headerValues[1] || '1.0.0'
+        description = headerValues[2]
+        author = headerValues[3]
+        const tagsString = headerValues[4]
+        tags = tagsString ? tagsString.split(';').filter(Boolean) : undefined
+      }
     }
-    
-    const name = headerValues[0]
-    const version = headerValues[1] || '1.0.0'
-    const description = headerValues[2]
-    const author = headerValues[3]
-    const tagsString = headerValues[4]
-    const tags = tagsString ? tagsString.split(';').filter(Boolean) : undefined
     
     const annotations: TrainingAnnotation[] = []
     
     let annotationsStartIndex = -1
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('ID,Type,Position X')) {
+      const line = lines[i]
+      if (line.includes('N°,ID Annotation,Type de composant') || line.includes('ID,Type,Position X')) {
         annotationsStartIndex = i + 1
         break
       }
@@ -244,20 +419,59 @@ export function importLibraryFromCSV(csvContent: string): ComponentLibrary | nul
     if (annotationsStartIndex !== -1) {
       for (let i = annotationsStartIndex; i < lines.length; i++) {
         const line = lines[i].trim()
-        if (!line) continue
+        if (!line || line.startsWith('===')) continue
         
         const values = parseCSVLine(line)
         if (values.length >= 7) {
+          let idIndex = 0
+          let typeIndex = 1
+          let xIndex = 2
+          let yIndex = 3
+          let widthIndex = 4
+          let heightIndex = 5
+          let schematicIdIndex = 7
+          
+          if (line.match(/^\d+,/)) {
+            idIndex = 1
+            typeIndex = 2
+            xIndex = 3
+            yIndex = 4
+            widthIndex = 5
+            heightIndex = 6
+            schematicIdIndex = 11
+          }
+          
+          let componentType = values[typeIndex] as ComponentType
+          const typeMap: Record<string, ComponentType> = {
+            'Disjoncteur': 'breaker',
+            'Transformateur': 'transformer',
+            'Barre omnibus': 'bus-bar',
+            'Interrupteur': 'switch',
+            'Fusible': 'fuse',
+            'Relais': 'relay',
+            'Compteur': 'meter',
+            'Condensateur': 'capacitor',
+            'Inductance': 'inductor',
+            'Générateur': 'generator',
+            'Moteur': 'motor',
+            'Charge': 'load',
+            'Inconnu': 'unknown'
+          }
+          
+          if (typeMap[componentType]) {
+            componentType = typeMap[componentType]
+          }
+          
           const annotation: TrainingAnnotation = {
-            id: values[0] || `annotation-${Date.now()}-${i}`,
-            correctType: values[1] as ComponentType,
+            id: values[idIndex] || `annotation-${Date.now()}-${i}`,
+            correctType: componentType,
             boundingBox: {
-              x: parseFloat(values[2]) || 0,
-              y: parseFloat(values[3]) || 0,
-              width: parseFloat(values[4]) || 50,
-              height: parseFloat(values[5]) || 50,
+              x: parseFloat(values[xIndex]) || 0,
+              y: parseFloat(values[yIndex]) || 0,
+              width: parseFloat(values[widthIndex]) || 50,
+              height: parseFloat(values[heightIndex]) || 50,
             },
-            schematicId: values[7] || 'imported',
+            schematicId: values[schematicIdIndex] || 'imported',
             userVerified: true,
             createdAt: Date.now(),
           }

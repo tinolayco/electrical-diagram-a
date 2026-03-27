@@ -101,6 +101,45 @@ Le **slider de confiance** contrôle quels composants sont affichés :
 
 ## 🔧 Fonctionnalités avancées
 
+### **Exporter les résultats en CSV pour Excel**
+
+Vous pouvez exporter vos analyses et bibliothèques en format CSV pour une analyse approfondie dans Excel, Google Sheets ou LibreOffice Calc.
+
+#### **Exporter un schéma analysé :**
+
+1. Après avoir analysé un schéma, cliquez sur le bouton `📄 Exporter CSV` à côté du seuil de confiance
+2. Choisissez l'emplacement de sauvegarde
+3. Le fichier CSV contient :
+   - **Informations du schéma** : nom, date, nombre de composants
+   - **Statistiques par type** : nombre, confiance moyenne, annotations manuelles vs auto-détectées
+   - **Détails des composants** : position, dimensions, confiance, tension, puissance, connexions
+   - **Chemins électriques** : description, tension, liste des composants
+   - **Matrice de connexions** : toutes les connexions entre composants
+
+#### **Exporter une bibliothèque d'entraînement :**
+
+1. Cliquez sur l'icône `⬇️` (télécharger) dans le gestionnaire de bibliothèques
+2. Sélectionnez le format **CSV** dans la boîte de dialogue
+3. Le fichier CSV contient :
+   - **Informations de la bibliothèque** : nom, version, auteur, tags
+   - **Statistiques par type** : répartition des annotations par type de composant
+   - **Détails des annotations** : position, dimensions, aires, ratios, centres
+
+#### **Réimporter une bibliothèque CSV :**
+
+1. Cliquez sur l'icône `⬆️` (téléverser) dans le gestionnaire de bibliothèques
+2. Sélectionnez votre fichier CSV exporté
+3. La bibliothèque est automatiquement recréée avec toutes ses annotations
+
+> **💡 Astuce :** Les fichiers CSV sont parfaits pour :
+> - Créer des tableaux croisés dynamiques dans Excel
+> - Générer des graphiques et statistiques
+> - Partager les résultats avec des collègues
+> - Archiver les analyses pour référence future
+> - Importer dans d'autres outils d'analyse
+
+---
+
 ### **Réentraîner sur de nouveaux composants**
 
 Si vous voulez détecter un nouveau type de composant :
