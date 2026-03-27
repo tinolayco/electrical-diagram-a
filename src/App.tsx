@@ -17,6 +17,23 @@ import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
 import { 
   UploadSimple, 
@@ -28,7 +45,8 @@ import {
   Question,
   Sparkle,
   GraduationCap,
-  Sliders
+  Sliders,
+  TrashSimple
 } from '@phosphor-icons/react'
 
 function App() {
@@ -45,6 +63,8 @@ function App() {
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [trainingMode, setTrainingMode] = useState(false)
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [resetType, setResetType] = useState<'all' | 'training' | 'schematics' | null>(null)
 
   const filteredComponents = useMemo(() => {
     if (!currentSchematic) return []
@@ -232,6 +252,43 @@ function App() {
     }
   }
 
+  const handleResetClick = (type: 'all' | 'training' | 'schematics') => {
+    setResetType(type)
+    setResetDialogOpen(true)
+  }
+
+  const handleResetConfirm = () => {
+    if (!resetType) return
+
+    switch (resetType) {
+      case 'all':
+        setSchematics([])
+        setCatalog([])
+        setTrainingAnnotations([])
+        setConfidenceThreshold(97)
+        setCurrentSchematic(null)
+        setSelectedComponent(null)
+        setHighlightedPath(null)
+        toast.success('Toutes les données ont été réinitialisées')
+        break
+      case 'training':
+        setTrainingAnnotations([])
+        toast.success('Données d\'entraînement réinitialisées')
+        break
+      case 'schematics':
+        setSchematics([])
+        setCatalog([])
+        setCurrentSchematic(null)
+        setSelectedComponent(null)
+        setHighlightedPath(null)
+        toast.success('Schémas et catalogue réinitialisés')
+        break
+    }
+
+    setResetDialogOpen(false)
+    setResetType(null)
+  }
+
   const selectedComponentData = filteredComponents.find(
     c => c.id === selectedComponent
   )
@@ -261,6 +318,35 @@ function App() {
               >
                 <Question size={18} weight="bold" />
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-foreground h-8 w-8"
+                  >
+                    <TrashSimple size={18} weight="bold" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => handleResetClick('training')}>
+                    <GraduationCap size={16} className="mr-2" />
+                    Réinitialiser l'entraînement
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleResetClick('schematics')}>
+                    <Cpu size={16} className="mr-2" />
+                    Réinitialiser les schémas
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => handleResetClick('all')}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <TrashSimple size={16} className="mr-2" weight="fill" />
+                    Tout réinitialiser
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant="outline"
                 size="sm"
@@ -502,6 +588,35 @@ function App() {
         open={helpDialogOpen}
         onClose={() => setHelpDialogOpen(false)}
       />
+
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {resetType === 'all' && 'Réinitialiser toutes les données?'}
+              {resetType === 'training' && 'Réinitialiser l\'entraînement?'}
+              {resetType === 'schematics' && 'Réinitialiser les schémas?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {resetType === 'all' && 
+                'Cette action supprimera tous les schémas, le catalogue de composants et les données d\'entraînement. Cette action est irréversible.'}
+              {resetType === 'training' && 
+                'Cette action supprimera toutes les annotations d\'entraînement. Vous devrez réentraîner le modèle pour détecter de nouveaux composants.'}
+              {resetType === 'schematics' && 
+                'Cette action supprimera tous les schémas et le catalogue de composants. Les données d\'entraînement seront conservées.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Réinitialiser
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
