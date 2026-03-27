@@ -157,15 +157,35 @@ export function DiagramViewer({
                     }}
                     rx={4}
                   />
-                  {(isSelected || isInPath) && (
+                  <rect
+                    x={x + width / 2 - 35}
+                    y={y - 30}
+                    width={70}
+                    height={22}
+                    fill={color}
+                    fillOpacity={0.95}
+                    rx={4}
+                    className="pointer-events-none"
+                  />
+                  <text
+                    x={x + width / 2}
+                    y={y - 14}
+                    textAnchor="middle"
+                    className="text-xs font-mono font-semibold pointer-events-none"
+                    fill="white"
+                    style={{ fontSize: '11px' }}
+                  >
+                    {comp.name}
+                  </text>
+                  {comp.confidence && (
                     <text
                       x={x + width / 2}
-                      y={y - 8}
+                      y={y + height + 16}
                       textAnchor="middle"
-                      className="text-xs font-mono font-medium pointer-events-none"
+                      className="text-[10px] font-mono pointer-events-none"
                       fill={color}
                     >
-                      {comp.name}
+                      {Math.round(comp.confidence)}%
                     </text>
                   )}
                 </g>
