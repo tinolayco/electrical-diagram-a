@@ -3,7 +3,7 @@ import { detectComponentsInImage } from './image-detection'
 
 export async function analyzeSchematic(imageData: string, trainingAnnotations?: TrainingAnnotation[]): Promise<Component[]> {
   const imageDetectedComponents = trainingAnnotations 
-    ? convertAnnotationsToComponents(trainingAnnotations)
+    ? await convertAnnotationsToComponents(trainingAnnotations, imageData)
     : await detectComponentsInImage(imageData)
   
   if (imageDetectedComponents.length === 0) {
@@ -192,14 +192,35 @@ export function getComponentLabel(type: ComponentType): string {
   return labels[type] || labels.unknown
 }
 
-function convertAnnotationsToComponents(annotations: TrainingAnnotation[]): Component[] {
-  return annotations.map((annotation, index) => ({
-    id: annotation.id,
-    type: annotation.correctType,
-    name: `${annotation.correctType.toUpperCase()}-${index + 1}`,
-    boundingBox: annotation.boundingBox,
-    confidence: 100,
-    connections: [],
-    metadata: { userAnnotated: 'true' }
-  }))
+async function convertAnnotationsToComponents(annotations: TrainingAnnotation[], imageData: string): Promise<Component[]> {
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = reject
+    image.src = imageData
+  })
+  
+  const imageWidth = img.width
+  const imageHeight = img.height
+  
+  return annotations.map((annotation, index) => {
+    const bbox = annotation.boundingBox
+    
+    const percentBox: BoundingBox = {
+      x: (bbox.x / imageWidth) * 100,
+      y: (bbox.y / imageHeight) * 100,
+      width: (bbox.width / imageWidth) * 100,
+      height: (bbox.height / imageHeight) * 100
+    }
+    
+    return {
+      id: annotation.id,
+      type: annotation.correctType,
+      name: `${annotation.correctType.toUpperCase()}-${index + 1}`,
+      boundingBox: percentBox,
+      confidence: 100,
+      connections: [],
+      metadata: { userAnnotated: 'true', source: 'training' }
+    }
+  })
 }
