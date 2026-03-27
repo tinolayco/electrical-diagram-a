@@ -18,7 +18,9 @@ import {
   Eye,
   CheckCircle,
   Sparkle,
-  GraduationCap
+  GraduationCap,
+  DownloadSimple,
+  FileCsv
 } from '@phosphor-icons/react'
 
 interface HelpDialogProps {
@@ -302,6 +304,77 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                   <p className="text-accent-foreground text-xs">
                     <CheckCircle size={14} weight="fill" className="inline mr-1" />
                     <strong>Important :</strong> Vos corrections améliorent le catalogue et la précision future de l'IA. Le système apprend de vos modifications.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <Separator />
+
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="font-bold text-primary font-mono">7</span>
+                </div>
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <DownloadSimple size={20} weight="duotone" className="text-accent" />
+                  Exporter et Importer
+                </h3>
+              </div>
+              <div className="ml-10 space-y-3 text-sm text-muted-foreground">
+                <p>Sauvegardez et partagez vos données localement via le système de fichiers de votre ordinateur.</p>
+                
+                <div className="space-y-3 mt-3">
+                  <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-md p-3">
+                    <h4 className="font-medium text-foreground flex items-center gap-2 mb-2">
+                      <DownloadSimple size={16} className="text-blue-500" />
+                      Exporter une Bibliothèque
+                    </h4>
+                    <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
+                      <li>Cliquez sur l'icône de téléchargement (↓) dans la section des bibliothèques</li>
+                      <li><strong>Formats:</strong> JSON (complet), CSV (Excel), XML (structuré)</li>
+                      <li>Le <strong>navigateur ouvre une boîte de dialogue</strong> pour choisir où sauvegarder</li>
+                      <li>Version automatique pour JSON (patch/minor/major)</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-md p-3">
+                    <h4 className="font-medium text-foreground flex items-center gap-2 mb-2">
+                      <UploadSimple size={16} className="text-green-500" />
+                      Importer une Bibliothèque
+                    </h4>
+                    <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
+                      <li>Cliquez sur l'icône d'upload (↑) dans la section des bibliothèques</li>
+                      <li><strong>Formats acceptés:</strong> JSON, CSV, XML</li>
+                      <li>Le <strong>navigateur ouvre une boîte de dialogue</strong> pour sélectionner le fichier</li>
+                      <li>L'historique des versions est préservé (JSON uniquement)</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-md p-3">
+                    <h4 className="font-medium text-foreground flex items-center gap-2 mb-2">
+                      <FileCsv size={16} className="text-violet-500" />
+                      Exporter Schémas et Catalogues
+                    </h4>
+                    <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
+                      <li><strong>Schéma:</strong> Bouton "Exporter CSV" dans l'onglet Analyse</li>
+                      <li><strong>Catalogue:</strong> Bouton "Exporter CSV" dans l'onglet Catalogue</li>
+                      <li>Format CSV compatible Excel, Google Sheets, LibreOffice</li>
+                      <li>Inclut toutes les statistiques et détections</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="bg-accent/10 border border-accent/20 rounded-md p-3 mt-3">
+                  <p className="text-accent-foreground text-xs font-medium mb-2">
+                    <CheckCircle size={14} weight="fill" className="inline mr-1" />
+                    Sécurité et Confidentialité
+                  </p>
+                  <p className="text-xs">
+                    ✅ Tous les fichiers sont sauvegardés <strong>localement sur votre ordinateur</strong><br/>
+                    ✅ Vous choisissez exactement où sauvegarder chaque fichier<br/>
+                    ✅ Aucune donnée n'est envoyée vers un serveur externe<br/>
+                    ✅ API File System Access du navigateur moderne
                   </p>
                 </div>
               </div>

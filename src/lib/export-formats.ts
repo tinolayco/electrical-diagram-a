@@ -784,10 +784,17 @@ export async function downloadFile(content: string, fileName: string, mimeType: 
   if ('showSaveFilePicker' in window && typeof (window as any).showSaveFilePicker === 'function') {
     try {
       const extension = fileName.split('.').pop() || 'txt'
+      const descriptions: Record<string, string> = {
+        'json': 'Bibliothèque iSchémateur (JSON)',
+        'csv': 'Données tabulaires (CSV)',
+        'xml': 'Données structurées (XML)',
+        'txt': 'Fichier texte'
+      }
+      
       const fileHandle = await (window as any).showSaveFilePicker({
         suggestedName: fileName,
         types: [{
-          description: `Fichier ${extension.toUpperCase()}`,
+          description: descriptions[extension] || `Fichier ${extension.toUpperCase()}`,
           accept: { [mimeType]: [`.${extension}`] },
         }],
       })
@@ -800,7 +807,7 @@ export async function downloadFile(content: string, fileName: string, mimeType: 
       if (err.name === 'AbortError') {
         throw new Error('CANCELLED')
       }
-      console.warn('showSaveFilePicker failed, falling back to download link:', err)
+      console.warn('API showSaveFilePicker non disponible, utilisation du téléchargement classique:', err)
     }
   }
   
