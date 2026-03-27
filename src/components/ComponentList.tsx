@@ -31,20 +31,20 @@ export function ComponentList({
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-4 space-y-4">
+      <div className="p-3 space-y-3">
         {userAnnotated.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <GraduationCap size={16} weight="duotone" className="text-primary" />
-              <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
+              <GraduationCap size={14} weight="duotone" className="text-primary" />
+              <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                 Annotés ({userAnnotated.length})
               </h5>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {userAnnotated.map(comp => (
                 <Card
                   key={comp.id}
-                  className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                  className={`p-2 cursor-pointer transition-all hover:shadow-md ${
                     selectedComponent === comp.id 
                       ? 'ring-2 ring-primary shadow-md' 
                       : 'hover:border-primary/50'
@@ -53,25 +53,25 @@ export function ComponentList({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-1.5 mb-0.5">
                         <div
-                          className="w-3 h-3 rounded-sm flex-shrink-0"
+                          className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
                           style={{ backgroundColor: getComponentColor(comp.type) }}
                         />
-                        <h4 className="font-medium text-sm truncate">{comp.name}</h4>
+                        <h4 className="font-medium text-xs truncate">{comp.name}</h4>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] text-muted-foreground">
                         {getComponentLabel(comp.type)}
                       </p>
                       {(comp.voltage || comp.rating) && (
-                        <div className="flex gap-1 mt-2">
+                        <div className="flex gap-1 mt-1">
                           {comp.voltage && (
-                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
+                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
                               {comp.voltage}
                             </Badge>
                           )}
                           {comp.rating && (
-                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
+                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
                               {comp.rating}
                             </Badge>
                           )}
@@ -80,7 +80,7 @@ export function ComponentList({
                     </div>
                     <Badge 
                       variant="secondary" 
-                      className="text-[10px] font-mono flex-shrink-0 h-5 px-1.5"
+                      className="text-[9px] font-mono flex-shrink-0 h-4 px-1.5"
                     >
                       {comp.confidence}%
                     </Badge>
@@ -93,17 +93,17 @@ export function ComponentList({
 
         {autoDetected.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <Sparkle size={16} weight="fill" className="text-accent" />
-              <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Détectés automatiquement ({autoDetected.length})
+            <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
+              <Sparkle size={14} weight="fill" className="text-accent" />
+              <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                Détectés auto ({autoDetected.length})
               </h5>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {autoDetected.map(comp => (
                 <Card
                   key={comp.id}
-                  className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                  className={`p-2 cursor-pointer transition-all hover:shadow-md ${
                     selectedComponent === comp.id 
                       ? 'ring-2 ring-accent shadow-md' 
                       : 'hover:border-accent/50'
@@ -112,25 +112,25 @@ export function ComponentList({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-1.5 mb-0.5">
                         <div
-                          className="w-3 h-3 rounded-sm flex-shrink-0"
+                          className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
                           style={{ backgroundColor: getComponentColor(comp.type) }}
                         />
-                        <h4 className="font-medium text-sm truncate">{comp.name}</h4>
+                        <h4 className="font-medium text-xs truncate">{comp.name}</h4>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] text-muted-foreground">
                         {getComponentLabel(comp.type)}
                       </p>
                       {(comp.voltage || comp.rating) && (
-                        <div className="flex gap-1 mt-2">
+                        <div className="flex gap-1 mt-1">
                           {comp.voltage && (
-                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
+                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
                               {comp.voltage}
                             </Badge>
                           )}
                           {comp.rating && (
-                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
+                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
                               {comp.rating}
                             </Badge>
                           )}
@@ -139,7 +139,7 @@ export function ComponentList({
                     </div>
                     <Badge 
                       variant="outline" 
-                      className="text-[10px] font-mono flex-shrink-0 h-5 px-1.5 bg-accent/10 text-accent border-accent/20"
+                      className="text-[9px] font-mono flex-shrink-0 h-4 px-1.5 bg-accent/10 text-accent border-accent/20"
                     >
                       {comp.confidence}%
                     </Badge>

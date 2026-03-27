@@ -237,96 +237,76 @@ function App() {
   )
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Cpu size={32} weight="duotone" className="text-primary" />
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="border-b border-border bg-card flex-shrink-0">
+        <div className="px-4 lg:px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <Cpu size={28} weight="duotone" className="text-primary flex-shrink-0" />
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-xl font-bold tracking-tight">
                   Electrical Schematic Analyzer
                 </h1>
-                <p className="text-sm text-muted-foreground">
-                  AI-powered component recognition and path analysis
+                <p className="text-xs text-muted-foreground">
+                  AI-powered component recognition
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              {currentSchematic && currentSchematic.components.length > 0 && (
-                <Card className="px-4 py-2 flex items-center gap-3">
-                  <Sliders size={18} className="text-muted-foreground" />
-                  <div className="flex flex-col gap-1 min-w-[140px]">
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-xs font-medium">Seuil</Label>
-                      <span className="text-xs font-mono text-muted-foreground">{confidenceThreshold}%</span>
-                    </div>
-                    <Slider
-                      value={[confidenceThreshold || 97]}
-                      onValueChange={(value) => setConfidenceThreshold(value[0])}
-                      min={80}
-                      max={99}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="text-xs text-muted-foreground border-l pl-3">
-                    {filteredComponents.length}/{currentSchematic.components.length}
-                  </div>
-                </Card>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setHelpDialogOpen(true)}
+                className="text-muted-foreground hover:text-foreground h-8 w-8"
+              >
+                <Question size={18} weight="bold" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoadDemo}
+              >
+                <Sparkle size={16} className="mr-1.5" weight="fill" />
+                Example
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setUploadDialogOpen(true)}
+              >
+                <UploadSimple size={16} className="mr-1.5" />
+                Upload
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleAnalyze}
+                disabled={!currentSchematic || analyzing}
+              >
+                <Lightning size={16} className="mr-1.5" weight="fill" />
+                {analyzing ? 'Analyse...' : 'Analyser'}
+              </Button>
+              {trainingAnnotations && trainingAnnotations.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTrainingMode(true)}
+                >
+                  <GraduationCap size={16} className="mr-1.5" weight="duotone" />
+                  Entraîner ({trainingAnnotations.length})
+                </Button>
               )}
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setHelpDialogOpen(true)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <Question size={20} weight="bold" />
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleLoadDemo}
-                >
-                  <Sparkle size={18} className="mr-2" weight="fill" />
-                  Load Example
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setUploadDialogOpen(true)}
-                >
-                  <UploadSimple size={18} className="mr-2" />
-                  Upload
-                </Button>
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={!currentSchematic || analyzing}
-                >
-                  <Lightning size={18} className="mr-2" weight="fill" />
-                  {analyzing ? 'Analyseencours...' : 'Analyser'}
-                </Button>
-                {trainingAnnotations && trainingAnnotations.length > 0 && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setTrainingMode(true)}
-                  >
-                    <GraduationCap size={18} className="mr-2" weight="duotone" />
-                    Entraîner ({trainingAnnotations.length})
-                  </Button>
-                )}
-              </div>
             </div>
           </div>
         </div>
       </header>
 
       {analysisProgress > 0 && (
-        <div className="container mx-auto px-4 lg:px-6 py-2">
+        <div className="px-4 lg:px-6">
           <Progress value={analysisProgress} className="h-1" />
         </div>
       )}
 
-      <main className="container mx-auto px-4 lg:px-6 py-6">
+      <main className="px-4 lg:px-6 py-4 flex-1 flex flex-col min-h-0">
         {!currentSchematic ? (
           <Card className="p-12 text-center">
             <Cpu size={64} weight="duotone" className="mx-auto mb-4 text-muted-foreground" />
@@ -355,25 +335,50 @@ function App() {
             onCancel={() => setTrainingMode(false)}
           />
         ) : (
-          <Tabs defaultValue="analysis" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-3">
-              <TabsTrigger value="analysis" className="gap-2">
-                <Lightning size={16} />
-                Analysis
-              </TabsTrigger>
-              <TabsTrigger value="catalog" className="gap-2">
-                <Cube size={16} />
-                Catalog
-              </TabsTrigger>
-              <TabsTrigger value="paths" className="gap-2">
-                <GitBranch size={16} />
-                Paths
-              </TabsTrigger>
-            </TabsList>
+          <Tabs defaultValue="analysis" className="w-full flex flex-col flex-1 min-h-0">
+            <div className="flex items-center justify-between mb-3">
+              <TabsList>
+                <TabsTrigger value="analysis" className="gap-1.5 text-xs">
+                  <Lightning size={14} />
+                  Analysis
+                </TabsTrigger>
+                <TabsTrigger value="catalog" className="gap-1.5 text-xs">
+                  <Cube size={14} />
+                  Catalog
+                </TabsTrigger>
+                <TabsTrigger value="paths" className="gap-1.5 text-xs">
+                  <GitBranch size={14} />
+                  Paths
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="analysis" className="mt-6">
-              <div className="grid lg:grid-cols-[1fr_400px] gap-6 h-[calc(100vh-280px)]">
-                <Card className="overflow-hidden">
+              {currentSchematic && currentSchematic.components.length > 0 && (
+                <Card className="px-3 py-1.5 flex items-center gap-3">
+                  <Sliders size={14} className="text-muted-foreground" />
+                  <div className="flex flex-col gap-0.5 min-w-[120px]">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-[10px] font-medium">Seuil</Label>
+                      <span className="text-[10px] font-mono text-muted-foreground">{confidenceThreshold}%</span>
+                    </div>
+                    <Slider
+                      value={[confidenceThreshold || 97]}
+                      onValueChange={(value) => setConfidenceThreshold(value[0])}
+                      min={80}
+                      max={99}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="text-[10px] text-muted-foreground border-l pl-2 font-mono">
+                    {filteredComponents.length}/{currentSchematic.components.length}
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            <TabsContent value="analysis" className="flex-1 min-h-0 m-0">
+              <div className="grid lg:grid-cols-[1fr_360px] gap-3 h-full">
+                <Card className="overflow-hidden flex flex-col">
                   <DiagramViewer
                     imageData={currentSchematic.imageData}
                     components={filteredComponents}
@@ -386,7 +391,7 @@ function App() {
                   />
                 </Card>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3 min-h-0">
                   {filteredComponents.length > 0 && (
                     <DetectionStats 
                       components={filteredComponents} 
@@ -394,16 +399,17 @@ function App() {
                     />
                   )}
                   
-                  <Card className="flex-1 flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-border flex items-center justify-between">
-                      <h3 className="font-semibold">Components</h3>
+                  <Card className="flex-1 flex flex-col overflow-hidden min-h-0">
+                    <div className="p-3 border-b border-border flex items-center justify-between flex-shrink-0">
+                      <h3 className="font-semibold text-sm">Components</h3>
                       {selectedComponent && (
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => setEditorOpen(true)}
+                          className="h-7 text-xs"
                         >
-                          <PencilSimple size={16} className="mr-1" />
+                          <PencilSimple size={14} className="mr-1" />
                           Edit
                         </Button>
                       )}
@@ -418,22 +424,22 @@ function App() {
               </div>
             </TabsContent>
 
-            <TabsContent value="catalog" className="mt-6">
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Component Catalog</h3>
+            <TabsContent value="catalog" className="flex-1 min-h-0 m-0">
+              <Card className="p-4 h-full overflow-auto">
+                <h3 className="text-base font-semibold mb-3">Component Catalog</h3>
                 {!catalog || catalog.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Cube size={48} className="mx-auto mb-3" weight="duotone" />
-                    <p>No components in catalog yet</p>
-                    <p className="text-sm">Analyze schematics to build your catalog</p>
+                    <p className="text-sm">No components in catalog yet</p>
+                    <p className="text-xs mt-1">Analyze schematics to build your catalog</p>
                   </div>
                 ) : (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {catalog.map(entry => (
-                      <Card key={entry.id} className="p-4">
-                        <div className="font-medium text-sm mb-1">{entry.type}</div>
-                        <div className="text-2xl font-bold text-primary">{entry.count}</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                      <Card key={entry.id} className="p-3">
+                        <div className="font-medium text-xs mb-1">{entry.type}</div>
+                        <div className="text-xl font-bold text-primary">{entry.count}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">
                           instances detected
                         </div>
                       </Card>
@@ -443,31 +449,31 @@ function App() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="paths" className="mt-6">
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Electrical Paths</h3>
+            <TabsContent value="paths" className="flex-1 min-h-0 m-0">
+              <Card className="p-4 h-full overflow-auto">
+                <h3 className="text-base font-semibold mb-3">Electrical Paths</h3>
                 {currentSchematic.paths.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <GitBranch size={48} className="mx-auto mb-3" weight="duotone" />
-                    <p>No electrical paths identified yet</p>
-                    <p className="text-sm">Analyze the schematic to identify connections</p>
+                    <p className="text-sm">No electrical paths identified yet</p>
+                    <p className="text-xs mt-1">Analyze the schematic to identify connections</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {currentSchematic.paths.map(path => (
                       <Card
                         key={path.id}
-                        className="p-4 cursor-pointer hover:border-primary/50 transition-colors"
+                        className="p-3 cursor-pointer hover:border-primary/50 transition-colors"
                         onClick={() => handlePathClick(path.id)}
                       >
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
-                            <div className="font-medium mb-1">{path.description}</div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="font-medium text-sm mb-0.5">{path.description}</div>
+                            <div className="text-xs text-muted-foreground">
                               {path.components.length} components • {path.voltage}
                             </div>
                           </div>
-                          <GitBranch size={20} className="text-muted-foreground flex-shrink-0" />
+                          <GitBranch size={18} className="text-muted-foreground flex-shrink-0" />
                         </div>
                       </Card>
                     ))}

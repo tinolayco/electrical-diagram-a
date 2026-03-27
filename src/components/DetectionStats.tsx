@@ -35,85 +35,79 @@ export function DetectionStats({ components, isAnalyzing }: DetectionStatsProps)
   const lowConfidence = components.filter(c => c.confidence < 70).length
 
   return (
-    <Card className="p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Target size={20} className="text-primary" weight="duotone" />
-        <h3 className="font-semibold">Detection Statistics</h3>
+    <Card className="p-3">
+      <div className="flex items-center gap-1.5 mb-2">
+        <Target size={16} className="text-primary" weight="duotone" />
+        <h3 className="font-semibold text-sm">Detection Statistics</h3>
       </div>
       
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Total Components</span>
-          <Badge variant="secondary" className="font-mono text-xs h-5 px-2">
-            {components.length}
-          </Badge>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Avg. Confidence</span>
-          <Badge 
-            variant={avgConfidence >= 85 ? 'default' : avgConfidence >= 70 ? 'secondary' : 'outline'}
-            className="font-mono text-xs h-5 px-2"
-          >
-            {avgConfidence}%
-          </Badge>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-1.5">
-          <div className="text-xs font-medium text-muted-foreground mb-2">Confidence Distribution</div>
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={14} className="text-green-600" weight="fill" />
-              <span className="text-muted-foreground">High (&ge;85%)</span>
-            </div>
-            <span className="font-mono text-xs">{highConfidence}</span>
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-0.5">
+            <span className="text-[10px] text-muted-foreground">Total</span>
+            <div className="font-mono text-lg font-bold">{components.length}</div>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={14} className="text-yellow-600" weight="fill" />
-              <span className="text-muted-foreground">Medium (70-84%)</span>
-            </div>
-            <span className="font-mono text-xs">{mediumConfidence}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={14} className="text-orange-600" weight="fill" />
-              <span className="text-muted-foreground">Low (&lt;70%)</span>
-            </div>
-            <span className="font-mono text-xs">{lowConfidence}</span>
+          <div className="space-y-0.5">
+            <span className="text-[10px] text-muted-foreground">Avg. Conf.</span>
+            <div className="font-mono text-lg font-bold">{avgConfidence}%</div>
           </div>
         </div>
 
         <Separator />
 
-        <div className="space-y-1.5">
-          <div className="text-xs font-medium text-muted-foreground mb-2">By Component Type</div>
+        <div className="space-y-1">
+          <div className="text-[10px] font-medium text-muted-foreground mb-1">Distribution</div>
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle size={12} className="text-green-600" weight="fill" />
+              <span className="text-muted-foreground">High</span>
+            </div>
+            <span className="font-mono text-[10px]">{highConfidence}</span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle size={12} className="text-yellow-600" weight="fill" />
+              <span className="text-muted-foreground">Med</span>
+            </div>
+            <span className="font-mono text-[10px]">{mediumConfidence}</span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle size={12} className="text-orange-600" weight="fill" />
+              <span className="text-muted-foreground">Low</span>
+            </div>
+            <span className="font-mono text-[10px]">{lowConfidence}</span>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-1">
+          <div className="text-[10px] font-medium text-muted-foreground mb-1">By Type</div>
           {Object.entries(componentsByType)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
+            .slice(0, 4)
             .map(([type, count]) => (
-              <div key={type} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
+              <div key={type} className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5">
                   <div 
-                    className="w-3 h-3 rounded-sm" 
+                    className="w-2.5 h-2.5 rounded-sm flex-shrink-0" 
                     style={{ backgroundColor: getComponentColor(type as any) }}
                   />
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-muted-foreground text-[10px] truncate">
                     {getComponentLabel(type as any)}
                   </span>
                 </div>
-                <span className="font-mono text-xs">{count}</span>
+                <span className="font-mono text-[10px] flex-shrink-0">{count}</span>
               </div>
             ))}
         </div>
 
         <Separator />
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Cpu size={14} weight="duotone" />
-          <span>Computer Vision + AI Detection</span>
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <Cpu size={12} weight="duotone" />
+          <span>CV + AI</span>
         </div>
       </div>
     </Card>
