@@ -86,14 +86,27 @@ function App() {
 
     setAnalyzing(true)
     setAnalysisProgress(0)
-    toast.info('Analyse en cours avec vos annotations d\'entraînement...', { duration: 3000 })
+    toast.info('Analyse en cours - les composants s\'afficheront dès qu\'ils sont détectés...', { duration: 3000 })
+
+    const detectedComponents: Component[] = []
 
     try {
       setAnalysisProgress(30)
       const components = await analyzeSchematic(
         currentSchematic.imageData,
         trainingAnnotations && trainingAnnotations.length > 0 ? trainingAnnotations : undefined,
-        confidenceThreshold || 97
+        confidenceThreshold || 97,
+        (newComponent: Component) => {
+          detectedComponents.push(newComponent)
+          
+          const updatedSchematic: Schematic = {
+            ...currentSchematic,
+            components: [...detectedComponents],
+            paths: []
+          }
+          
+          setCurrentSchematic(updatedSchematic)
+        }
       )
       
       setAnalysisProgress(70)

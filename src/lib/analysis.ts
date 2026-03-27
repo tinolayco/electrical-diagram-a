@@ -4,10 +4,11 @@ import { detectComponentsInImage } from './image-detection'
 export async function analyzeSchematic(
   imageData: string, 
   trainingAnnotations?: TrainingAnnotation[], 
-  confidenceThreshold: number = 97
+  confidenceThreshold: number = 97,
+  onComponentFound?: (component: Component) => void
 ): Promise<Component[]> {
   const imageDetectedComponents = trainingAnnotations 
-    ? await convertAnnotationsToComponents(trainingAnnotations, imageData, confidenceThreshold)
+    ? await convertAnnotationsToComponents(trainingAnnotations, imageData, confidenceThreshold, onComponentFound)
     : await detectComponentsInImage(imageData)
   
   if (imageDetectedComponents.length === 0) {
@@ -199,7 +200,8 @@ export function getComponentLabel(type: ComponentType): string {
 async function convertAnnotationsToComponents(
   annotations: TrainingAnnotation[], 
   imageData: string,
-  confidenceThreshold: number = 97
+  confidenceThreshold: number = 97,
+  onComponentFound?: (component: Component) => void
 ): Promise<Component[]> {
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image()
@@ -232,7 +234,7 @@ async function convertAnnotationsToComponents(
       height: (bbox.height / imageHeight) * 100
     }
     
-    allComponents.push({
+    const userComponent: Component = {
       id: annotation.id,
       type: annotation.correctType,
       name: `${annotation.correctType.toUpperCase()}-${allComponents.filter(c => c.type === annotation.correctType).length + 1}`,
@@ -240,7 +242,13 @@ async function convertAnnotationsToComponents(
       confidence: 100,
       connections: [],
       metadata: { userAnnotated: 'true', source: 'training' }
-    })
+    }
+    
+    allComponents.push(userComponent)
+    
+    if (onComponentFound) {
+      onComponentFound(userComponent)
+    }
     
     const templateData = ctx.getImageData(
       Math.floor(bbox.x),
@@ -256,7 +264,8 @@ async function convertAnnotationsToComponents(
       annotation.correctType,
       imageWidth,
       imageHeight,
-      confidenceThreshold
+      confidenceThreshold,
+      onComponentFound
     )
     
     allComponents.push(...similarComponents)
@@ -272,7 +281,8 @@ async function findSimilarComponents(
   componentType: ComponentType,
   imageWidth: number,
   imageHeight: number,
-  confidenceThreshold: number = 97
+  confidenceThreshold: number = 97,
+  onComponentFound?: (component: Component) => void
 ): Promise<Component[]> {
   const similarComponents: Component[] = []
   const templateWidth = template.width
@@ -314,7 +324,7 @@ async function findSimilarComponents(
         if (!hasOverlap && similarComponents.length < 20) {
           const confidence = Math.round(similarity * 100)
           
-          similarComponents.push({
+          const newComponent: Component = {
             id: `comp-similar-${Date.now()}-${Math.random()}`,
             type: componentType,
             name: `${componentType.toUpperCase()}-auto`,
@@ -326,7 +336,13 @@ async function findSimilarComponents(
               similarity: similarity.toFixed(3),
               templateBased: 'true'
             }
-          })
+          }
+          
+          similarComponents.push(newComponent)
+          
+          if (onComponentFound) {
+            onComponentFound(newComponent)
+          }
         }
       }
     }
