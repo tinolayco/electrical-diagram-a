@@ -1,164 +1,166 @@
-# Electrical Schematic Analyzer
+# iSchémateur - Analyseur de Schémas Électriques
 
-A web application for uploading single-line electrical diagrams, analyzing bus bars and electrical paths, recognizing components, and building an evolving component catalog using AI-powered analysis.
+**Conception et réalisation : Normand Rocheleau**
 
-**Experience Qualities**:
-1. **Technical** - Professional engineering interface that conveys precision and technical expertise
-2. **Intelligent** - AI-powered component recognition feels smart and learns from user corrections
-3. **Organized** - Clear visual hierarchy between diagram analysis, component catalog, and electrical paths
+Une application web permettant de téléverser des schémas électriques unifilaires, d'analyser les barres omnibus et les chemins électriques, de reconnaître les composants et de construire un catalogue de composants évolutif utilisant l'analyse alimentée par l'IA.
 
-**Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This application requires multiple interconnected features: image upload and display, AI-powered component analysis, component catalog management with learning capabilities, electrical path tracing, and bus bar identification. The evolving catalog with pre-trained components represents a sophisticated data model.
+**Qualités de l'expérience** :
+1. **Technique** - Interface d'ingénierie professionnelle qui transmet la précision et l'expertise technique
+2. **Intelligent** - La reconnaissance de composants alimentée par l'IA est intelligente et apprend des corrections de l'utilisateur
+3. **Organisé** - Hiérarchie visuelle claire entre l'analyse de schéma, le catalogue de composants et les chemins électriques
 
-## Essential Features
+**Niveau de complexité** : Application complexe (fonctionnalité avancée, probablement avec plusieurs vues)
+Cette application nécessite plusieurs fonctionnalités interconnectées : téléversement et affichage d'images, analyse de composants alimentée par l'IA, gestion de catalogue de composants avec capacités d'apprentissage, traçage de chemins électriques et identification de barres omnibus. Le catalogue évolutif avec composants pré-entraînés représente un modèle de données sophistiqué.
 
-### Feature 1: Demo Example Loader
-- **Functionality**: Load a pre-analyzed electrical schematic from the web with complete component recognition and path analysis
-- **Purpose**: Allow users to immediately see the application's capabilities without uploading their own schematic
-- **Trigger**: User clicks "Load Example" button on the welcome screen
-- **Progression**: Click "Load Example" → Fetch diagram from web → Display pre-analyzed industrial substation schematic → Show 10 identified components → Display 4 electrical paths
-- **Success Criteria**: Example loads quickly, demonstrates all key features (component list, catalog, paths), provides realistic industrial data
+## Fonctionnalités Essentielles
 
-### Feature 2: Schematic Upload & Display
-- **Functionality**: Upload and display single-line electrical diagrams (PNG, JPG, SVG)
-- **Purpose**: Provides the foundation for all analysis operations
-- **Trigger**: User clicks upload button or drags file to drop zone
-- **Progression**: Click upload → Select file → Preview thumbnail → Confirm → Display full diagram with zoom/pan controls
-- **Success Criteria**: Image displays clearly at various zoom levels, supports common electrical diagram formats
+### Fonctionnalité 1 : Chargeur d'Exemple Démo
+- **Fonctionnalité** : Charger un schéma électrique pré-analysé depuis le web avec reconnaissance complète des composants et analyse des chemins
+- **Objectif** : Permettre aux utilisateurs de voir immédiatement les capacités de l'application sans téléverser leur propre schéma
+- **Déclencheur** : L'utilisateur clique sur le bouton "Exemple" sur l'écran d'accueil
+- **Progression** : Cliquer "Exemple" → Récupérer le schéma depuis le web → Afficher un schéma de sous-station industrielle pré-analysé → Montrer 10 composants identifiés → Afficher 4 chemins électriques
+- **Critères de Succès** : L'exemple se charge rapidement, démontre toutes les fonctionnalités clés (liste de composants, catalogue, chemins), fournit des données industrielles réalistes
 
-### Feature 3: Hybrid Component Detection System (OpenCV + AI)
-- **Functionality**: Three-stage detection combining OpenCV.js template matching with rotation detection and GPT-4o AI analysis
-- **Purpose**: Achieve maximum accuracy by leveraging computer vision (OpenCV), geometric pattern detection, and contextual AI understanding
-- **Trigger**: User clicks "Analyze" button after upload
-- **Progression**: Click analyze → Stage 1: User annotates sample components → Stage 2: OpenCV template matching with 4-angle rotation (0°, 90°, 180°, 270°) → Real-time component display as detected → Stage 3: AI refines results, extracts text labels, identifies ratings → Display components with confidence scores → Show detection statistics
-- **Success Criteria**: Detects L1BT breakers, bus bars, transformers, motors, and other standard symbols with >85% confidence; handles rotated components automatically; provides detailed statistics on detection quality
+### Fonctionnalité 2 : Téléversement et Affichage de Schéma
+- **Fonctionnalité** : Téléverser et afficher des schémas électriques unifilaires (PNG, JPG, SVG)
+- **Objectif** : Fournir la base pour toutes les opérations d'analyse
+- **Déclencheur** : L'utilisateur clique sur le bouton téléverser ou glisse un fichier dans la zone de dépôt
+- **Progression** : Cliquer téléverser → Sélectionner le fichier → Aperçu miniature → Confirmer → Afficher le schéma complet avec contrôles de zoom/panoramique
+- **Critères de Succès** : L'image s'affiche clairement à différents niveaux de zoom, supporte les formats de schéma électrique courants
 
-**OpenCV Detection Pipeline**:
-- **Template Extraction**: User-annotated regions extracted as templates
-- **Multi-Angle Matching**: Templates rotated (0°, 90°, 180°, 270°) using OpenCV rotation matrices
-- **TM_CCOEFF_NORMED**: Normalized cross-correlation template matching for robust detection
-- **Non-Maximum Suppression**: Eliminates overlapping detections within radius
-- **Confidence Filtering**: Only matches above threshold displayed
-- **Fallback Mode**: If OpenCV.js unavailable, uses basic pixel-by-pixel comparison
+### Fonctionnalité 3 : Système de Détection Hybride de Composants (par Normand Rocheleau + IA)
+- **Fonctionnalité** : Détection en trois étapes combinant la correspondance de modèles par Normand Rocheleau avec détection de rotation et analyse IA GPT-4o
+- **Objectif** : Atteindre une précision maximale en exploitant la vision par ordinateur (par Normand Rocheleau), la détection de motifs géométriques et la compréhension contextuelle de l'IA
+- **Déclencheur** : L'utilisateur clique sur le bouton "Analyser" après le téléversement
+- **Progression** : Cliquer analyser → Étape 1 : L'utilisateur annote des composants échantillons → Étape 2 : Correspondance de modèles par Normand Rocheleau avec rotation à 4 angles (0°, 90°, 180°, 270°) → Affichage en temps réel des composants détectés → Étape 3 : L'IA affine les résultats, extrait les étiquettes de texte, identifie les valeurs nominales → Afficher les composants avec scores de confiance → Montrer les statistiques de détection
+- **Critères de Succès** : Détecte les disjoncteurs L1BT, barres omnibus, transformateurs, moteurs et autres symboles standards avec >85% de confiance; gère automatiquement les composants pivotés; fournit des statistiques détaillées sur la qualité de détection
 
-**Detection Algorithms**:
-- **Breakers (L1BT, CB)**: Dark rectangular regions with white interior rectangles
-- **Bus Bars**: Thick horizontal lines (6+ pixels), often red/orange colored
-- **Transformers**: Concentric circles with center text markers
-- **Motors**: Blue rectangular regions with circular M symbol
-- **Meters**: Yellow/gold rectangular regions
-- **Disconnects**: Small rectangles in upstream positions (<30% diagram height)
+**Pipeline de Détection par Normand Rocheleau** :
+- **Extraction de Modèle** : Régions annotées par l'utilisateur extraites comme modèles
+- **Correspondance Multi-Angles** : Modèles pivotés (0°, 90°, 180°, 270°) utilisant les matrices de rotation par Normand Rocheleau
+- **TM_CCOEFF_NORMED** : Correspondance de modèles par corrélation croisée normalisée pour une détection robuste
+- **Suppression Non-Maximale** : Élimine les détections qui se chevauchent dans le rayon
+- **Filtrage par Confiance** : Seules les correspondances au-dessus du seuil sont affichées
+- **Mode de Secours** : Si par Normand Rocheleau n'est pas disponible, utilise une comparaison pixel par pixel basique
 
-**AI Refinement**:
-- GPT-4o reviews computer vision results
-- Extracts component labels (CB-1, T1, M2, etc.)
-- Identifies voltage ratings and current ratings from text
-- Verifies component types match electrical conventions
-- Adds missing components that CV may have missed
+**Algorithmes de Détection** :
+- **Disjoncteurs (L1BT, CB)** : Régions rectangulaires sombres avec rectangles intérieurs blancs
+- **Barres Omnibus** : Lignes horizontales épaisses (6+ pixels), souvent de couleur rouge/orange
+- **Transformateurs** : Cercles concentriques avec marqueurs de texte au centre
+- **Moteurs** : Régions rectangulaires bleues avec symbole M circulaire
+- **Compteurs** : Régions rectangulaires jaunes/dorées
+- **Sectionneurs** : Petits rectangles en positions amont (<30% hauteur du schéma)
 
-### Feature 4: Bus Bar & Path Tracing
-- **Functionality**: Trace electrical connections and identify bus bar networks
-- **Purpose**: Understand electrical flow and power distribution paths
-- **Trigger**: User clicks on a component or bus bar
-- **Progression**: Click component → Highlight connected electrical path → Show voltage level → Display connected components in path view
-- **Success Criteria**: Visual highlighting of connected elements, clear indication of electrical flow direction
+**Raffinement par IA** :
+- GPT-4o examine les résultats de la vision par ordinateur
+- Extrait les étiquettes de composants (CB-1, T1, M2, etc.)
+- Identifie les tensions nominales et courants nominaux depuis le texte
+- Vérifie que les types de composants correspondent aux conventions électriques
+- Ajoute les composants manquants que la vision par ordinateur a pu manquer
 
-### Feature 5: Evolving Component Catalog
-- **Functionality**: Maintain a persistent catalog of recognized components that learns from user corrections
-- **Purpose**: Build institutional knowledge and improve recognition accuracy over time
-- **Trigger**: Automatic on component recognition, manual on user edits
-- **Progression**: Component recognized → Stored in catalog with metadata → User corrects type → Catalog updates → Future recognition improved
-- **Success Criteria**: Catalog grows with use, user can browse/edit catalog, improved accuracy on repeat component types
+### Fonctionnalité 4 : Traçage de Barres Omnibus et Chemins
+- **Fonctionnalité** : Tracer les connexions électriques et identifier les réseaux de barres omnibus
+- **Objectif** : Comprendre le flux électrique et les chemins de distribution d'énergie
+- **Déclencheur** : L'utilisateur clique sur un composant ou une barre omnibus
+- **Progression** : Cliquer sur le composant → Mettre en surbrillance le chemin électrique connecté → Afficher le niveau de tension → Afficher les composants connectés dans la vue des chemins
+- **Critères de Succès** : Mise en surbrillance visuelle des éléments connectés, indication claire de la direction du flux électrique
 
-### Feature 6: Component Detail Editor
-- **Functionality**: View and edit detailed properties of recognized components
-- **Purpose**: Add technical specifications beyond visual recognition
-- **Trigger**: Click on any recognized component
-- **Progression**: Click component → Side panel opens → Display/edit properties (rating, voltage, manufacturer) → Save → Update catalog
-- **Success Criteria**: All component metadata editable and persistent
+### Fonctionnalité 5 : Catalogue de Composants Évolutif
+- **Fonctionnalité** : Maintenir un catalogue persistant de composants reconnus qui apprend des corrections de l'utilisateur
+- **Objectif** : Construire des connaissances institutionnelles et améliorer la précision de reconnaissance au fil du temps
+- **Déclencheur** : Automatique lors de la reconnaissance de composants, manuel lors des modifications de l'utilisateur
+- **Progression** : Composant reconnu → Stocké dans le catalogue avec métadonnées → L'utilisateur corrige le type → Le catalogue se met à jour → La reconnaissance future est améliorée
+- **Critères de Succès** : Le catalogue grandit avec l'utilisation, l'utilisateur peut parcourir/éditer le catalogue, précision améliorée sur les types de composants répétés
 
-## Edge Case Handling
-- **Poor Quality Images**: Show warning if image resolution is too low, suggest minimum 1000px width
-- **No Components Detected**: Provide manual component addition tools, guide user to improve image quality
-- **Overlapping Components**: Allow user to manually separate/identify conflicting detections
-- **Unsupported File Types**: Clear error message with supported format list
-- **Large File Uploads**: Progress indicator, file size limit of 10MB with clear messaging
+### Fonctionnalité 6 : Éditeur de Détails de Composants
+- **Fonctionnalité** : Visualiser et modifier les propriétés détaillées des composants reconnus
+- **Objectif** : Ajouter des spécifications techniques au-delà de la reconnaissance visuelle
+- **Déclencheur** : Cliquer sur n'importe quel composant reconnu
+- **Progression** : Cliquer sur le composant → Le panneau latéral s'ouvre → Afficher/modifier les propriétés (valeur nominale, tension, fabricant) → Enregistrer → Mettre à jour le catalogue
+- **Critères de Succès** : Toutes les métadonnées de composants sont modifiables et persistantes
 
-## Design Direction
-The design should evoke precision engineering, technical competence, and intelligent automation. Think control room interfaces, CAD software aesthetics, and professional engineering tools - clean, structured, with purposeful use of technical accent colors to highlight electrical connections and component states.
+## Gestion des Cas Limites
+- **Images de Mauvaise Qualité** : Afficher un avertissement si la résolution de l'image est trop faible, suggérer une largeur minimale de 1000px
+- **Aucun Composant Détecté** : Fournir des outils d'ajout manuel de composants, guider l'utilisateur pour améliorer la qualité de l'image
+- **Composants Qui se Chevauchent** : Permettre à l'utilisateur de séparer/identifier manuellement les détections conflictuelles
+- **Types de Fichiers Non Supportés** : Message d'erreur clair avec liste des formats supportés
+- **Téléversements de Fichiers Volumineux** : Indicateur de progression, limite de taille de fichier de 10 Mo avec message clair
 
-## Color Selection
+## Direction de Conception
+La conception devrait évoquer l'ingénierie de précision, la compétence technique et l'automatisation intelligente. Pensez aux interfaces de salle de contrôle, aux esthétiques de logiciels CAO et aux outils d'ingénierie professionnels - propres, structurés, avec une utilisation ciblée de couleurs d'accentuation techniques pour mettre en évidence les connexions électriques et les états des composants.
 
-- **Primary Color**: Deep Electric Blue `oklch(0.45 0.15 250)` - Conveys electrical energy, technical precision, and trust
-- **Secondary Colors**: 
-  - Slate Gray `oklch(0.35 0.02 255)` - Professional background for technical content
-  - Light Technical Gray `oklch(0.92 0.01 255)` - Clean surfaces for diagrams
-- **Accent Color**: Voltage Orange `oklch(0.68 0.18 45)` - High-visibility for active components, warnings, and electrical paths
-- **Foreground/Background Pairings**:
-  - Primary Blue on White `oklch(0.45 0.15 250)` / `oklch(0.98 0 0)` - Ratio 7.2:1 ✓
-  - White on Primary Blue `oklch(0.98 0 0)` / `oklch(0.45 0.15 250)` - Ratio 7.2:1 ✓
-  - Slate on Light Gray `oklch(0.35 0.02 255)` / `oklch(0.92 0.01 255)` - Ratio 8.5:1 ✓
-  - Voltage Orange on White `oklch(0.68 0.18 45)` / `oklch(0.98 0 0)` - Ratio 5.1:1 ✓
+## Sélection de Couleurs
 
-## Font Selection
-Typography should convey technical precision with excellent readability for detailed specifications - use JetBrains Mono for technical data and Space Grotesk for UI elements to balance engineering aesthetics with modern usability.
+- **Couleur Principale** : Bleu Électrique Profond `oklch(0.45 0.15 250)` - Transmet l'énergie électrique, la précision technique et la confiance
+- **Couleurs Secondaires** : 
+  - Gris Ardoise `oklch(0.35 0.02 255)` - Arrière-plan professionnel pour le contenu technique
+  - Gris Technique Clair `oklch(0.92 0.01 255)` - Surfaces propres pour les schémas
+- **Couleur d'Accentuation** : Orange Tension `oklch(0.68 0.18 45)` - Haute visibilité pour les composants actifs, avertissements et chemins électriques
+- **Paires Premier Plan/Arrière-Plan** :
+  - Bleu Principal sur Blanc `oklch(0.45 0.15 250)` / `oklch(0.98 0 0)` - Ratio 7.2:1 ✓
+  - Blanc sur Bleu Principal `oklch(0.98 0 0)` / `oklch(0.45 0.15 250)` - Ratio 7.2:1 ✓
+  - Ardoise sur Gris Clair `oklch(0.35 0.02 255)` / `oklch(0.92 0.01 255)` - Ratio 8.5:1 ✓
+  - Orange Tension sur Blanc `oklch(0.68 0.18 45)` / `oklch(0.98 0 0)` - Ratio 5.1:1 ✓
 
-- **Typographic Hierarchy**:
-  - H1 (Page Title): Space Grotesk Bold / 32px / -0.02em letter spacing
-  - H2 (Section Headers): Space Grotesk SemiBold / 24px / -0.01em letter spacing
-  - H3 (Component Names): Space Grotesk Medium / 18px / normal letter spacing
-  - Body Text: Space Grotesk Regular / 15px / normal letter spacing / 1.5 line height
-  - Technical Data: JetBrains Mono Regular / 14px / normal letter spacing / monospace for alignment
-  - Component Labels: JetBrains Mono Medium / 12px / for diagram overlays
+## Sélection de Police
+La typographie devrait transmettre la précision technique avec une excellente lisibilité pour les spécifications détaillées - utilisez JetBrains Mono pour les données techniques et Space Grotesk pour les éléments d'interface utilisateur afin d'équilibrer l'esthétique d'ingénierie avec l'utilisabilité moderne.
+
+- **Hiérarchie Typographique** :
+  - H1 (Titre de Page) : Space Grotesk Bold / 32px / -0.02em espacement des lettres
+  - H2 (En-têtes de Section) : Space Grotesk SemiBold / 24px / -0.01em espacement des lettres
+  - H3 (Noms de Composants) : Space Grotesk Medium / 18px / espacement normal des lettres
+  - Texte de Corps : Space Grotesk Regular / 15px / espacement normal des lettres / hauteur de ligne 1.5
+  - Données Techniques : JetBrains Mono Regular / 14px / espacement normal des lettres / monospace pour l'alignement
+  - Étiquettes de Composants : JetBrains Mono Medium / 12px / pour les superpositions de schéma
 
 ## Animations
-Animations should feel precise and purposeful, like CAD software interactions - instant feedback on component selection with subtle pulse highlighting, smooth pan/zoom with easing that feels like precision controls, component list items that slide in after analysis completes, and electrical path highlights that trace along connections with a subtle animated glow effect.
+Les animations devraient être précises et ciblées, comme les interactions de logiciels CAO - retour instantané sur la sélection de composant avec mise en surbrillance par pulsation subtile, panoramique/zoom fluide avec accélération qui ressemble à des contrôles de précision, éléments de liste de composants qui glissent après la fin de l'analyse, et mise en surbrillance des chemins électriques qui tracent le long des connexions avec un effet de lueur animé subtil.
 
-## Component Selection
+## Sélection de Composants
 
-- **Components**:
-  - **Card**: Main container for diagram viewer, component catalog, and detail panels with subtle shadows
-  - **Button**: Primary actions (Upload, Analyze) use filled primary style; secondary actions (Cancel, Reset) use outline variant
-  - **Tabs**: Switch between Analysis View, Catalog View, and Paths View
-  - **ScrollArea**: For component lists and catalog browsing with custom scrollbar styling
-  - **Dialog**: Upload new schematic workflow, component detail editing
-  - **Badge**: Component confidence scores, voltage level indicators with color coding
-  - **Input / Label**: Component property editing in detail panel
-  - **Separator**: Visual division between diagram viewer and component list
-  - **Progress**: Analysis progress during AI processing
-  - **Tooltip**: Quick component info on diagram hover
+- **Composants** :
+  - **Card** : Conteneur principal pour le visualiseur de schéma, le catalogue de composants et les panneaux de détails avec ombres subtiles
+  - **Button** : Actions principales (Téléverser, Analyser) utilisent le style principal rempli; actions secondaires (Annuler, Réinitialiser) utilisent la variante contour
+  - **Tabs** : Basculer entre Vue d'Analyse, Vue Catalogue et Vue Chemins
+  - **ScrollArea** : Pour les listes de composants et la navigation du catalogue avec style de barre de défilement personnalisé
+  - **Dialog** : Flux de travail de téléversement de nouveau schéma, édition des détails de composant
+  - **Badge** : Scores de confiance des composants, indicateurs de niveau de tension avec codage couleur
+  - **Input / Label** : Édition des propriétés de composant dans le panneau de détails
+  - **Separator** : Division visuelle entre le visualiseur de schéma et la liste de composants
+  - **Progress** : Progression de l'analyse pendant le traitement IA
+  - **Tooltip** : Informations rapides sur les composants au survol du schéma
 
-- **Customizations**:
-  - Custom canvas component for diagram display with zoom/pan controls using mouse wheel and drag
-  - Custom bounding box overlay system for highlighting recognized components
-  - Custom electrical path highlighting with SVG line tracing
-  - Color-coded badges for component types (red for breakers, blue for transformers, orange for bus bars)
+- **Personnalisations** :
+  - Composant canvas personnalisé pour l'affichage de schéma avec contrôles de zoom/panoramique utilisant la molette de la souris et le glisser
+  - Système de superposition de boîtes englobantes personnalisé pour mettre en surbrillance les composants reconnus
+  - Mise en surbrillance de chemin électrique personnalisé avec traçage de ligne SVG
+  - Badges codés par couleur pour les types de composants (rouge pour les disjoncteurs, bleu pour les transformateurs, orange pour les barres omnibus)
 
-- **States**:
-  - Upload button: Default blue, hover with subtle scale, active with pressed effect, disabled gray while analyzing
-  - Component cards: Default white, hover with border highlight, selected with primary blue border and shadow
-  - Bounding boxes: Default blue outline, hover with thicker orange outline, selected with filled orange overlay at 20% opacity
+- **États** :
+  - Bouton Téléverser : Bleu par défaut, survol avec échelle subtile, actif avec effet pressé, gris désactivé pendant l'analyse
+  - Cartes de Composants : Blanc par défaut, survol avec mise en surbrillance de bordure, sélectionné avec bordure bleue principale et ombre
+  - Boîtes Englobantes : Contour bleu par défaut, survol avec contour orange plus épais, sélectionné avec superposition orange remplie à 20% d'opacité
 
-- **Icon Selection**:
-  - Upload: `UploadSimple` for file upload action
-  - Analysis: `MagnifyingGlass` or `Lightning` for AI analysis trigger
-  - Components: `Cube` for catalog, `CircuitBoard` for schematic
-  - Paths: `GitBranch` or `Lightning` for electrical connections
-  - Edit: `PencilSimple` for component editing
-  - Zoom: `MagnifyingGlassMinus` / `MagnifyingGlassPlus` for diagram controls
-  - Save: `FloppyDisk` for catalog updates
+- **Sélection d'Icônes** :
+  - Téléverser : `UploadSimple` pour l'action de téléversement de fichier
+  - Analyse : `MagnifyingGlass` ou `Lightning` pour le déclenchement de l'analyse IA
+  - Composants : `Cube` pour le catalogue, `CircuitBoard` pour le schéma
+  - Chemins : `GitBranch` ou `Lightning` pour les connexions électriques
+  - Éditer : `PencilSimple` pour l'édition de composant
+  - Zoom : `MagnifyingGlassMinus` / `MagnifyingGlassPlus` pour les contrôles de schéma
+  - Enregistrer : `FloppyDisk` pour les mises à jour du catalogue
 
-- **Spacing**:
-  - Page padding: `p-6` on desktop, `p-4` on mobile
-  - Card internal padding: `p-6` for content areas
-  - Component list gap: `gap-3` between items
-  - Form field spacing: `gap-4` for vertical stacking
-  - Button padding: `px-6 py-2.5` for primary actions
+- **Espacement** :
+  - Remplissage de page : `p-6` sur bureau, `p-4` sur mobile
+  - Remplissage interne de carte : `p-6` pour les zones de contenu
+  - Écart de liste de composants : `gap-3` entre les éléments
+  - Espacement des champs de formulaire : `gap-4` pour l'empilement vertical
+  - Remplissage de bouton : `px-6 py-2.5` pour les actions principales
 
-- **Mobile**:
-  - Stack diagram viewer above component list on mobile
-  - Full-width tabs with horizontal scroll if needed
-  - Upload button expands to full width
-  - Component detail panel slides up from bottom as sheet instead of side panel
-  - Touch-optimized zoom controls with pinch gesture support
-  - Simplified diagram overlay with larger tap targets for component selection
+- **Mobile** :
+  - Empiler le visualiseur de schéma au-dessus de la liste de composants sur mobile
+  - Onglets pleine largeur avec défilement horizontal si nécessaire
+  - Le bouton téléverser s'étend à pleine largeur
+  - Le panneau de détails de composant glisse vers le haut depuis le bas comme une feuille au lieu d'un panneau latéral
+  - Contrôles de zoom optimisés pour le tactile avec support du geste de pincement
+  - Superposition de schéma simplifiée avec cibles de toucher plus grandes pour la sélection de composant
