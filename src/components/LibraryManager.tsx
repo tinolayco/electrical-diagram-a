@@ -10,6 +10,8 @@ import {
   exportLibraryToCSV,
   exportLibraryToXML,
   downloadFile,
+  importLibraryFromCSV,
+  importLibraryFromXML,
 } from '@/lib/export-formats'
 import {
   Dialog,
@@ -286,32 +288,65 @@ export function LibraryManager({
   const handleImportLibrary = () => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = '.json'
+    input.accept = '.json,.csv,.xml'
     
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
 
       try {
+        const fileName = file.name.toLowerCase()
         const text = await file.text()
-        const data = JSON.parse(text)
-        
-        const validation = validateImportData(data)
-        
-        if (!validation.valid || !validation.exportData) {
-          toast.error(validation.error || 'Format de fichier invalide')
+        let importedLibrary: ComponentLibrary | null = null
+
+        if (fileName.endsWith('.csv')) {
+          importedLibrary = importLibraryFromCSV(text)
+          if (!importedLibrary) {
+            toast.error('Format CSV invalide ou fichier corrompu')
+            return
+          }
+        } else if (fileName.endsWith('.xml')) {
+          importedLibrary = importLibraryFromXML(text)
+          if (!importedLibrary) {
+            toast.error('Format XML invalide ou fichier corrompu')
+            return
+          }
+        } else if (fileName.endsWith('.json')) {
+          const data = JSON.parse(text)
+          const validation = validateImportData(data)
+          
+          if (!validation.valid || !validation.exportData) {
+            toast.error(validation.error || 'Format de fichier invalide')
+            return
+          }
+
+          const { library, versionHistory: importedHistory } = validation.exportData
+
+          importedLibrary = {
+            ...library,
+            id: `library-${Date.now()}`,
+            createdAt: Date.now(),
+            lastModified: Date.now(),
+            isDefault: false,
+          }
+
+          if (importedHistory && importedHistory.length > 0 && onVersionHistoryUpdate) {
+            onVersionHistoryUpdate(importedLibrary.id, importedHistory)
+          }
+        } else {
+          toast.error('Format de fichier non supporté. Utilisez JSON, CSV ou XML.')
           return
         }
 
-        const { library, versionHistory: importedHistory } = validation.exportData
-
-        const importedLibrary: ComponentLibrary = {
-          ...library,
-          id: `library-${Date.now()}`,
-          createdAt: Date.now(),
-          lastModified: Date.now(),
-          isDefault: false,
+        if (!importedLibrary) {
+          toast.error('Erreur lors de l\'importation de la bibliothèque')
+          return
         }
+
+        importedLibrary.id = `library-${Date.now()}`
+        importedLibrary.createdAt = Date.now()
+        importedLibrary.lastModified = Date.now()
+        importedLibrary.isDefault = false
 
         if (onLibraryImport) {
           onLibraryImport(importedLibrary)
@@ -319,12 +354,10 @@ export function LibraryManager({
           onLibraryCreate(importedLibrary)
         }
 
-        if (importedHistory && importedHistory.length > 0 && onVersionHistoryUpdate) {
-          onVersionHistoryUpdate(importedLibrary.id, importedHistory)
-        }
-
-        const versionInfo = library.version ? ` (v${library.version})` : ''
-        toast.success(`Bibliothèque "${importedLibrary.name}"${versionInfo} importée avec succès`)
+        const versionInfo = importedLibrary.version ? ` (v${importedLibrary.version})` : ''
+        const formatInfo = fileName.endsWith('.csv') ? ' depuis CSV' : 
+                          fileName.endsWith('.xml') ? ' depuis XML' : ''
+        toast.success(`Bibliothèque "${importedLibrary.name}"${versionInfo} importée${formatInfo} avec succès`)
       } catch (error) {
         console.error('Import error:', error)
         toast.error('Erreur lors de l\'importation de la bibliothèque')
@@ -394,7 +427,7 @@ export function LibraryManager({
           size="icon"
           onClick={handleImportLibrary}
           className="h-8 w-8"
-          title="Importer une bibliothèque"
+          title="Importer une bibliothèque (JSON, CSV, XML)"
         >
           <UploadSimple size={16} />
         </Button>

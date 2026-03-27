@@ -1,4 +1,4 @@
-import type { ComponentLibrary, Schematic, Component, TrainingAnnotation } from './types'
+import type { ComponentLibrary, Schematic, Component, TrainingAnnotation, ComponentType } from './types'
 
 export function exportLibraryToCSV(library: ComponentLibrary): string {
   const lines: string[] = []
@@ -207,6 +207,185 @@ function escapeXML(value: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;')
+}
+
+export function importLibraryFromCSV(csvContent: string): ComponentLibrary | null {
+  try {
+    const lines = csvContent.split('\n').filter(line => line.trim())
+    
+    if (lines.length < 2) {
+      throw new Error('Fichier CSV invalide: trop peu de lignes')
+    }
+    
+    const headerLine = lines[1]
+    const headerValues = parseCSVLine(headerLine)
+    
+    if (headerValues.length < 8) {
+      throw new Error('Fichier CSV invalide: en-tête incomplet')
+    }
+    
+    const name = headerValues[0]
+    const version = headerValues[1] || '1.0.0'
+    const description = headerValues[2]
+    const author = headerValues[3]
+    const tagsString = headerValues[4]
+    const tags = tagsString ? tagsString.split(';').filter(Boolean) : undefined
+    
+    const annotations: TrainingAnnotation[] = []
+    
+    let annotationsStartIndex = -1
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes('ID,Type,Position X')) {
+        annotationsStartIndex = i + 1
+        break
+      }
+    }
+    
+    if (annotationsStartIndex !== -1) {
+      for (let i = annotationsStartIndex; i < lines.length; i++) {
+        const line = lines[i].trim()
+        if (!line) continue
+        
+        const values = parseCSVLine(line)
+        if (values.length >= 7) {
+          const annotation: TrainingAnnotation = {
+            id: values[0] || `annotation-${Date.now()}-${i}`,
+            correctType: values[1] as ComponentType,
+            boundingBox: {
+              x: parseFloat(values[2]) || 0,
+              y: parseFloat(values[3]) || 0,
+              width: parseFloat(values[4]) || 50,
+              height: parseFloat(values[5]) || 50,
+            },
+            schematicId: values[7] || 'imported',
+            userVerified: true,
+            createdAt: Date.now(),
+          }
+          annotations.push(annotation)
+        }
+      }
+    }
+    
+    const library: ComponentLibrary = {
+      id: `library-${Date.now()}`,
+      name: name || 'Bibliothèque importée',
+      description: description || '',
+      isDefault: false,
+      createdAt: Date.now(),
+      lastModified: Date.now(),
+      annotations,
+      componentCount: annotations.length,
+      version,
+      author: author || undefined,
+      tags: tags && tags.length > 0 ? tags : undefined,
+    }
+    
+    return library
+  } catch (error) {
+    console.error('Erreur lors de l\'import CSV:', error)
+    return null
+  }
+}
+
+export function importLibraryFromXML(xmlContent: string): ComponentLibrary | null {
+  try {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(xmlContent, 'text/xml')
+    
+    const parserError = doc.querySelector('parsererror')
+    if (parserError) {
+      throw new Error('Fichier XML invalide')
+    }
+    
+    const root = doc.querySelector('bibliotheque')
+    if (!root) {
+      throw new Error('Élément racine <bibliotheque> introuvable')
+    }
+    
+    const name = root.querySelector('informations > nom')?.textContent || 'Bibliothèque importée'
+    const version = root.querySelector('informations > version')?.textContent || '1.0.0'
+    const description = root.querySelector('informations > description')?.textContent || ''
+    const author = root.querySelector('informations > auteur')?.textContent || undefined
+    
+    const tagElements = root.querySelectorAll('informations > etiquettes > etiquette')
+    const tags: string[] = []
+    tagElements.forEach(tag => {
+      const tagText = tag.textContent
+      if (tagText) tags.push(tagText)
+    })
+    
+    const annotations: TrainingAnnotation[] = []
+    const annotationElements = root.querySelectorAll('annotations > annotation')
+    
+    annotationElements.forEach((annotationEl, index) => {
+      const id = annotationEl.querySelector('id')?.textContent || `annotation-${Date.now()}-${index}`
+      const type = annotationEl.querySelector('type')?.textContent || 'unknown'
+      const x = parseFloat(annotationEl.querySelector('limites > x')?.textContent || '0')
+      const y = parseFloat(annotationEl.querySelector('limites > y')?.textContent || '0')
+      const width = parseFloat(annotationEl.querySelector('limites > largeur')?.textContent || '50')
+      const height = parseFloat(annotationEl.querySelector('limites > hauteur')?.textContent || '50')
+      const schematicId = annotationEl.querySelector('schematicId')?.textContent || 'imported'
+      const verified = annotationEl.querySelector('verifie')?.textContent === 'true'
+      
+      const annotation: TrainingAnnotation = {
+        id,
+        correctType: type as ComponentType,
+        boundingBox: { x, y, width, height },
+        schematicId,
+        userVerified: verified,
+        createdAt: Date.now(),
+      }
+      
+      annotations.push(annotation)
+    })
+    
+    const library: ComponentLibrary = {
+      id: `library-${Date.now()}`,
+      name,
+      description,
+      isDefault: false,
+      createdAt: Date.now(),
+      lastModified: Date.now(),
+      annotations,
+      componentCount: annotations.length,
+      version,
+      author,
+      tags: tags.length > 0 ? tags : undefined,
+    }
+    
+    return library
+  } catch (error) {
+    console.error('Erreur lors de l\'import XML:', error)
+    return null
+  }
+}
+
+function parseCSVLine(line: string): string[] {
+  const values: string[] = []
+  let current = ''
+  let inQuotes = false
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    const nextChar = line[i + 1]
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        current += '"'
+        i++
+      } else {
+        inQuotes = !inQuotes
+      }
+    } else if (char === ',' && !inQuotes) {
+      values.push(current.trim())
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  
+  values.push(current.trim())
+  return values
 }
 
 export async function downloadFile(content: string, fileName: string, mimeType: string): Promise<void> {
