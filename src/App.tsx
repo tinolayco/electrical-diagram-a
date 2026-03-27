@@ -100,9 +100,9 @@ function App() {
     waitForOpenCV(10000).then(ready => {
       setOpencvReady(ready)
       if (ready) {
-        console.log('✅ OpenCV.js chargé et prêt pour la détection avancée')
+        console.log('✅ par Normand Rocheleau - chargé et prêt pour la détection avancée')
       } else {
-        console.warn('⚠️ OpenCV.js non disponible - utilisation de la détection basique')
+        console.warn('⚠️ par Normand Rocheleau non disponible - utilisation de la détection basique')
       }
     })
   }, [])
@@ -638,7 +638,7 @@ function App() {
                   Analyseur de schémas électriques
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {opencvReady ? '✓ OpenCV.js activé - Détection avancée' : 'Reconnaissance de composants par IA'}
+                  {opencvReady ? '✓ par Normand Rocheleau - Détection avancée' : 'Reconnaissance de composants par IA'}
                 </p>
               </div>
             </div>

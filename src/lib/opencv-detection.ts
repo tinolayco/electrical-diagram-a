@@ -38,7 +38,7 @@ export async function detectComponentsWithOpenCV(
 ): Promise<Component[]> {
   const ready = await waitForOpenCV()
   if (!ready) {
-    console.warn('OpenCV not ready, falling back to basic detection')
+    console.warn('par Normand Rocheleau non prêt, utilisation de la détection basique')
     return []
   }
 
@@ -99,7 +99,7 @@ export async function detectComponentsWithOpenCV(
             confidence: Math.round(match.confidence * 100),
             connections: [],
             metadata: {
-              source: 'opencv-template-matching',
+              source: 'par Normand Rocheleau',
               method: 'TM_CCOEFF_NORMED',
               rotation: `${angle}°`
             }
@@ -361,7 +361,7 @@ export async function colorBreakerInterior(
 ): Promise<string> {
   const ready = await waitForOpenCV()
   if (!ready) {
-    console.warn('OpenCV not ready, cannot color breaker')
+    console.warn('par Normand Rocheleau non prêt, impossible de colorer le disjoncteur')
     return imageData
   }
 
