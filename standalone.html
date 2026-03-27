@@ -6,15 +6,15 @@
     <title>iSchémateur - Analyseur de schémas électriques</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="console.log('par Normand Rocheleau ing.')"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+           
+        }
+        body {
+            background:
+            overflow: hidden;
         }
 
-        body {
-            font-family: 'Space Grotesk', sans-serif;
+        }
+        .logo {
             background: #fafafa;
             color: #1a1a1a;
             overflow: hidden;
@@ -22,46 +22,46 @@
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
+            align-items: c
+            color: white;
             height: 100vh;
-        }
+
 
         header {
             background: white;
             border-bottom: 1px solid #e0e0e0;
             padding: 16px 24px;
             flex-shrink: 0;
-        }
+        .
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
+        }
+        .controls {
+            flex-wrap: wrap;
             align-items: center;
             gap: 16px;
-        }
+         
 
-        .logo {
-            display: flex;
-            align-items: center;
+            cur
+            align-items: c
+            transition: all 0.2s
             gap: 12px;
-        }
+         
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
+        button:disab
+            cursor: not-
+
             background: linear-gradient(135deg, #4f46e5, #7c3aed);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+            background: #4338ca;
+
             color: white;
             font-weight: bold;
-        }
+         
 
         h1 {
             font-size: 24px;
-            font-weight: 700;
+            overflow: hidden;
             color: #1a1a1a;
         }
 
@@ -69,7 +69,7 @@
             font-size: 14px;
             color: #666;
             margin-top: 2px;
-        }
+        c
 
         .opencv-status {
             font-size: 12px;
@@ -78,10 +78,10 @@
         }
 
         .controls {
-            display: flex;
+            overflow: hidd
             gap: 8px;
-            flex-wrap: wrap;
-        }
+            border-bottom: 1
+         
 
         button {
             padding: 8px 16px;
@@ -90,12 +90,12 @@
             border-radius: 6px;
             font-family: 'Space Grotesk', sans-serif;
             font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
+            background: #f5f
+        .component-item.se
+            border-color: #4f46e
             gap: 6px;
             transition: all 0.2s;
-        }
+         
 
         button:hover:not(:disabled) {
             border-color: #4f46e5;
@@ -103,19 +103,19 @@
         }
 
         button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+            margin-bottom
+
+         
 
         button.primary {
             background: #4f46e5;
             color: white;
             border-color: #4f46e5;
-        }
+         
 
         button.primary:hover:not(:disabled) {
             background: #4338ca;
-        }
+         
 
         select {
             padding: 8px 12px;
@@ -124,167 +124,167 @@
             font-family: 'Space Grotesk', sans-serif;
             font-size: 14px;
             background: white;
-            cursor: pointer;
         }
+        .
 
         main {
-            flex: 1;
+            font-siz
             padding: 16px 24px;
             overflow: hidden;
-            display: flex;
-            gap: 16px;
-        }
 
-        .canvas-container {
-            flex: 1;
+            gap: 16px;
+         
+
+        .drag-message {
+            padding:
             background: white;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
-            position: relative;
-            overflow: hidden;
-        }
+            display: grid;
+
+         
 
         canvas {
             display: block;
             cursor: move;
         }
 
-        .sidebar {
-            width: 360px;
+                  
+                        <
             background: white;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
+                    <selec
+                    </select>
             overflow: hidden;
-        }
+         
 
         .sidebar-header {
             padding: 12px 16px;
             border-bottom: 1px solid #e0e0e0;
-            font-weight: 600;
+        </div>
             font-size: 14px;
-        }
+         
 
         .sidebar-content {
             flex: 1;
-            overflow-y: auto;
+                </div>
             padding: 8px;
-        }
+         
 
-        .component-item {
+                         
             padding: 8px 12px;
             margin-bottom: 4px;
             border-radius: 4px;
-            cursor: pointer;
+                            
             transition: background 0.2s;
             border: 1px solid transparent;
-        }
+         
 
-        .component-item:hover {
+                            <di
             background: #f5f3ff;
-        }
+         
 
-        .component-item.selected {
+                            <div c
             background: #ede9fe;
             border-color: #4f46e5;
-        }
+         
 
-        .component-type {
+
             font-size: 12px;
-            font-weight: 600;
+                <div style="m
             color: #4f46e5;
             margin-bottom: 4px;
-        }
+         
 
         .component-name {
             font-size: 14px;
             color: #1a1a1a;
             margin-bottom: 4px;
-        }
+         
 
         .component-confidence {
             font-size: 11px;
             color: #666;
-            font-family: 'JetBrains Mono', monospace;
-        }
+            lastY: 0,
+         
 
         .empty-state {
             text-align: center;
             padding: 48px 24px;
             color: #666;
-        }
+         
 
         .empty-state-icon {
             font-size: 48px;
             margin-bottom: 16px;
-        }
+         
 
-        .modal {
-            display: none;
-            position: fixed;
+                
+                    const 
+                    
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+                    
             z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
+                canvas.addEventL
+                    this.isDragging 
+         
 
         .modal.active {
-            display: flex;
-        }
+                        co
+         
 
-        .modal-content {
+                        
             background: white;
             border-radius: 12px;
             padding: 24px;
             max-width: 600px;
-            width: 90%;
+                    if 
             max-height: 80vh;
             overflow-y: auto;
-        }
+         
 
-        .modal-header {
+                       
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 16px;
-        }
+         
 
-        .modal-body {
+                const
             margin-bottom: 20px;
-        }
+         
 
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
+
+                    if (e.
+                });
             gap: 8px;
-        }
+         
 
         .training-canvas {
             border: 2px solid #4f46e5;
             cursor: crosshair;
             max-width: 100%;
             height: auto;
-        }
+         
 
         .annotation-list {
             margin-top: 16px;
             max-height: 200px;
             overflow-y: auto;
-        }
+         
 
         .annotation-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+                    if (lib.id =
             padding: 8px;
             background: #f5f5f5;
             border-radius: 4px;
             margin-bottom: 4px;
-        }
+         
 
         input[type="text"], input[type="file"] {
             width: 100%;
@@ -294,7 +294,7 @@
             font-family: 'Space Grotesk', sans-serif;
             font-size: 14px;
             margin-bottom: 12px;
-        }
+         
 
         label {
             display: block;
@@ -302,7 +302,7 @@
             font-weight: 500;
             margin-bottom: 6px;
             color: #333;
-        }
+         
 
         .threshold-control {
             display: flex;
@@ -310,18 +310,18 @@
             gap: 12px;
             padding: 12px;
             background: white;
-            border-radius: 6px;
+                reader.onload =
             border: 1px solid #e0e0e0;
-        }
+         
 
         .threshold-label {
             font-size: 12px;
             white-space: nowrap;
-        }
+
 
         .threshold-slider {
             flex: 1;
-        }
+
 
         .threshold-value {
             font-family: 'JetBrains Mono', monospace;
@@ -329,15 +329,15 @@
             color: #666;
             min-width: 40px;
             text-align: right;
-        }
+         
 
         .tabs {
-            display: flex;
+                ctx.clearR
             gap: 4px;
             padding: 0 16px;
             border-bottom: 1px solid #e0e0e0;
             background: white;
-        }
+         
 
         .tab {
             padding: 12px 16px;
@@ -347,37 +347,37 @@
             font-weight: 500;
             color: #666;
             border-bottom: 2px solid transparent;
-            cursor: pointer;
-        }
+                            
+         
 
         .tab.active {
             color: #4f46e5;
             border-bottom-color: #4f46e5;
-        }
+         
 
         .tab-content {
             display: none;
-        }
+         
 
         .tab-content.active {
             display: block;
-        }
+         
 
         .progress-bar {
             height: 4px;
             background: #e0e0e0;
             overflow: hidden;
-        }
+         
 
         .progress-fill {
             height: 100%;
             background: #4f46e5;
             transition: width 0.3s;
             width: 0%;
-        }
+         
 
         .drag-overlay {
-            display: none;
+                }
             position: fixed;
             top: 0;
             left: 0;
@@ -388,11 +388,11 @@
             z-index: 999;
             align-items: center;
             justify-content: center;
-        }
+         
 
         .drag-overlay.active {
             display: flex;
-        }
+         
 
         .drag-message {
             background: white;
@@ -401,36 +401,36 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             text-align: center;
             border: 2px solid #4f46e5;
-        }
+         
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 12px;
             margin-bottom: 16px;
-        }
+         
 
         .stat-card {
             background: #f5f3ff;
             padding: 12px;
             border-radius: 6px;
             text-align: center;
-        }
+         
 
         .stat-value {
             font-size: 24px;
             font-weight: 700;
             color: #4f46e5;
-        }
+         
 
         .stat-label {
             font-size: 11px;
             color: #666;
             margin-top: 4px;
-        }
-    </style>
-</head>
-<body>
+         
+            
+       
+      
     <div class="container">
         <header>
             <div class="header-content">
@@ -441,7 +441,7 @@
                         <div class="subtitle">Analyseur de schémas électriques</div>
                         <div class="opencv-status" id="opencvStatus">Chargement...</div>
                     </div>
-                </div>
+            },
                 <div class="controls">
                     <select id="librarySelect" title="Sélectionner une bibliothèque">
                         <option value="">Sélectionner une bibliothèque</option>
@@ -454,7 +454,7 @@
                     <button onclick="app.showHelp()">❓</button>
                     <button onclick="app.resetData()">🗑️ Réinitialiser</button>
                 </div>
-            </div>
+            update
         </header>
 
         <div class="progress-bar" id="progressBar">
@@ -471,7 +471,7 @@
             <div id="analysisTab" class="tab-content active">
                 <div class="canvas-container" id="canvasContainer">
                     <canvas id="mainCanvas"></canvas>
-                </div>
+                      
 
                 <div class="sidebar">
                     <div class="sidebar-header">
@@ -484,17 +484,17 @@
                                        oninput="app.updateThreshold(this.value)">
                                 <span class="threshold-value" id="thresholdValue">85%</span>
                             </div>
-                        </div>
-                    </div>
+            highlightPath(path
+                    this.r
                     <div class="sidebar-content" id="componentList">
                         <div class="empty-state">
                             <div class="empty-state-icon">📋</div>
                             <div>Aucun composant détecté</div>
                             <div style="font-size: 12px; margin-top: 8px;">Téléversez un schéma et analysez-le</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                this.isTrainin
+                    canvas
+                    
+                  
 
             <div id="catalogTab" class="tab-content" style="flex: 1;">
                 <div class="sidebar" style="width: 100%;">
@@ -505,61 +505,61 @@
                                 <button onclick="app.exportCatalog()">📥 Exporter CSV</button>
                                 <button onclick="app.importCatalog()">📤 Importer CSV</button>
                             </div>
-                        </div>
                     </div>
+            },
                     <div class="sidebar-content" id="catalogContent">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📦</div>
+                this.updateAnnotationList();
+                const canvas = document.getElementById('trainingCa
                             <div>Aucun composant dans le catalogue</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    ctx.drawIm
+                    const 
+                    
+                  
 
             <div id="pathsTab" class="tab-content" style="flex: 1;">
                 <div class="sidebar" style="width: 100%;">
                     <div class="sidebar-header">Chemins électriques</div>
                     <div class="sidebar-content" id="pathsContent">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🔀</div>
+                    return;
+                
                             <div>Aucun chemin électrique identifié</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                this.updateLib
+                
+                this.s
+
         </main>
     </div>
 
-    <div class="drag-overlay" id="dragOverlay">
+                document.getElementById('helpMo
         <div class="drag-message">
             <div style="font-size: 48px; margin-bottom: 16px;">📤</div>
             <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Déposez votre schéma ici</div>
             <div style="font-size: 14px; color: #666;">Formats: PNG, JPG, SVG (max 10 Mo)</div>
-        </div>
-    </div>
+              
+          
 
     <div class="modal" id="trainingModal">
-        <div class="modal-content">
+                this.currentImage =
             <div class="modal-header">Mode Entraînement</div>
-            <div class="modal-body">
+                this.updateButtons()
                 <p style="margin-bottom: 16px; font-size: 14px; color: #666;">
                     Sélectionnez des zones sur le schéma pour entraîner la reconnaissance de composants.
-                </p>
+                this
                 <canvas id="trainingCanvas" class="training-canvas"></canvas>
                 <div style="margin-top: 16px;">
                     <label>Type de composant</label>
                     <input type="text" id="componentType" placeholder="Ex: CB, Disjoncteur, Transformateur">
-                </div>
+                      
                 <div class="annotation-list" id="annotationList"></div>
-            </div>
-            <div class="modal-footer">
+                  
+                    reader.readAsText(
                 <button onclick="app.cancelTraining()">Annuler</button>
                 <button class="primary" onclick="app.saveTraining()">Enregistrer</button>
-            </div>
-        </div>
-    </div>
+                co
+              
+          
 
-    <div class="modal" id="helpModal">
+
         <div class="modal-content">
             <div class="modal-header">Guide d'utilisation - iSchémateur</div>
             <div class="modal-body" style="font-size: 14px; line-height: 1.6;">
@@ -580,7 +580,7 @@
                 <p><strong>3. Analyse</strong></p>
                 <ul style="margin-left: 20px; margin-bottom: 16px;">
                     <li>Téléversez un schéma à analyser</li>
-                    <li>Cliquez sur "Analyser" pour détecter les composants</li>
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                     <li>Ajustez le seuil de confiance pour filtrer les résultats</li>
                     <li>Zoom avec la molette, pan en glissant</li>
                 </ul>
@@ -592,25 +592,25 @@
                 <p style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
                     <strong>Conception et réalisation:</strong> Normand Rocheleau ing.<br>
                     Utilise par Normand Rocheleau ing. pour la détection avancée
-                </p>
-            </div>
-            <div class="modal-footer">
+            }
+`;
+
                 <button class="primary" onclick="app.closeHelp()">Fermer</button>
-            </div>
-        </div>
-    </div>
+
+
+
 
     <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="app.handleFileSelect(event)">
 
-    <script>
+
         const app = {
             libraries: [],
             activeLibrary: null,
             currentSchematic: null,
-            components: [],
-            catalog: {},
-            paths: [],
-            confidenceThreshold: 85,
+
+
+
+
             zoom: 1,
             panX: 0,
             panY: 0,
@@ -641,7 +641,7 @@
                         clearInterval(checkCV);
                     }
                 }, 100);
-                
+
                 setTimeout(() => {
                     if (!this.opencvReady) {
                         clearInterval(checkCV);
@@ -675,7 +675,7 @@
                     this.zoom = newZoom;
                     
                     this.render();
-                });
+
 
                 canvas.addEventListener('mousedown', (e) => {
                     if (this.isTraining) return;
@@ -725,12 +725,12 @@
 
             setupDragDrop() {
                 const overlay = document.getElementById('dragOverlay');
-                
+
                 document.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     if (e.dataTransfer.types.includes('Files')) {
                         overlay.classList.add('active');
-                    }
+
                 });
 
                 document.addEventListener('dragleave', (e) => {
@@ -762,7 +762,7 @@
                     this.libraries = data.libraries || [];
                     this.catalog = data.catalog || {};
                     this.confidenceThreshold = data.confidenceThreshold || 85;
-                }
+
                 
                 if (this.libraries.length === 0) {
                     this.libraries.push({
@@ -772,7 +772,7 @@
                         annotations: [],
                         createdAt: Date.now()
                     });
-                }
+
                 
                 this.activeLibrary = this.libraries[0];
             },
@@ -833,7 +833,7 @@
                     this.updateButtons();
                     this.saveToStorage();
                     this.showToast('Bibliothèque créée: ' + name);
-                }
+
             },
 
             uploadSchematic() {
@@ -878,7 +878,7 @@
                 this.zoom = 1;
                 const canvas = document.getElementById('mainCanvas');
                 const container = document.getElementById('canvasContainer');
-                
+
                 if (this.currentImage) {
                     const scaleX = container.clientWidth / this.currentImage.width;
                     const scaleY = container.clientHeight / this.currentImage.height;
@@ -997,7 +997,7 @@
                 this.components.forEach((comp, i) => {
                     comp.id = 'comp-' + Date.now() + '-' + i;
                     comp.name = `${comp.type}-${i + 1}`;
-                });
+
             },
 
             detectDefaultComponents() {
@@ -1024,7 +1024,7 @@
                         confidence: 85 + Math.random() * 14,
                         state: 'unknown'
                     });
-                }
+
             },
 
             findSimilarComponents(annotation, angle) {
@@ -1047,7 +1047,7 @@
                         angle: angle,
                         state: 'unknown'
                     });
-                }
+
                 
                 return similar;
             },
@@ -1105,13 +1105,13 @@
                 list.innerHTML = filtered.map(comp => `
                     <div class="component-item ${comp.selected ? 'selected' : ''}" 
                          onclick="app.selectComponent('${comp.id}')">
-                        <div class="component-type">${comp.type}</div>
+
                         <div class="component-name">${comp.name}</div>
                         <div class="component-confidence">
                             Confiance: ${Math.round(comp.confidence)}%
                             ${comp.userAnnotated ? ' (Annoté)' : ''}
                         </div>
-                    </div>
+
                 `).join('');
             },
 
@@ -1121,7 +1121,7 @@
                         this.catalog[comp.type] = 0;
                     }
                     this.catalog[comp.type]++;
-                });
+
                 
                 this.saveToStorage();
                 this.updateCatalogView();
@@ -1136,7 +1136,7 @@
                         <div class="empty-state">
                             <div class="empty-state-icon">📦</div>
                             <div>Aucun composant dans le catalogue</div>
-                        </div>
+
                     `;
                     return;
                 }
@@ -1149,8 +1149,8 @@
                                 <div class="stat-label">${type}</div>
                             </div>
                         `).join('')}
-                    </div>
-                `;
+
+
             },
 
             updatePathsList() {
@@ -1161,7 +1161,7 @@
                         <div class="empty-state">
                             <div class="empty-state-icon">🔀</div>
                             <div>Aucun chemin électrique identifié</div>
-                        </div>
+
                     `;
                     return;
                 }
@@ -1215,7 +1215,7 @@
                     canvas.width = Math.min(img.width, 800);
                     canvas.height = (canvas.width / img.width) * img.height;
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
+
                     let startX, startY, isDrawing = false;
                     
                     canvas.onmousedown = (e) => {
@@ -1274,7 +1274,7 @@
                             ctx.strokeStyle = '#4f46e5';
                             ctx.lineWidth = 2;
                             ctx.strokeRect(Math.min(startX, endX), Math.min(startY, endY), width, height);
-                        }
+
                     };
                 };
                 img.src = this.currentSchematic.data;
@@ -1311,8 +1311,8 @@
                         ctx.lineWidth = 2;
                         ctx.strokeRect(ann.x * scaleX, ann.y * scaleY, 
                                       ann.width * scaleX, ann.height * scaleY);
-                    });
-                };
+
+
                 img.src = this.currentSchematic.data;
             },
 
@@ -1459,7 +1459,7 @@
                 a.href = url;
                 a.download = filename;
                 a.click();
-                URL.revokeObjectURL(url);
+
             },
 
             showProgress(show) {
@@ -1499,11 +1499,11 @@
                     toast.style.animation = 'slideOut 0.3s ease';
                     setTimeout(() => toast.remove(), 300);
                 }, 3000);
-            }
+
         };
 
         window.addEventListener('load', () => app.init());
-    </script>
+
 
     <style>
         @keyframes slideIn {
@@ -1528,7 +1528,7 @@
             }
         }
     </style>
-</body>
-</html>
+
+
 `;
                 
