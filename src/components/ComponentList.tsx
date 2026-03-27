@@ -21,7 +21,7 @@ export function ComponentList({
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
         <Cube size={48} className="text-muted-foreground mb-3" weight="duotone" />
         <p className="text-sm text-muted-foreground">Aucun composant détecté</p>
-        <p className="text-xs text-muted-foreground mt-1">Téléchargez et analysez un schéma</p>
+        <p className="text-xs text-muted-foreground mt-1">Téléversez et analysez un schéma</p>
       </div>
     )
   }
@@ -63,24 +63,10 @@ export function ComponentList({
                       <p className="text-[10px] text-muted-foreground">
                         {getComponentLabel(comp.type)}
                       </p>
-                      {(comp.voltage || comp.rating) && (
-                        <div className="flex gap-1 mt-1">
-                          {comp.voltage && (
-                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
-                              {comp.voltage}
-                            </Badge>
-                          )}
-                          {comp.rating && (
-                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
-                              {comp.rating}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
                     </div>
                     <Badge 
                       variant="secondary" 
-                      className="text-[9px] font-mono flex-shrink-0 h-4 px-1.5"
+                      className="text-[8px] font-mono flex-shrink-0 h-3 px-1"
                     >
                       {comp.confidence}%
                     </Badge>
@@ -122,24 +108,10 @@ export function ComponentList({
                       <p className="text-[10px] text-muted-foreground">
                         {getComponentLabel(comp.type)}
                       </p>
-                      {(comp.voltage || comp.rating) && (
-                        <div className="flex gap-1 mt-1">
-                          {comp.voltage && (
-                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
-                              {comp.voltage}
-                            </Badge>
-                          )}
-                          {comp.rating && (
-                            <Badge variant="outline" className="text-[9px] font-mono h-3.5 px-1">
-                              {comp.rating}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
                     </div>
                     <Badge 
                       variant="outline" 
-                      className="text-[9px] font-mono flex-shrink-0 h-4 px-1.5 bg-accent/10 text-accent border-accent/20"
+                      className="text-[8px] font-mono flex-shrink-0 h-3 px-1 bg-accent/10 text-accent border-accent/20"
                     >
                       {comp.confidence}%
                     </Badge>

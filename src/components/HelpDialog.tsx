@@ -48,11 +48,11 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                 Essayez l'exemple
               </h3>
               <p className="text-sm text-muted-foreground mb-3">
-                Nouveau sur l'application ? Cliquez sur <Badge variant="outline" className="mx-1">Load Example</Badge> sur l'écran d'accueil
+                Nouveau sur l'application ? Cliquez sur <Badge variant="outline" className="mx-1 text-[8px] h-3 px-1">Exemple</Badge> sur l'écran d'accueil
                 pour charger un schéma industriel pré-analysé avec tous les composants et chemins électriques détectés.
               </p>
               <p className="text-xs text-accent-foreground">
-                L'exemple montre un poste électrique avec transformateur, bus bars, disjoncteurs et moteurs.
+                L'exemple montre un poste électrique avec transformateur, barres omnibus, disjoncteurs et moteurs.
               </p>
             </section>
 
@@ -65,13 +65,13 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                 </div>
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <UploadSimple size={20} weight="duotone" className="text-accent" />
-                  Télécharger un schéma
+                  Téléverser un schéma
                 </h3>
               </div>
               <div className="ml-10 space-y-2 text-sm text-muted-foreground">
                 <p>
-                  Cliquez sur le bouton <Badge variant="outline" className="mx-1">Upload</Badge> dans l'en-tête
-                  pour télécharger votre schéma électrique unifilaire.
+                  Cliquez sur le bouton <Badge variant="outline" className="mx-1 text-[8px] h-3 px-1">Téléverser</Badge> dans l'en-tête
+                  pour téléverser votre schéma électrique unifilaire.
                 </p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>Formats acceptés : PNG, JPG, JPEG, SVG</li>
@@ -108,7 +108,7 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                     Mode d'apprentissage guidé
                   </p>
                   <p className="text-xs text-green-950/80 dark:text-green-100/80">
-                    Lorsque vous cliquez sur <Badge variant="default" className="mx-1">Analyser</Badge> pour la première fois, 
+                    Lorsque vous cliquez sur <Badge variant="default" className="mx-1 text-[8px] h-3 px-1">Analyser</Badge> pour la première fois, 
                     vous entrez en mode entraînement supervisé :
                   </p>
                   <ul className="list-disc list-inside space-y-1 ml-2 mt-2 text-xs">
@@ -140,7 +140,7 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
               </div>
               <div className="ml-10 space-y-2 text-sm text-muted-foreground">
                 <p>
-                  Une fois votre schéma téléchargé, cliquez sur <Badge variant="default" className="mx-1">Analyze</Badge>
+                  Une fois votre schéma téléversé, cliquez sur <Badge variant="default" className="mx-1 text-[8px] h-3 px-1">Analyser</Badge>
                   pour lancer l'analyse automatique par intelligence artificielle.
                 </p>
                 <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-md p-3 my-3">
@@ -294,7 +294,7 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                 </p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>Sélectionnez un composant dans la liste</li>
-                  <li>Cliquez sur le bouton <Badge variant="outline" className="mx-1 text-xs">Edit</Badge></li>
+                  <li>Cliquez sur le bouton <Badge variant="outline" className="mx-1 text-[8px] h-3 px-1">Modifier</Badge></li>
                   <li>Modifiez le type, les propriétés ou les spécifications techniques</li>
                   <li>Sauvegardez vos modifications</li>
                 </ul>

@@ -179,19 +179,19 @@ export function getComponentColor(type: ComponentType): string {
 
 export function getComponentLabel(type: ComponentType): string {
   const labels: Record<ComponentType, string> = {
-    'breaker': 'Circuit Breaker',
-    'transformer': 'Transformer',
-    'bus-bar': 'Bus Bar',
-    'switch': 'Switch',
-    'fuse': 'Fuse',
-    'relay': 'Relay',
-    'meter': 'Meter',
-    'capacitor': 'Capacitor',
-    'inductor': 'Inductor',
-    'generator': 'Generator',
-    'motor': 'Motor',
-    'load': 'Load',
-    'unknown': 'Unknown'
+    'breaker': 'Disjoncteur',
+    'transformer': 'Transformateur',
+    'bus-bar': 'Barre omnibus',
+    'switch': 'Interrupteur',
+    'fuse': 'Fusible',
+    'relay': 'Relais',
+    'meter': 'Compteur',
+    'capacitor': 'Condensateur',
+    'inductor': 'Inducteur',
+    'generator': 'Générateur',
+    'motor': 'Moteur',
+    'load': 'Charge',
+    'unknown': 'Inconnu'
   }
   return labels[type] || labels.unknown
 }
