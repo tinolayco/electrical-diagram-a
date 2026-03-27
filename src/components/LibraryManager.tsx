@@ -268,7 +268,6 @@ export function LibraryManager({
             onClick={() => handleExportLibrary(activeLibrary.id)}
             className="h-8 w-8"
             title="Exporter la bibliothèque active"
-            disabled={activeLibrary.componentCount === 0}
           >
             <DownloadSimple size={16} />
           </Button>
