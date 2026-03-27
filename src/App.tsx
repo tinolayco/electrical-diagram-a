@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
-import type { Component, Schematic, CatalogEntry, ComponentLibrary, TrainingAnnotation } from '@/lib/types'
+import type { Component, Schematic, CatalogEntry, ComponentLibrary, TrainingAnnotation, LibraryVersion } from '@/lib/types'
 import { analyzeSchematic, identifyElectricalPaths } from '@/lib/analysis'
 import { loadDemoSchematic } from '@/lib/demo-data'
 import { waitForOpenCV } from '@/lib/opencv-detection'
@@ -56,6 +56,7 @@ function App() {
   const [libraries, setLibraries] = useKV<ComponentLibrary[]>('component-libraries', [])
   const [activeLibraryId, setActiveLibraryId] = useKV<string | null>('active-library-id', null)
   const [confidenceThreshold, setConfidenceThreshold] = useKV<number>('confidence-threshold', 85)
+  const [versionHistoryData, setVersionHistoryData] = useKV<Record<string, LibraryVersion[]>>('library-version-history', {})
   
   const [currentSchematic, setCurrentSchematic] = useState<Schematic | null>(null)
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null)
@@ -460,6 +461,13 @@ function App() {
                 onLibraryUpdate={handleLibraryUpdate}
                 onLibraryDelete={handleLibraryDelete}
                 onLibraryImport={handleLibraryImport}
+                versionHistory={new Map(Object.entries(versionHistoryData || {}))}
+                onVersionHistoryUpdate={(libraryId, history) => {
+                  setVersionHistoryData(current => ({
+                    ...current,
+                    [libraryId]: history
+                  }))
+                }}
               />
               
               <Button

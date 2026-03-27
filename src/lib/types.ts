@@ -79,4 +79,27 @@ export interface ComponentLibrary {
   lastModified: number
   annotations: TrainingAnnotation[]
   componentCount: number
+  version?: string
+  author?: string
+  tags?: string[]
+}
+
+export interface LibraryVersion {
+  version: string
+  changelog: string
+  createdAt: number
+  createdBy?: string
+}
+
+export interface LibraryExportData {
+  formatVersion: string
+  exportedAt: number
+  exportedBy?: string
+  library: ComponentLibrary
+  metadata: {
+    appVersion: string
+    compatibleWith: string[]
+    checksum?: string
+  }
+  versionHistory?: LibraryVersion[]
 }
