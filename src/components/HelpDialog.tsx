@@ -178,7 +178,53 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
             <section>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="font-bold text-primary font-mono">3</span>
+                  <span className="font-bold text-primary font-mono">4</span>
+                </div>
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Eye size={20} weight="duotone" className="text-accent" />
+                  Ajuster le seuil de confiance
+                </h3>
+              </div>
+              <div className="ml-10 space-y-2 text-sm text-muted-foreground">
+                <p>
+                  Le <strong>slider de confiance</strong> vous permet de filtrer les composants détectés selon leur score de confiance.
+                </p>
+                <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-md p-3 my-3">
+                  <p className="font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Sparkle size={16} weight="duotone" className="text-violet-500" />
+                    Où trouver le slider ?
+                  </p>
+                  <p className="text-xs text-violet-950/80 dark:text-violet-100/80 mb-2">
+                    Une fois l'analyse terminée, cherchez le slider en haut à droite de l'interface, à côté des onglets Analysis/Catalog/Paths.
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
+                    <li><strong>Icône Sliders ⚙️</strong> avec un petit indicateur de seuil (ex: 85%)</li>
+                    <li><strong>Compteur X/Y</strong> montrant les composants affichés sur le total détecté</li>
+                    <li><strong>Plage : 80% à 99%</strong> - ajustez selon vos besoins</li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-medium text-foreground">Comment l'utiliser :</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
+                    <li><strong>Baissez le seuil (80-85%)</strong> : Affiche plus de composants, risque de faux positifs</li>
+                    <li><strong>Augmentez le seuil (90-95%)</strong> : Affiche moins de composants, mais plus précis</li>
+                    <li><strong>Composants annotés (100%)</strong> : Toujours affichés, quel que soit le seuil</li>
+                  </ul>
+                </div>
+                <div className="bg-accent/10 border border-accent/20 rounded-md p-3 mt-2">
+                  <p className="text-accent-foreground text-xs">
+                    <strong>Astuce :</strong> Si vous voyez trop de détections incorrectes, augmentez le seuil à 90-95%. Si vous manquez des composants, baissez-le à 80-85%.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <Separator />
+
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="font-bold text-primary font-mono">5</span>
                 </div>
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <Eye size={20} weight="duotone" className="text-accent" />
@@ -197,6 +243,8 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                     <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
                       <li>Vue du schéma avec composants identifiés en surbrillance</li>
                       <li>Liste complète des composants détectés sur la droite</li>
+                      <li>Zoom avec molette de la souris (zoom contextuel à la position du curseur)</li>
+                      <li>Pan (clic + glisser) pour déplacer la vue</li>
                       <li>Cliquez sur un composant pour le sélectionner et voir ses détails</li>
                     </ul>
                   </div>
@@ -233,7 +281,7 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
             <section>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="font-bold text-primary font-mono">4</span>
+                  <span className="font-bold text-primary font-mono">6</span>
                 </div>
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <PencilSimple size={20} weight="duotone" className="text-accent" />
@@ -267,8 +315,15 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                 <div className="flex gap-3">
                   <div className="w-1 bg-primary rounded-full flex-shrink-0" />
                   <div>
+                    <p className="font-medium text-foreground">OpenCV.js - Détection multi-angles</p>
+                    <p className="text-xs">Détection automatique des composants avec rotation (0°, 90°, 180°, 270°) via template matching OpenCV. Méthode TM_CCOEFF_NORMED pour une corrélation normalisée optimale.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-1 bg-primary rounded-full flex-shrink-0" />
+                  <div>
                     <p className="font-medium text-foreground">Catalogue évolutif</p>
-                    <p className="text-xs">Le système utilise l'apprentissage profond pour améliorer continuellement la reconnaissance des composants basée sur des modèles pré-entraînés.</p>
+                    <p className="text-xs">Le système utilise l'apprentissage supervisé pour améliorer continuellement la reconnaissance des composants basée sur vos annotations.</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
