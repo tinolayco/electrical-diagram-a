@@ -50,7 +50,7 @@ import {
   TrashSimple,
   FileCsv
 } from '@phosphor-icons/react'
-import { exportSchematicToCSV, downloadFile } from '@/lib/export-formats'
+import { exportSchematicToCSV, exportCatalogToCSV, downloadFile } from '@/lib/export-formats'
 
 function App() {
   const [schematics, setSchematics] = useKV<Schematic[]>('schematics', [])
@@ -451,6 +451,25 @@ function App() {
     }
   }
 
+  const handleExportCatalogCSV = async () => {
+    if (!catalog || catalog.length === 0) return
+    
+    try {
+      const csvContent = exportCatalogToCSV(catalog)
+      const fileName = `catalogue_composants_${Date.now()}.csv`
+      
+      await downloadFile(csvContent, fileName, 'text/csv')
+      toast.success('Catalogue exporté en CSV avec succès')
+    } catch (error: any) {
+      if (error.message === 'CANCELLED') {
+        toast.info('Export annulé')
+        return
+      }
+      console.error('Export error:', error)
+      toast.error('Erreur lors de l\'exportation du catalogue')
+    }
+  }
+
   const selectedComponentData = filteredComponents.find(
     c => c.id === selectedComponent
   )
@@ -727,7 +746,20 @@ function App() {
 
             <TabsContent value="catalog" className="flex-1 min-h-0 m-0">
               <Card className="p-4 h-full overflow-auto">
-                <h3 className="text-base font-semibold mb-3">Catalogue de composants</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-semibold">Catalogue de composants</h3>
+                  {catalog && catalog.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportCatalogCSV}
+                      className="h-8 text-xs"
+                    >
+                      <FileCsv size={14} className="mr-1.5" />
+                      Exporter CSV
+                    </Button>
+                  )}
+                </div>
                 {!catalog || catalog.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Cube size={48} className="mx-auto mb-3" weight="duotone" />

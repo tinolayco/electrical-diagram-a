@@ -1,4 +1,4 @@
-import type { ComponentLibrary, Schematic, Component, TrainingAnnotation, ComponentType } from './types'
+import type { ComponentLibrary, Schematic, Component, TrainingAnnotation, ComponentType, CatalogEntry } from './types'
 
 export function exportLibraryToCSV(library: ComponentLibrary): string {
   const lines: string[] = []
@@ -600,6 +600,74 @@ function parseCSVLine(line: string): string[] {
   
   values.push(current.trim())
   return values
+}
+
+export function exportCatalogToCSV(catalog: CatalogEntry[]): string {
+  const lines: string[] = []
+  
+  lines.push('=== CATALOGUE DE COMPOSANTS ===')
+  lines.push('')
+  lines.push('Champ,Valeur')
+  lines.push(`Nombre de types différents,${catalog.length}`)
+  
+  const totalInstances = catalog.reduce((sum, entry) => sum + entry.count, 0)
+  lines.push(`Nombre total d'instances,${totalInstances}`)
+  lines.push(`Date d'export,${new Date().toLocaleString('fr-FR')}`)
+  
+  lines.push('')
+  lines.push('')
+  lines.push('=== DÉTAILS PAR TYPE DE COMPOSANT ===')
+  lines.push('')
+  lines.push('N°,Type de composant,Nombre d\'instances,Pourcentage,Dernière mise à jour')
+  
+  const sortedCatalog = [...catalog].sort((a, b) => b.count - a.count)
+  
+  sortedCatalog.forEach((entry, index) => {
+    const percentage = ((entry.count / totalInstances) * 100).toFixed(1)
+    const lastUpdate = entry.lastUpdated 
+      ? new Date(entry.lastUpdated).toLocaleString('fr-FR')
+      : 'Non disponible'
+    
+    lines.push([
+      (index + 1).toString(),
+      escapeCSV(getComponentTypeLabel(entry.type)),
+      entry.count.toString(),
+      `${percentage}%`,
+      lastUpdate
+    ].join(','))
+  })
+  
+  lines.push('')
+  lines.push('')
+  lines.push('=== STATISTIQUES RÉCAPITULATIVES ===')
+  lines.push('')
+  
+  if (catalog.length > 0) {
+    const topType = sortedCatalog[0]
+    const topPercentage = ((topType.count / totalInstances) * 100).toFixed(1)
+    lines.push(`Type le plus fréquent,${escapeCSV(getComponentTypeLabel(topType.type))} (${topType.count} instances - ${topPercentage}%)`)
+    
+    const avgInstancesPerType = (totalInstances / catalog.length).toFixed(1)
+    lines.push(`Moyenne d'instances par type,${avgInstancesPerType}`)
+    
+    const variance = catalog.reduce((sum, entry) => {
+      const diff = entry.count - parseFloat(avgInstancesPerType)
+      return sum + diff * diff
+    }, 0) / catalog.length
+    const stdDev = Math.sqrt(variance).toFixed(1)
+    lines.push(`Écart-type,${stdDev}`)
+  }
+  
+  lines.push('')
+  lines.push('')
+  lines.push('=== INFORMATIONS D\'EXPORT ===')
+  lines.push('')
+  lines.push('Exporté le,' + new Date().toLocaleString('fr-FR'))
+  lines.push('Format,CSV pour analyse Excel')
+  lines.push('Application,iSchémateur - Analyseur de schémas électriques')
+  lines.push('Compatible avec,Microsoft Excel, Google Sheets, LibreOffice Calc')
+  
+  return lines.join('\n')
 }
 
 export async function downloadFile(content: string, fileName: string, mimeType: string): Promise<void> {
