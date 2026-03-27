@@ -102,7 +102,9 @@ function App() {
       updateCatalog(components)
       
       setAnalysisProgress(100)
-      toast.success(`Détection terminée! ${components.length} composants trouvés (${components.filter(c => c.confidence >= 85).length} haute confiance) et ${paths.length} chemins électriques`, { duration: 5000 })
+      const userAnnotated = components.filter(c => c.metadata?.userAnnotated === 'true').length
+      const autoDetected = components.length - userAnnotated
+      toast.success(`Détection terminée! ${components.length} composants trouvés (${userAnnotated} annotés + ${autoDetected} similaires détectés) et ${paths.length} chemins électriques`, { duration: 5000 })
     } catch (error) {
       console.error('Analysis failed:', error)
       toast.error('Échec de l\'analyse. Veuillez réessayer.')

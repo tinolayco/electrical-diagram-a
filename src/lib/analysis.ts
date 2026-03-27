@@ -203,7 +203,18 @@ async function convertAnnotationsToComponents(annotations: TrainingAnnotation[],
   const imageWidth = img.width
   const imageHeight = img.height
   
-  return annotations.map((annotation, index) => {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return []
+  
+  canvas.width = imageWidth
+  canvas.height = imageHeight
+  ctx.drawImage(img, 0, 0)
+  const fullImageData = ctx.getImageData(0, 0, imageWidth, imageHeight)
+  
+  const allComponents: Component[] = []
+  
+  for (const annotation of annotations) {
     const bbox = annotation.boundingBox
     
     const percentBox: BoundingBox = {
@@ -213,14 +224,174 @@ async function convertAnnotationsToComponents(annotations: TrainingAnnotation[],
       height: (bbox.height / imageHeight) * 100
     }
     
-    return {
+    allComponents.push({
       id: annotation.id,
       type: annotation.correctType,
-      name: `${annotation.correctType.toUpperCase()}-${index + 1}`,
+      name: `${annotation.correctType.toUpperCase()}-${allComponents.filter(c => c.type === annotation.correctType).length + 1}`,
       boundingBox: percentBox,
       confidence: 100,
       connections: [],
       metadata: { userAnnotated: 'true', source: 'training' }
+    })
+    
+    const templateData = ctx.getImageData(
+      Math.floor(bbox.x),
+      Math.floor(bbox.y),
+      Math.floor(bbox.width),
+      Math.floor(bbox.height)
+    )
+    
+    const similarComponents = await findSimilarComponents(
+      fullImageData,
+      templateData,
+      bbox,
+      annotation.correctType,
+      imageWidth,
+      imageHeight
+    )
+    
+    allComponents.push(...similarComponents)
+  }
+  
+  return deduplicateComponents(allComponents)
+}
+
+async function findSimilarComponents(
+  fullImage: ImageData,
+  template: ImageData,
+  originalBox: { x: number; y: number; width: number; height: number },
+  componentType: ComponentType,
+  imageWidth: number,
+  imageHeight: number
+): Promise<Component[]> {
+  const similarComponents: Component[] = []
+  const templateWidth = template.width
+  const templateHeight = template.height
+  const threshold = 0.75
+  
+  const stepSize = Math.max(5, Math.floor(templateWidth / 4))
+  
+  for (let y = 0; y < imageHeight - templateHeight; y += stepSize) {
+    for (let x = 0; x < imageWidth - templateWidth; x += stepSize) {
+      if (Math.abs(x - originalBox.x) < 10 && Math.abs(y - originalBox.y) < 10) {
+        continue
+      }
+      
+      const similarity = calculateTemplateSimilarity(
+        fullImage.data,
+        template.data,
+        x,
+        y,
+        templateWidth,
+        templateHeight,
+        imageWidth
+      )
+      
+      if (similarity > threshold) {
+        const percentBox: BoundingBox = {
+          x: (x / imageWidth) * 100,
+          y: (y / imageHeight) * 100,
+          width: (templateWidth / imageWidth) * 100,
+          height: (templateHeight / imageHeight) * 100
+        }
+        
+        const confidence = Math.round(similarity * 100)
+        
+        similarComponents.push({
+          id: `comp-similar-${Date.now()}-${Math.random()}`,
+          type: componentType,
+          name: `${componentType.toUpperCase()}-auto`,
+          boundingBox: percentBox,
+          confidence,
+          connections: [],
+          metadata: { 
+            source: 'template-matching',
+            similarity: similarity.toFixed(3),
+            templateBased: 'true'
+          }
+        })
+      }
+    }
+  }
+  
+  return similarComponents
+}
+
+function calculateTemplateSimilarity(
+  fullImageData: Uint8ClampedArray,
+  templateData: Uint8ClampedArray,
+  startX: number,
+  startY: number,
+  templateWidth: number,
+  templateHeight: number,
+  imageWidth: number
+): number {
+  let matchScore = 0
+  let totalPixels = 0
+  
+  for (let ty = 0; ty < templateHeight; ty += 2) {
+    for (let tx = 0; tx < templateWidth; tx += 2) {
+      const imageX = startX + tx
+      const imageY = startY + ty
+      
+      if (imageX >= imageWidth || imageY * imageWidth + imageX >= fullImageData.length / 4) {
+        continue
+      }
+      
+      const imageIdx = (imageY * imageWidth + imageX) * 4
+      const templateIdx = (ty * templateWidth + tx) * 4
+      
+      const imgR = fullImageData[imageIdx]
+      const imgG = fullImageData[imageIdx + 1]
+      const imgB = fullImageData[imageIdx + 2]
+      
+      const tmpR = templateData[templateIdx]
+      const tmpG = templateData[templateIdx + 1]
+      const tmpB = templateData[templateIdx + 2]
+      
+      const rDiff = Math.abs(imgR - tmpR)
+      const gDiff = Math.abs(imgG - tmpG)
+      const bDiff = Math.abs(imgB - tmpB)
+      
+      const avgDiff = (rDiff + gDiff + bDiff) / 3
+      const pixelSimilarity = 1 - (avgDiff / 255)
+      
+      matchScore += pixelSimilarity
+      totalPixels++
+    }
+  }
+  
+  return totalPixels > 0 ? matchScore / totalPixels : 0
+}
+
+function deduplicateComponents(components: Component[]): Component[] {
+  const deduplicated: Component[] = []
+  
+  for (const comp of components) {
+    const isDuplicate = deduplicated.some(existing => {
+      const xOverlap = Math.abs(existing.boundingBox.x - comp.boundingBox.x) < 2
+      const yOverlap = Math.abs(existing.boundingBox.y - comp.boundingBox.y) < 2
+      const sameType = existing.type === comp.type
+      
+      return xOverlap && yOverlap && sameType
+    })
+    
+    if (!isDuplicate) {
+      deduplicated.push(comp)
+    }
+  }
+  
+  const typeCounters: Record<string, number> = {}
+  
+  return deduplicated.map(comp => {
+    if (comp.metadata?.userAnnotated === 'true') {
+      return comp
+    }
+    
+    typeCounters[comp.type] = (typeCounters[comp.type] || 0) + 1
+    return {
+      ...comp,
+      name: `${comp.type.toUpperCase()}-${typeCounters[comp.type]}`
     }
   })
 }
