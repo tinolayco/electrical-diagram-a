@@ -781,7 +781,7 @@ export async function uploadFile(accept: string): Promise<{ content: string; fil
 export async function downloadFile(content: string, fileName: string, mimeType: string): Promise<void> {
   const blob = new Blob([content], { type: mimeType })
   
-  if ('showSaveFilePicker' in window) {
+  if ('showSaveFilePicker' in window && typeof (window as any).showSaveFilePicker === 'function') {
     try {
       const extension = fileName.split('.').pop() || 'txt'
       const fileHandle = await (window as any).showSaveFilePicker({
@@ -795,23 +795,25 @@ export async function downloadFile(content: string, fileName: string, mimeType: 
       const writable = await fileHandle.createWritable()
       await writable.write(blob)
       await writable.close()
+      return
     } catch (err: any) {
       if (err.name === 'AbortError') {
         throw new Error('CANCELLED')
       }
-      throw err
+      console.warn('showSaveFilePicker failed, falling back to download link:', err)
     }
-  } else {
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = fileName
-    document.body.appendChild(a)
-    a.click()
-    
-    setTimeout(() => {
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    }, 100)
   }
+  
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  a.style.display = 'none'
+  document.body.appendChild(a)
+  a.click()
+  
+  setTimeout(() => {
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, 100)
 }
