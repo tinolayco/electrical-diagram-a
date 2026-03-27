@@ -53,7 +53,7 @@ function App() {
   const [schematics, setSchematics] = useKV<Schematic[]>('schematics', [])
   const [catalog, setCatalog] = useKV<CatalogEntry[]>('component-catalog', [])
   const [trainingAnnotations, setTrainingAnnotations] = useKV<TrainingAnnotation[]>('training-annotations', [])
-  const [confidenceThreshold, setConfidenceThreshold] = useKV<number>('confidence-threshold', 97)
+  const [confidenceThreshold, setConfidenceThreshold] = useKV<number>('confidence-threshold', 85)
   const [currentSchematic, setCurrentSchematic] = useState<Schematic | null>(null)
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null)
   const [highlightedPath, setHighlightedPath] = useState<string[] | null>(null)
@@ -70,7 +70,9 @@ function App() {
     if (!currentSchematic) return []
     return currentSchematic.components.filter(comp => {
       if (comp.metadata?.userAnnotated === 'true') return true
-      return comp.confidence >= (confidenceThreshold || 97)
+      const threshold = confidenceThreshold !== undefined ? confidenceThreshold : 85
+      if (!comp.confidence) return true
+      return comp.confidence >= threshold
     })
   }, [currentSchematic, confidenceThreshold])
 
@@ -115,7 +117,7 @@ function App() {
       const components = await analyzeSchematic(
         currentSchematic.imageData,
         trainingAnnotations && trainingAnnotations.length > 0 ? trainingAnnotations : undefined,
-        confidenceThreshold || 97,
+        confidenceThreshold !== undefined ? confidenceThreshold : 85,
         (newComponent: Component) => {
           detectedComponents.push(newComponent)
           
@@ -151,15 +153,16 @@ function App() {
       
       const userAnnotated = components.filter(c => c.metadata?.userAnnotated === 'true').length
       const autoDetected = components.length - userAnnotated
+      const currentThreshold = confidenceThreshold !== undefined ? confidenceThreshold : 85
       const filtered = components.filter(comp => {
         if (comp.metadata?.userAnnotated === 'true') return true
-        return comp.confidence >= (confidenceThreshold || 97)
+        return comp.confidence >= currentThreshold
       })
       const belowThreshold = components.length - filtered.length
       
       toast.success(
         `Détection terminée! ${components.length} composants trouvés (${userAnnotated} annotés + ${autoDetected} similaires détectés)\n` +
-        `Affichés avec seuil ${confidenceThreshold}%: ${filtered.length} composants (${belowThreshold} masqués)\n` +
+        `Affichés avec seuil ${currentThreshold}%: ${filtered.length} composants (${belowThreshold} masqués)\n` +
         `${paths.length} chemins électriques identifiés`,
         { duration: 7000 }
       )
@@ -265,7 +268,7 @@ function App() {
         setSchematics([])
         setCatalog([])
         setTrainingAnnotations([])
-        setConfidenceThreshold(97)
+        setConfidenceThreshold(85)
         setCurrentSchematic(null)
         setSelectedComponent(null)
         setHighlightedPath(null)
@@ -444,10 +447,10 @@ function App() {
                   <div className="flex flex-col gap-0.5 min-w-[120px]">
                     <div className="flex items-center justify-between gap-2">
                       <Label className="text-[10px] font-medium">Seuil</Label>
-                      <span className="text-[10px] font-mono text-muted-foreground">{confidenceThreshold}%</span>
+                      <span className="text-[10px] font-mono text-muted-foreground">{confidenceThreshold !== undefined ? confidenceThreshold : 85}%</span>
                     </div>
                     <Slider
-                      value={[confidenceThreshold || 97]}
+                      value={[confidenceThreshold !== undefined ? confidenceThreshold : 85]}
                       onValueChange={(value) => setConfidenceThreshold(value[0])}
                       min={80}
                       max={99}

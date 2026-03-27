@@ -4,7 +4,7 @@ import { detectComponentsInImage } from './image-detection'
 export async function analyzeSchematic(
   imageData: string, 
   trainingAnnotations?: TrainingAnnotation[], 
-  confidenceThreshold: number = 97,
+  confidenceThreshold: number = 85,
   onComponentFound?: (component: Component) => void
 ): Promise<Component[]> {
   const imageDetectedComponents = trainingAnnotations 
@@ -200,7 +200,7 @@ export function getComponentLabel(type: ComponentType): string {
 async function convertAnnotationsToComponents(
   annotations: TrainingAnnotation[], 
   imageData: string,
-  confidenceThreshold: number = 97,
+  confidenceThreshold: number = 85,
   onComponentFound?: (component: Component) => void
 ): Promise<Component[]> {
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -281,7 +281,7 @@ async function findSimilarComponents(
   componentType: ComponentType,
   imageWidth: number,
   imageHeight: number,
-  confidenceThreshold: number = 97,
+  confidenceThreshold: number = 85,
   onComponentFound?: (component: Component) => void
 ): Promise<Component[]> {
   const similarComponents: Component[] = []
