@@ -7,6 +7,11 @@ import {
   formatVersionHistory,
 } from '@/lib/library-versioning'
 import {
+  exportLibraryToCSV,
+  exportLibraryToXML,
+  downloadFile,
+} from '@/lib/export-formats'
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -84,6 +89,7 @@ export function LibraryManager({
   const [exportVersionType, setExportVersionType] = useState<'major' | 'minor' | 'patch'>('patch')
   const [exportChangelog, setExportChangelog] = useState('')
   const [exportAuthor, setExportAuthor] = useState('')
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xml'>('json')
 
   const activeLibrary = libraries.find(lib => lib.id === activeLibraryId)
   const selectedLibrary = libraries.find(lib => lib.id === selectedLibraryId)
@@ -209,72 +215,60 @@ export function LibraryManager({
     }
 
     try {
-      const currentVersion = library.version || '1.0.0'
-      const newVersion = incrementVersion(currentVersion, exportVersionType)
-      
-      const newVersionEntry: LibraryVersion = {
-        version: newVersion,
-        changelog: exportChangelog.trim() || 'Nouvelle version exportée',
-        createdAt: Date.now(),
-        createdBy: exportAuthor.trim() || undefined,
-      }
-
-      const existingHistory = versionHistory?.get(library.id) || []
-      const updatedHistory = [...existingHistory, newVersionEntry]
-
-      const exportData = createLibraryExportData(
-        { ...library, version: newVersion },
-        exportAuthor.trim() || undefined,
-        updatedHistory
-      )
-
-      if (onVersionHistoryUpdate) {
-        onVersionHistoryUpdate(library.id, updatedHistory)
-      }
-
-      onLibraryUpdate(library.id, { version: newVersion })
-
-      const jsonString = JSON.stringify(exportData, null, 2)
-      const blob = new Blob([jsonString], { type: 'application/json' })
       const safeFileName = library.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()
-      const suggestedFileName = `bibliotheque_${safeFileName}_v${newVersion}_${Date.now()}.json`
+      let content: string
+      let fileName: string
+      let mimeType: string
 
-      if ('showSaveFilePicker' in window) {
-        try {
-          const fileHandle = await (window as any).showSaveFilePicker({
-            suggestedName: suggestedFileName,
-            types: [{
-              description: 'Fichier de bibliothèque JSON',
-              accept: { 'application/json': ['.json'] },
-            }],
-          })
-          
-          const writable = await fileHandle.createWritable()
-          await writable.write(blob)
-          await writable.close()
-          
-          toast.success(`Bibliothèque "${library.name}" exportée avec succès (v${newVersion})`)
-        } catch (err: any) {
-          if (err.name === 'AbortError') {
-            toast.info('Export annulé')
-            return
-          }
-          throw err
-        }
+      if (exportFormat === 'csv') {
+        content = exportLibraryToCSV(library)
+        fileName = `bibliotheque_${safeFileName}_${Date.now()}.csv`
+        mimeType = 'text/csv'
+      } else if (exportFormat === 'xml') {
+        content = exportLibraryToXML(library)
+        fileName = `bibliotheque_${safeFileName}_${Date.now()}.xml`
+        mimeType = 'application/xml'
       } else {
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = suggestedFileName
-        document.body.appendChild(a)
-        a.click()
+        const currentVersion = library.version || '1.0.0'
+        const newVersion = incrementVersion(currentVersion, exportVersionType)
         
-        setTimeout(() => {
-          document.body.removeChild(a)
-          URL.revokeObjectURL(url)
-        }, 100)
-        
-        toast.success(`Bibliothèque "${library.name}" exportée avec succès (v${newVersion})`)
+        const newVersionEntry: LibraryVersion = {
+          version: newVersion,
+          changelog: exportChangelog.trim() || 'Nouvelle version exportée',
+          createdAt: Date.now(),
+          createdBy: exportAuthor.trim() || undefined,
+        }
+
+        const existingHistory = versionHistory?.get(library.id) || []
+        const updatedHistory = [...existingHistory, newVersionEntry]
+
+        const exportData = createLibraryExportData(
+          { ...library, version: newVersion },
+          exportAuthor.trim() || undefined,
+          updatedHistory
+        )
+
+        if (onVersionHistoryUpdate) {
+          onVersionHistoryUpdate(library.id, updatedHistory)
+        }
+
+        onLibraryUpdate(library.id, { version: newVersion })
+
+        content = JSON.stringify(exportData, null, 2)
+        fileName = `bibliotheque_${safeFileName}_v${newVersion}_${Date.now()}.json`
+        mimeType = 'application/json'
+      }
+
+      try {
+        await downloadFile(content, fileName, mimeType)
+        const formatLabel = exportFormat.toUpperCase()
+        toast.success(`Bibliothèque "${library.name}" exportée en ${formatLabel} avec succès`)
+      } catch (error: any) {
+        if (error.message === 'CANCELLED') {
+          toast.info('Export annulé')
+          return
+        }
+        throw error
       }
 
       setExportDialogOpen(false)
@@ -282,6 +276,7 @@ export function LibraryManager({
       setExportChangelog('')
       setExportAuthor('')
       setExportVersionType('patch')
+      setExportFormat('json')
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Erreur lors de l\'exportation de la bibliothèque')
@@ -593,46 +588,38 @@ export function LibraryManager({
           <DialogHeader>
             <DialogTitle>Exporter la bibliothèque</DialogTitle>
             <DialogDescription>
-              Configurez les informations de version pour l'export de "{selectedLibrary?.name}".
+              Exportez "{selectedLibrary?.name}" dans le format de votre choix.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <Card className="p-3 bg-muted/50">
-              <div className="flex items-center gap-2 text-sm">
-                <Tag size={14} className="text-muted-foreground" />
-                <span className="text-muted-foreground">Version actuelle:</span>
-                <span className="font-mono font-semibold">{selectedLibrary?.version || '1.0.0'}</span>
-              </div>
-            </Card>
-            
             <div className="space-y-2">
-              <Label htmlFor="version-type">Type de version *</Label>
-              <Select value={exportVersionType} onValueChange={(value: 'major' | 'minor' | 'patch') => setExportVersionType(value)}>
-                <SelectTrigger id="version-type">
+              <Label htmlFor="export-format">Format d'export *</Label>
+              <Select value={exportFormat} onValueChange={(value: 'json' | 'csv' | 'xml') => setExportFormat(value)}>
+                <SelectTrigger id="export-format">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patch">
+                  <SelectItem value="json">
                     <div className="flex flex-col items-start">
-                      <span className="font-medium">Patch (correction de bogues)</span>
+                      <span className="font-medium">JSON (avec versioning)</span>
                       <span className="text-xs text-muted-foreground">
-                        {selectedLibrary?.version || '1.0.0'} → {incrementVersion(selectedLibrary?.version || '1.0.0', 'patch')}
+                        Format complet réimportable
                       </span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="minor">
+                  <SelectItem value="csv">
                     <div className="flex flex-col items-start">
-                      <span className="font-medium">Minor (nouvelles fonctionnalités)</span>
+                      <span className="font-medium">CSV (tableur)</span>
                       <span className="text-xs text-muted-foreground">
-                        {selectedLibrary?.version || '1.0.0'} → {incrementVersion(selectedLibrary?.version || '1.0.0', 'minor')}
+                        Compatible Excel, Google Sheets
                       </span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="major">
+                  <SelectItem value="xml">
                     <div className="flex flex-col items-start">
-                      <span className="font-medium">Major (changements importants)</span>
+                      <span className="font-medium">XML (données structurées)</span>
                       <span className="text-xs text-muted-foreground">
-                        {selectedLibrary?.version || '1.0.0'} → {incrementVersion(selectedLibrary?.version || '1.0.0', 'major')}
+                        Format universel structuré
                       </span>
                     </div>
                   </SelectItem>
@@ -640,26 +627,82 @@ export function LibraryManager({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="export-changelog">Notes de version *</Label>
-              <Textarea
-                id="export-changelog"
-                placeholder="Décrivez les modifications de cette version..."
-                value={exportChangelog}
-                onChange={(e) => setExportChangelog(e.target.value)}
-                rows={3}
-              />
-            </div>
+            {exportFormat === 'json' && (
+              <>
+                <Card className="p-3 bg-muted/50">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Tag size={14} className="text-muted-foreground" />
+                    <span className="text-muted-foreground">Version actuelle:</span>
+                    <span className="font-mono font-semibold">{selectedLibrary?.version || '1.0.0'}</span>
+                  </div>
+                </Card>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="version-type">Type de version *</Label>
+                  <Select value={exportVersionType} onValueChange={(value: 'major' | 'minor' | 'patch') => setExportVersionType(value)}>
+                    <SelectTrigger id="version-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="patch">
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Patch (correction de bogues)</span>
+                          <span className="text-xs text-muted-foreground">
+                            {selectedLibrary?.version || '1.0.0'} → {incrementVersion(selectedLibrary?.version || '1.0.0', 'patch')}
+                          </span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="minor">
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Minor (nouvelles fonctionnalités)</span>
+                          <span className="text-xs text-muted-foreground">
+                            {selectedLibrary?.version || '1.0.0'} → {incrementVersion(selectedLibrary?.version || '1.0.0', 'minor')}
+                          </span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="major">
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">Major (changements importants)</span>
+                          <span className="text-xs text-muted-foreground">
+                            {selectedLibrary?.version || '1.0.0'} → {incrementVersion(selectedLibrary?.version || '1.0.0', 'major')}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="export-author">Auteur</Label>
-              <Input
-                id="export-author"
-                placeholder="Votre nom"
-                value={exportAuthor}
-                onChange={(e) => setExportAuthor(e.target.value)}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="export-changelog">Notes de version *</Label>
+                  <Textarea
+                    id="export-changelog"
+                    placeholder="Décrivez les modifications de cette version..."
+                    value={exportChangelog}
+                    onChange={(e) => setExportChangelog(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="export-author">Auteur</Label>
+                  <Input
+                    id="export-author"
+                    placeholder="Votre nom"
+                    value={exportAuthor}
+                    onChange={(e) => setExportAuthor(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            {exportFormat !== 'json' && (
+              <Card className="p-3 bg-muted/50">
+                <p className="text-sm text-muted-foreground">
+                  Les exports CSV et XML contiennent les données de la bibliothèque sans versioning.
+                  Pour réimporter, utilisez le format JSON.
+                </p>
+              </Card>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
@@ -667,7 +710,7 @@ export function LibraryManager({
             </Button>
             <Button onClick={handleExportLibrary}>
               <DownloadSimple size={16} className="mr-2" />
-              Exporter
+              Exporter en {exportFormat.toUpperCase()}
             </Button>
           </DialogFooter>
         </DialogContent>
