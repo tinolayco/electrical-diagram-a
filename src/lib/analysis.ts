@@ -267,13 +267,13 @@ async function findSimilarComponents(
   const similarComponents: Component[] = []
   const templateWidth = template.width
   const templateHeight = template.height
-  const threshold = 0.92
+  const threshold = 0.97
   
-  const stepSize = Math.max(10, Math.floor(templateWidth / 2))
+  const stepSize = Math.max(15, Math.floor(templateWidth / 3))
   
   for (let y = 0; y < imageHeight - templateHeight; y += stepSize) {
     for (let x = 0; x < imageWidth - templateWidth; x += stepSize) {
-      if (Math.abs(x - originalBox.x) < 10 && Math.abs(y - originalBox.y) < 10) {
+      if (Math.abs(x - originalBox.x) < 15 && Math.abs(y - originalBox.y) < 15) {
         continue
       }
       
@@ -296,12 +296,12 @@ async function findSimilarComponents(
         }
         
         const hasOverlap = similarComponents.some(existing => {
-          const xOverlap = Math.abs(existing.boundingBox.x - percentBox.x) < 3
-          const yOverlap = Math.abs(existing.boundingBox.y - percentBox.y) < 3
+          const xOverlap = Math.abs(existing.boundingBox.x - percentBox.x) < 2
+          const yOverlap = Math.abs(existing.boundingBox.y - percentBox.y) < 2
           return xOverlap && yOverlap
         })
         
-        if (!hasOverlap && similarComponents.length < 50) {
+        if (!hasOverlap && similarComponents.length < 20) {
           const confidence = Math.round(similarity * 100)
           
           similarComponents.push({
@@ -322,7 +322,7 @@ async function findSimilarComponents(
     }
   }
   
-  return similarComponents
+  return similarComponents.sort((a, b) => (b.confidence || 0) - (a.confidence || 0)).slice(0, 15)
 }
 
 function calculateTemplateSimilarity(
@@ -377,11 +377,14 @@ function deduplicateComponents(components: Component[]): Component[] {
   
   for (const comp of components) {
     const isDuplicate = deduplicated.some(existing => {
-      const xOverlap = Math.abs(existing.boundingBox.x - comp.boundingBox.x) < 1.5
-      const yOverlap = Math.abs(existing.boundingBox.y - comp.boundingBox.y) < 1.5
+      const xOverlap = Math.abs(existing.boundingBox.x - comp.boundingBox.x) < 2
+      const yOverlap = Math.abs(existing.boundingBox.y - comp.boundingBox.y) < 2
       const sameType = existing.type === comp.type
       
-      return xOverlap && yOverlap && sameType
+      const widthSimilar = Math.abs(existing.boundingBox.width - comp.boundingBox.width) < 1
+      const heightSimilar = Math.abs(existing.boundingBox.height - comp.boundingBox.height) < 1
+      
+      return xOverlap && yOverlap && sameType && widthSimilar && heightSimilar
     })
     
     if (!isDuplicate) {
@@ -395,11 +398,16 @@ function deduplicateComponents(components: Component[]): Component[] {
     return (b.confidence || 0) - (a.confidence || 0)
   })
   
+  const userAnnotatedCount = sorted.filter(c => c.metadata?.userAnnotated === 'true').length
   const typeCounters: Record<string, number> = {}
   
   return sorted.map(comp => {
     if (comp.metadata?.userAnnotated === 'true') {
-      return comp
+      typeCounters[comp.type] = (typeCounters[comp.type] || 0) + 1
+      return {
+        ...comp,
+        name: `${comp.type.toUpperCase()}-${typeCounters[comp.type]}`
+      }
     }
     
     typeCounters[comp.type] = (typeCounters[comp.type] || 0) + 1

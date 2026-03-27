@@ -204,8 +204,10 @@ export function DiagramViewer({
                   const width = (comp.boundingBox.width / 100) * imageDimensions.width
                   const height = (comp.boundingBox.height / 100) * imageDimensions.height
 
-                  const labelWidth = 90
-                  const labelHeight = 22
+                  const labelText = comp.name
+                  const fontSize = Math.max(8, Math.min(11, imageDimensions.width / 120))
+                  const labelWidth = Math.min(75, labelText.length * (fontSize * 0.65) + 12)
+                  const labelHeight = 16
 
                   return (
                     <g key={comp.id}>
@@ -218,44 +220,49 @@ export function DiagramViewer({
                         fill={isSelected || isInPath ? color : 'none'}
                         fillOpacity={isSelected ? 0.25 : isInPath ? 0.15 : 0}
                         stroke={color}
-                        strokeWidth={isSelected ? 4 : isInPath ? 3 : 2}
-                        strokeDasharray={isInPath && !isSelected ? '8,8' : 'none'}
-                        className="cursor-pointer pointer-events-auto transition-all hover:stroke-[5] hover:fill-opacity-20"
+                        strokeWidth={isSelected ? 3 : isInPath ? 2.5 : 1.5}
+                        strokeDasharray={isInPath && !isSelected ? '6,4' : 'none'}
+                        className="cursor-pointer pointer-events-auto transition-all hover:stroke-[3] hover:fill-opacity-20"
                         onClick={(e) => {
                           e.stopPropagation()
                           onComponentSelect(comp.id)
                         }}
-                        rx={6}
+                        rx={4}
                       />
-                      <rect
-                        x={x + width / 2 - labelWidth / 2}
-                        y={y - labelHeight - 8}
-                        width={labelWidth}
-                        height={labelHeight}
-                        fill={color}
-                        fillOpacity={0.95}
-                        rx={6}
-                        className="pointer-events-none"
-                      />
-                      <text
-                        x={x + width / 2}
-                        y={y - labelHeight / 2 - 4}
-                        textAnchor="middle"
-                        className="font-mono font-semibold pointer-events-none"
-                        fill="white"
-                        style={{ fontSize: `${Math.max(11, imageDimensions.width / 80)}px` }}
-                      >
-                        {comp.name}
-                      </text>
-                      {comp.confidence && (
+                      {(isSelected || zoom > 1.2) && (
+                        <>
+                          <rect
+                            x={x + width / 2 - labelWidth / 2}
+                            y={y - labelHeight - 4}
+                            width={labelWidth}
+                            height={labelHeight}
+                            fill={color}
+                            fillOpacity={0.92}
+                            rx={3}
+                            className="pointer-events-none"
+                          />
+                          <text
+                            x={x + width / 2}
+                            y={y - labelHeight / 2 - 1}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className="font-mono font-semibold pointer-events-none"
+                            fill="white"
+                            style={{ fontSize: `${fontSize}px` }}
+                          >
+                            {comp.name}
+                          </text>
+                        </>
+                      )}
+                      {comp.confidence && isSelected && (
                         <text
                           x={x + width / 2}
-                          y={y + height + 16}
+                          y={y + height + 12}
                           textAnchor="middle"
                           className="font-mono pointer-events-none"
                           fill={color}
                           style={{ 
-                            fontSize: `${Math.max(10, imageDimensions.width / 100)}px`,
+                            fontSize: `${fontSize}px`,
                             fontWeight: '600'
                           }}
                         >
