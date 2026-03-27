@@ -44,7 +44,7 @@ export function DetectionStats({ components, isAnalyzing }: DetectionStatsProps)
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total Components</span>
-          <Badge variant="secondary" className="font-mono">
+          <Badge variant="secondary" className="font-mono text-xs h-5 px-2">
             {components.length}
           </Badge>
         </div>
@@ -53,7 +53,7 @@ export function DetectionStats({ components, isAnalyzing }: DetectionStatsProps)
           <span className="text-sm text-muted-foreground">Avg. Confidence</span>
           <Badge 
             variant={avgConfidence >= 85 ? 'default' : avgConfidence >= 70 ? 'secondary' : 'outline'}
-            className="font-mono"
+            className="font-mono text-xs h-5 px-2"
           >
             {avgConfidence}%
           </Badge>

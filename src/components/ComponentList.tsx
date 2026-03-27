@@ -66,12 +66,12 @@ export function ComponentList({
                       {(comp.voltage || comp.rating) && (
                         <div className="flex gap-1 mt-2">
                           {comp.voltage && (
-                            <Badge variant="outline" className="text-xs font-mono">
+                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
                               {comp.voltage}
                             </Badge>
                           )}
                           {comp.rating && (
-                            <Badge variant="outline" className="text-xs font-mono">
+                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
                               {comp.rating}
                             </Badge>
                           )}
@@ -80,7 +80,7 @@ export function ComponentList({
                     </div>
                     <Badge 
                       variant="secondary" 
-                      className="text-xs font-mono flex-shrink-0"
+                      className="text-[10px] font-mono flex-shrink-0 h-5 px-1.5"
                     >
                       {comp.confidence}%
                     </Badge>
@@ -125,12 +125,12 @@ export function ComponentList({
                       {(comp.voltage || comp.rating) && (
                         <div className="flex gap-1 mt-2">
                           {comp.voltage && (
-                            <Badge variant="outline" className="text-xs font-mono">
+                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
                               {comp.voltage}
                             </Badge>
                           )}
                           {comp.rating && (
-                            <Badge variant="outline" className="text-xs font-mono">
+                            <Badge variant="outline" className="text-[10px] font-mono h-4 px-1.5">
                               {comp.rating}
                             </Badge>
                           )}
@@ -139,7 +139,7 @@ export function ComponentList({
                     </div>
                     <Badge 
                       variant="outline" 
-                      className="text-xs font-mono flex-shrink-0 bg-accent/10 text-accent border-accent/20"
+                      className="text-[10px] font-mono flex-shrink-0 h-5 px-1.5 bg-accent/10 text-accent border-accent/20"
                     >
                       {comp.confidence}%
                     </Badge>
