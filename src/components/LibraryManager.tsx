@@ -328,6 +328,7 @@ export function LibraryManager({
             createdAt: Date.now(),
             lastModified: Date.now(),
             isDefault: false,
+            componentCount: library.annotations?.length || 0,
           }
 
           if (importedHistory && importedHistory.length > 0 && onVersionHistoryUpdate) {
@@ -347,6 +348,7 @@ export function LibraryManager({
         importedLibrary.createdAt = Date.now()
         importedLibrary.lastModified = Date.now()
         importedLibrary.isDefault = false
+        importedLibrary.componentCount = importedLibrary.annotations?.length || 0
 
         if (onLibraryImport) {
           onLibraryImport(importedLibrary)
