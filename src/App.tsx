@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import type { Component, Schematic, CatalogEntry, TrainingAnnotation } from '@/lib/types'
 import { analyzeSchematic, identifyElectricalPaths } from '@/lib/analysis'
@@ -15,6 +15,8 @@ import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
+import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { 
   UploadSimple, 
@@ -25,13 +27,15 @@ import {
   Cpu,
   Question,
   Sparkle,
-  GraduationCap
+  GraduationCap,
+  Sliders
 } from '@phosphor-icons/react'
 
 function App() {
   const [schematics, setSchematics] = useKV<Schematic[]>('schematics', [])
   const [catalog, setCatalog] = useKV<CatalogEntry[]>('component-catalog', [])
   const [trainingAnnotations, setTrainingAnnotations] = useKV<TrainingAnnotation[]>('training-annotations', [])
+  const [confidenceThreshold, setConfidenceThreshold] = useKV<number>('confidence-threshold', 97)
   const [currentSchematic, setCurrentSchematic] = useState<Schematic | null>(null)
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null)
   const [highlightedPath, setHighlightedPath] = useState<string[] | null>(null)
@@ -41,6 +45,14 @@ function App() {
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [trainingMode, setTrainingMode] = useState(false)
+
+  const filteredComponents = useMemo(() => {
+    if (!currentSchematic) return []
+    return currentSchematic.components.filter(comp => {
+      if (comp.metadata?.userAnnotated === 'true') return true
+      return comp.confidence >= (confidenceThreshold || 97)
+    })
+  }, [currentSchematic, confidenceThreshold])
 
   useEffect(() => {
     if (schematics && schematics.length > 0 && !currentSchematic) {
@@ -80,7 +92,8 @@ function App() {
       setAnalysisProgress(30)
       const components = await analyzeSchematic(
         currentSchematic.imageData,
-        trainingAnnotations && trainingAnnotations.length > 0 ? trainingAnnotations : undefined
+        trainingAnnotations && trainingAnnotations.length > 0 ? trainingAnnotations : undefined,
+        confidenceThreshold || 97
       )
       
       setAnalysisProgress(70)
@@ -194,7 +207,7 @@ function App() {
     }
   }
 
-  const selectedComponentData = currentSchematic?.components.find(
+  const selectedComponentData = filteredComponents.find(
     c => c.id === selectedComponent
   )
 
@@ -214,45 +227,69 @@ function App() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setHelpDialogOpen(true)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Question size={20} weight="bold" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleLoadDemo}
-              >
-                <Sparkle size={18} className="mr-2" weight="fill" />
-                Load Example
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setUploadDialogOpen(true)}
-              >
-                <UploadSimple size={18} className="mr-2" />
-                Upload
-              </Button>
-              <Button
-                onClick={handleAnalyze}
-                disabled={!currentSchematic || analyzing}
-              >
-                <Lightning size={18} className="mr-2" weight="fill" />
-                {analyzing ? 'Analyseencours...' : 'Analyser'}
-              </Button>
-              {trainingAnnotations && trainingAnnotations.length > 0 && (
+            <div className="flex items-center gap-3">
+              {currentSchematic && currentSchematic.components.length > 0 && (
+                <Card className="px-4 py-2 flex items-center gap-3">
+                  <Sliders size={18} className="text-muted-foreground" />
+                  <div className="flex flex-col gap-1 min-w-[140px]">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-xs font-medium">Seuil</Label>
+                      <span className="text-xs font-mono text-muted-foreground">{confidenceThreshold}%</span>
+                    </div>
+                    <Slider
+                      value={[confidenceThreshold || 97]}
+                      onValueChange={(value) => setConfidenceThreshold(value[0])}
+                      min={80}
+                      max={99}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="text-xs text-muted-foreground border-l pl-3">
+                    {filteredComponents.length}/{currentSchematic.components.length}
+                  </div>
+                </Card>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setHelpDialogOpen(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Question size={20} weight="bold" />
+                </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setTrainingMode(true)}
+                  onClick={handleLoadDemo}
                 >
-                  <GraduationCap size={18} className="mr-2" weight="duotone" />
-                  Entraîner ({trainingAnnotations.length})
+                  <Sparkle size={18} className="mr-2" weight="fill" />
+                  Load Example
                 </Button>
-              )}
+                <Button
+                  variant="outline"
+                  onClick={() => setUploadDialogOpen(true)}
+                >
+                  <UploadSimple size={18} className="mr-2" />
+                  Upload
+                </Button>
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={!currentSchematic || analyzing}
+                >
+                  <Lightning size={18} className="mr-2" weight="fill" />
+                  {analyzing ? 'Analyseencours...' : 'Analyser'}
+                </Button>
+                {trainingAnnotations && trainingAnnotations.length > 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setTrainingMode(true)}
+                  >
+                    <GraduationCap size={18} className="mr-2" weight="duotone" />
+                    Entraîner ({trainingAnnotations.length})
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -314,7 +351,7 @@ function App() {
                 <Card className="overflow-hidden">
                   <DiagramViewer
                     imageData={currentSchematic.imageData}
-                    components={currentSchematic.components}
+                    components={filteredComponents}
                     selectedComponent={selectedComponent}
                     highlightedPath={highlightedPath}
                     onComponentSelect={(id) => {
@@ -325,9 +362,9 @@ function App() {
                 </Card>
 
                 <div className="flex flex-col gap-4">
-                  {currentSchematic.components.length > 0 && (
+                  {filteredComponents.length > 0 && (
                     <DetectionStats 
-                      components={currentSchematic.components} 
+                      components={filteredComponents} 
                       isAnalyzing={analyzing}
                     />
                   )}
@@ -347,7 +384,7 @@ function App() {
                       )}
                     </div>
                     <ComponentList
-                      components={currentSchematic.components}
+                      components={filteredComponents}
                       selectedComponent={selectedComponent}
                       onComponentSelect={setSelectedComponent}
                     />

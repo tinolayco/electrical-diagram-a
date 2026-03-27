@@ -1,9 +1,13 @@
 import type { Component, ComponentType, TrainingAnnotation, BoundingBox } from './types'
 import { detectComponentsInImage } from './image-detection'
 
-export async function analyzeSchematic(imageData: string, trainingAnnotations?: TrainingAnnotation[]): Promise<Component[]> {
+export async function analyzeSchematic(
+  imageData: string, 
+  trainingAnnotations?: TrainingAnnotation[], 
+  confidenceThreshold: number = 97
+): Promise<Component[]> {
   const imageDetectedComponents = trainingAnnotations 
-    ? await convertAnnotationsToComponents(trainingAnnotations, imageData)
+    ? await convertAnnotationsToComponents(trainingAnnotations, imageData, confidenceThreshold)
     : await detectComponentsInImage(imageData)
   
   if (imageDetectedComponents.length === 0) {
@@ -192,7 +196,11 @@ export function getComponentLabel(type: ComponentType): string {
   return labels[type] || labels.unknown
 }
 
-async function convertAnnotationsToComponents(annotations: TrainingAnnotation[], imageData: string): Promise<Component[]> {
+async function convertAnnotationsToComponents(
+  annotations: TrainingAnnotation[], 
+  imageData: string,
+  confidenceThreshold: number = 97
+): Promise<Component[]> {
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image()
     image.onload = () => resolve(image)
@@ -247,7 +255,8 @@ async function convertAnnotationsToComponents(annotations: TrainingAnnotation[],
       bbox,
       annotation.correctType,
       imageWidth,
-      imageHeight
+      imageHeight,
+      confidenceThreshold
     )
     
     allComponents.push(...similarComponents)
@@ -262,12 +271,13 @@ async function findSimilarComponents(
   originalBox: { x: number; y: number; width: number; height: number },
   componentType: ComponentType,
   imageWidth: number,
-  imageHeight: number
+  imageHeight: number,
+  confidenceThreshold: number = 97
 ): Promise<Component[]> {
   const similarComponents: Component[] = []
   const templateWidth = template.width
   const templateHeight = template.height
-  const threshold = 0.97
+  const threshold = confidenceThreshold / 100
   
   const stepSize = Math.max(15, Math.floor(templateWidth / 3))
   
