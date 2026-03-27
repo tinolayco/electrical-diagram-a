@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import type { Component, Schematic, CatalogEntry } from '@/lib/types'
 import { analyzeSchematic, identifyElectricalPaths } from '@/lib/analysis'
+import { loadDemoSchematic } from '@/lib/demo-data'
 import { DiagramViewer } from '@/components/DiagramViewer'
 import { ComponentList } from '@/components/ComponentList'
 import { ComponentEditor } from '@/components/ComponentEditor'
@@ -20,7 +21,8 @@ import {
   GitBranch,
   PencilSimple,
   Cpu,
-  Question
+  Question,
+  Sparkle
 } from '@phosphor-icons/react'
 
 function App() {
@@ -148,6 +150,25 @@ function App() {
     }
   }
 
+  const handleLoadDemo = async () => {
+    try {
+      toast.info('Chargement de l\'exemple...')
+      const demoSchematic = await loadDemoSchematic()
+      
+      setSchematics(current => {
+        const filtered = (current || []).filter(s => s.id !== 'demo-schematic-example')
+        return [...filtered, demoSchematic]
+      })
+      setCurrentSchematic(demoSchematic)
+      updateCatalog(demoSchematic.components)
+      
+      toast.success('Exemple chargé avec succès! Explorez les onglets pour voir l\'analyse complète.')
+    } catch (error) {
+      console.error('Failed to load demo:', error)
+      toast.error('Échec du chargement de l\'exemple')
+    }
+  }
+
   const selectedComponentData = currentSchematic?.components.find(
     c => c.id === selectedComponent
   )
@@ -210,10 +231,19 @@ function App() {
             <p className="text-muted-foreground mb-6">
               Upload a single-line electrical diagram to get started
             </p>
-            <Button onClick={() => setUploadDialogOpen(true)}>
-              <UploadSimple size={18} className="mr-2" />
-              Upload Schematic
-            </Button>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => setUploadDialogOpen(true)}>
+                <UploadSimple size={18} className="mr-2" />
+                Upload Schematic
+              </Button>
+              <Button variant="outline" onClick={handleLoadDemo}>
+                <Sparkle size={18} className="mr-2" weight="fill" />
+                Load Example
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              Try the example to see how the AI analysis works
+            </p>
           </Card>
         ) : (
           <Tabs defaultValue="analysis" className="w-full">

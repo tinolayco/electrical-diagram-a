@@ -16,7 +16,8 @@ import {
   PencilSimple,
   Cpu,
   Eye,
-  CheckCircle
+  CheckCircle,
+  Sparkle
 } from '@phosphor-icons/react'
 
 interface HelpDialogProps {
@@ -40,6 +41,22 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
 
         <ScrollArea className="h-[calc(85vh-120px)] pr-4">
           <div className="space-y-6">
+            <section className="bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/30 rounded-lg p-4">
+              <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <Sparkle size={18} weight="fill" className="text-accent" />
+                Essayez l'exemple
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Nouveau sur l'application ? Cliquez sur <Badge variant="outline" className="mx-1">Load Example</Badge> sur l'écran d'accueil
+                pour charger un schéma industriel pré-analysé avec tous les composants et chemins électriques détectés.
+              </p>
+              <p className="text-xs text-accent-foreground">
+                L'exemple montre un poste électrique avec transformateur, bus bars, disjoncteurs et moteurs.
+              </p>
+            </section>
+
+            <Separator />
+
             <section>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">

@@ -12,35 +12,42 @@ This application requires multiple interconnected features: image upload and dis
 
 ## Essential Features
 
-### Feature 1: Schematic Upload & Display
+### Feature 1: Demo Example Loader
+- **Functionality**: Load a pre-analyzed electrical schematic from the web with complete component recognition and path analysis
+- **Purpose**: Allow users to immediately see the application's capabilities without uploading their own schematic
+- **Trigger**: User clicks "Load Example" button on the welcome screen
+- **Progression**: Click "Load Example" → Fetch diagram from web → Display pre-analyzed industrial substation schematic → Show 10 identified components → Display 4 electrical paths
+- **Success Criteria**: Example loads quickly, demonstrates all key features (component list, catalog, paths), provides realistic industrial data
+
+### Feature 2: Schematic Upload & Display
 - **Functionality**: Upload and display single-line electrical diagrams (PNG, JPG, SVG)
 - **Purpose**: Provides the foundation for all analysis operations
 - **Trigger**: User clicks upload button or drags file to drop zone
 - **Progression**: Click upload → Select file → Preview thumbnail → Confirm → Display full diagram with zoom/pan controls
 - **Success Criteria**: Image displays clearly at various zoom levels, supports common electrical diagram formats
 
-### Feature 2: AI-Powered Component Recognition
+### Feature 3: AI-Powered Component Recognition
 - **Functionality**: Analyze uploaded diagram using Spark LLM to identify electrical components (breakers, transformers, bus bars, switches, etc.)
 - **Purpose**: Automate the tedious process of manually cataloging components
 - **Trigger**: User clicks "Analyze Diagram" button after upload
 - **Progression**: Click analyze → Processing indicator → AI identifies components → Overlay bounding boxes on diagram → Display component list with confidence scores
 - **Success Criteria**: Correctly identifies common electrical symbols, allows user corrections to improve future recognition
 
-### Feature 3: Bus Bar & Path Tracing
+### Feature 4: Bus Bar & Path Tracing
 - **Functionality**: Trace electrical connections and identify bus bar networks
 - **Purpose**: Understand electrical flow and power distribution paths
 - **Trigger**: User clicks on a component or bus bar
 - **Progression**: Click component → Highlight connected electrical path → Show voltage level → Display connected components in path view
 - **Success Criteria**: Visual highlighting of connected elements, clear indication of electrical flow direction
 
-### Feature 4: Evolving Component Catalog
+### Feature 5: Evolving Component Catalog
 - **Functionality**: Maintain a persistent catalog of recognized components that learns from user corrections
 - **Purpose**: Build institutional knowledge and improve recognition accuracy over time
 - **Trigger**: Automatic on component recognition, manual on user edits
 - **Progression**: Component recognized → Stored in catalog with metadata → User corrects type → Catalog updates → Future recognition improved
 - **Success Criteria**: Catalog grows with use, user can browse/edit catalog, improved accuracy on repeat component types
 
-### Feature 5: Component Detail Editor
+### Feature 6: Component Detail Editor
 - **Functionality**: View and edit detailed properties of recognized components
 - **Purpose**: Add technical specifications beyond visual recognition
 - **Trigger**: Click on any recognized component
