@@ -119,7 +119,7 @@ function App() {
   }, [schematics, currentSchematic])
 
   const canTrain = activeLibrary && !activeLibrary.isDefault
-  const canAnalyze = activeLibrary && (activeLibrary.isDefault || (activeLibrary.componentCount > 0))
+  const canAnalyze = currentSchematic && activeLibrary && (activeLibrary.isDefault || (activeLibrary.componentCount > 0))
 
   const handleUpload = async (imageData: string, fileName: string) => {
     const newSchematic: Schematic = {
@@ -529,6 +529,13 @@ function App() {
                 size="sm"
                 onClick={handleAnalyze}
                 disabled={!currentSchematic || analyzing || !canAnalyze}
+                title={
+                  !currentSchematic 
+                    ? 'Téléversez un schéma pour analyser' 
+                    : !canAnalyze 
+                      ? 'La bibliothèque doit contenir des annotations pour analyser'
+                      : 'Analyser le schéma avec la bibliothèque active'
+                }
               >
                 <Lightning size={16} className="mr-1.5" weight="fill" />
                 {analyzing ? 'Analyse...' : 'Analyser'}
