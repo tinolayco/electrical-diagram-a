@@ -73,6 +73,7 @@ function App() {
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const [resetType, setResetType] = useState<'all' | 'library' | 'schematics' | null>(null)
   const [opencvReady, setOpencvReady] = useState(false)
+  const [globalDragActive, setGlobalDragActive] = useState(false)
 
   const activeLibrary = libraries?.find(lib => lib.id === activeLibraryId) || null
 
@@ -116,6 +117,64 @@ function App() {
 
     document.addEventListener('wheel', handleGlobalWheel, { passive: false })
     return () => document.removeEventListener('wheel', handleGlobalWheel)
+  }, [])
+
+  useEffect(() => {
+    const handleGlobalDragOver = (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.dataTransfer?.types.includes('Files')) {
+        setGlobalDragActive(true)
+      }
+    }
+
+    const handleGlobalDragLeave = (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.target === document.body || e.target === document.documentElement) {
+        setGlobalDragActive(false)
+      }
+    }
+
+    const handleGlobalDrop = (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setGlobalDragActive(false)
+
+      const files = e.dataTransfer?.files
+      if (files && files.length > 0) {
+        const file = files[0]
+        
+        if (!file.type.startsWith('image/')) {
+          toast.error('Veuillez déposer un fichier image (PNG, JPG, SVG)')
+          return
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error('La taille du fichier doit être inférieure à 10 Mo')
+          return
+        }
+
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          const result = event.target?.result
+          if (typeof result === 'string') {
+            handleUpload(result, file.name)
+          }
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    document.addEventListener('dragover', handleGlobalDragOver)
+    document.addEventListener('dragleave', handleGlobalDragLeave)
+    document.addEventListener('drop', handleGlobalDrop)
+
+    return () => {
+      document.removeEventListener('dragover', handleGlobalDragOver)
+      document.removeEventListener('dragleave', handleGlobalDragLeave)
+      document.removeEventListener('drop', handleGlobalDrop)
+    }
   }, [])
 
   const filteredComponents = useMemo(() => {
@@ -518,7 +577,19 @@ function App() {
   )
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative">
+      {globalDragActive && (
+        <div className="fixed inset-0 z-50 bg-primary/10 backdrop-blur-sm border-4 border-dashed border-primary flex items-center justify-center pointer-events-none">
+          <div className="bg-card rounded-lg shadow-2xl p-8 text-center border-2 border-primary">
+            <UploadSimple size={64} className="mx-auto mb-4 text-primary" weight="duotone" />
+            <p className="text-xl font-semibold mb-2">Déposez votre schéma ici</p>
+            <p className="text-sm text-muted-foreground">
+              Formats supportés: PNG, JPG, SVG (max 10 Mo)
+            </p>
+          </div>
+        </div>
+      )}
+      
       <header className="border-b border-border bg-card flex-shrink-0">
         <div className="px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between gap-4">
