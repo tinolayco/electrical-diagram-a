@@ -200,6 +200,13 @@ function App() {
               </Button>
               <Button
                 variant="outline"
+                onClick={handleLoadDemo}
+              >
+                <Sparkle size={18} className="mr-2" weight="fill" />
+                Load Example
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setUploadDialogOpen(true)}
               >
                 <UploadSimple size={18} className="mr-2" />
