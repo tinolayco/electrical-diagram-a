@@ -163,7 +163,7 @@ export function DiagramViewer({
           className="relative"
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: 'center center',
+            transformOrigin: '0 0',
             transition: isDragging ? 'none' : 'transform 0.1s ease-out',
             width: 'fit-content',
             margin: 'auto',
