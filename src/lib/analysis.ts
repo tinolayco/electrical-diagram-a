@@ -1,19 +1,29 @@
 import type { Component, ComponentType } from './types'
+import { detectComponentsInImage } from './image-detection'
 
 export async function analyzeSchematic(imageData: string): Promise<Component[]> {
+  const imageDetectedComponents = await detectComponentsInImage(imageData)
+  
   const prompt = spark.llmPrompt`You are an expert electrical engineer analyzing a single-line electrical diagram.
 
 Analyze this electrical schematic image and identify all electrical components visible in the diagram.
 
-For each component you identify, determine:
-1. Component type (breaker, transformer, bus-bar, switch, disconnect, fuse, relay, meter, capacitor, inductor, generator, motor, load, or unknown)
-2. Approximate position and size in the image (as percentages of image dimensions)
-3. Confidence level (0-100)
-4. Any visible labels or ratings
+We have already performed computer vision analysis and detected these components:
+${JSON.stringify(imageDetectedComponents.map(c => ({
+  type: c.type,
+  name: c.name,
+  position: c.boundingBox,
+  confidence: c.confidence
+})))}
 
-Return a JSON object with a single property "components" containing an array of component objects.
+Your task is to:
+1. Verify and refine the detected components
+2. Add any missing components that computer vision missed
+3. Extract text labels (component names like CB-1, M1, T1, etc.)
+4. Identify voltage and current ratings from visible text
+5. Identify manufacturer information if visible
 
-Each component object should have this structure:
+For each component, return:
 {
   "type": "breaker",
   "name": "CB-1",
@@ -25,10 +35,13 @@ Each component object should have this structure:
   },
   "confidence": 85,
   "voltage": "480V",
-  "rating": "100A"
+  "rating": "100A",
+  "manufacturer": "Schneider Electric"
 }
 
 The boundingBox coordinates should be percentages (0-100) of the image width and height.
+
+Return a JSON object with a single property "components" containing an array of all component objects.
 
 Image data: ${imageData.substring(0, 200)}...`
 
@@ -37,10 +50,10 @@ Image data: ${imageData.substring(0, 200)}...`
     const parsed = JSON.parse(response)
     
     if (!parsed.components || !Array.isArray(parsed.components)) {
-      return []
+      return imageDetectedComponents
     }
     
-    return parsed.components.map((comp: any, index: number) => ({
+    const refinedComponents = parsed.components.map((comp: any, index: number) => ({
       id: `comp-${Date.now()}-${index}`,
       type: (comp.type || 'unknown') as ComponentType,
       name: comp.name || `Component ${index + 1}`,
@@ -50,11 +63,13 @@ Image data: ${imageData.substring(0, 200)}...`
       rating: comp.rating,
       manufacturer: comp.manufacturer,
       connections: [],
-      metadata: {}
+      metadata: comp.metadata || {}
     }))
+    
+    return refinedComponents.length > 0 ? refinedComponents : imageDetectedComponents
   } catch (error) {
     console.error('Failed to analyze schematic:', error)
-    return []
+    return imageDetectedComponents
   }
 }
 

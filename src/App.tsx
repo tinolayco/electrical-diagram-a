@@ -8,6 +8,7 @@ import { ComponentList } from '@/components/ComponentList'
 import { ComponentEditor } from '@/components/ComponentEditor'
 import { UploadDialog } from '@/components/UploadDialog'
 import { HelpDialog } from '@/components/HelpDialog'
+import { DetectionStats } from '@/components/DetectionStats'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -63,7 +64,7 @@ function App() {
 
     setAnalyzing(true)
     setAnalysisProgress(0)
-    toast.info('Analyzing schematic...')
+    toast.info('Starting hybrid detection: Computer Vision + AI...', { duration: 3000 })
 
     try {
       setAnalysisProgress(30)
@@ -88,7 +89,7 @@ function App() {
       updateCatalog(components)
       
       setAnalysisProgress(100)
-      toast.success(`Analysis complete! Found ${components.length} components and ${paths.length} electrical paths`)
+      toast.success(`Detection complete! Found ${components.length} components (${components.filter(c => c.confidence >= 85).length} high confidence) and ${paths.length} electrical paths`, { duration: 5000 })
     } catch (error) {
       console.error('Analysis failed:', error)
       toast.error('Analysis failed. Please try again.')
@@ -285,6 +286,13 @@ function App() {
                 </Card>
 
                 <div className="flex flex-col gap-4">
+                  {currentSchematic.components.length > 0 && (
+                    <DetectionStats 
+                      components={currentSchematic.components} 
+                      isAnalyzing={analyzing}
+                    />
+                  )}
+                  
                   <Card className="flex-1 flex flex-col overflow-hidden">
                     <div className="p-4 border-b border-border flex items-center justify-between">
                       <h3 className="font-semibold">Components</h3>

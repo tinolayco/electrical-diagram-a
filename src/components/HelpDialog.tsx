@@ -102,17 +102,31 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                   Une fois votre schéma téléchargé, cliquez sur <Badge variant="default" className="mx-1">Analyze</Badge>
                   pour lancer l'analyse automatique par intelligence artificielle.
                 </p>
-                <p className="font-medium text-foreground mt-3 mb-2">L'IA va :</p>
+                <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-md p-3 my-3">
+                  <p className="font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Cpu size={16} weight="duotone" className="text-blue-500" />
+                    Détection hybride avancée
+                  </p>
+                  <p className="text-xs text-blue-950/80 dark:text-blue-100/80">
+                    L'application utilise une approche en deux étapes pour une précision maximale :
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 ml-2 mt-2 text-xs">
+                    <li><strong>Vision par ordinateur :</strong> Détection de formes, couleurs et patterns géométriques (rectangles, cercles, lignes épaisses)</li>
+                    <li><strong>Intelligence artificielle GPT-4o :</strong> Analyse contextuelle, lecture de texte et affinement des résultats</li>
+                  </ul>
+                </div>
+                <p className="font-medium text-foreground mt-3 mb-2">Le système détecte automatiquement :</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>Identifier tous les composants électriques (disjoncteurs, transformateurs, etc.)</li>
-                  <li>Détecter les bus bars et barres omnibus</li>
-                  <li>Tracer les chemins électriques et connexions</li>
-                  <li>Analyser les niveaux de tension</li>
-                  <li>Générer un catalogue automatique des composants</li>
+                  <li><strong>Disjoncteurs (L1BT, CB) :</strong> Rectangles noirs avec intérieur blanc</li>
+                  <li><strong>Bus bars :</strong> Lignes horizontales épaisses (souvent rouges)</li>
+                  <li><strong>Transformateurs :</strong> Cercles concentriques avec symbole T</li>
+                  <li><strong>Moteurs :</strong> Rectangles bleus avec symbole M circulaire</li>
+                  <li><strong>Compteurs :</strong> Rectangles jaunes/dorés</li>
+                  <li><strong>Disconnects :</strong> Petits rectangles en amont</li>
                 </ul>
                 <div className="bg-primary/5 border border-primary/20 rounded-md p-3 mt-2">
                   <p className="text-foreground text-xs">
-                    <strong>Note :</strong> L'analyse peut prendre quelques secondes selon la complexité du schéma.
+                    <strong>Note :</strong> L'analyse peut prendre 10-20 secondes selon la complexité du schéma. Une barre de progression s'affiche pendant le traitement.
                   </p>
                 </div>
               </div>

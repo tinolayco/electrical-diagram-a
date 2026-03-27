@@ -26,12 +26,27 @@ This application requires multiple interconnected features: image upload and dis
 - **Progression**: Click upload → Select file → Preview thumbnail → Confirm → Display full diagram with zoom/pan controls
 - **Success Criteria**: Image displays clearly at various zoom levels, supports common electrical diagram formats
 
-### Feature 3: AI-Powered Component Recognition
-- **Functionality**: Analyze uploaded diagram using Spark LLM to identify electrical components (breakers, transformers, bus bars, switches, etc.)
-- **Purpose**: Automate the tedious process of manually cataloging components
-- **Trigger**: User clicks "Analyze Diagram" button after upload
-- **Progression**: Click analyze → Processing indicator → AI identifies components → Overlay bounding boxes on diagram → Display component list with confidence scores
-- **Success Criteria**: Correctly identifies common electrical symbols, allows user corrections to improve future recognition
+### Feature 3: Hybrid Component Detection System
+- **Functionality**: Two-stage detection combining computer vision pattern matching with GPT-4o AI analysis
+- **Purpose**: Achieve maximum accuracy by leveraging both geometric detection and contextual AI understanding
+- **Trigger**: User clicks "Analyze" button after upload
+- **Progression**: Click analyze → Stage 1: Computer vision detects shapes (rectangles, circles, lines) and colors → Stage 2: AI refines results, extracts text labels, identifies ratings → Display components with confidence scores → Show detection statistics
+- **Success Criteria**: Detects L1BT breakers, bus bars, transformers, motors, and other standard symbols with >85% confidence; provides detailed statistics on detection quality
+
+**Detection Algorithms**:
+- **Breakers (L1BT, CB)**: Dark rectangular regions with white interior rectangles
+- **Bus Bars**: Thick horizontal lines (6+ pixels), often red/orange colored
+- **Transformers**: Concentric circles with center text markers
+- **Motors**: Blue rectangular regions with circular M symbol
+- **Meters**: Yellow/gold rectangular regions
+- **Disconnects**: Small rectangles in upstream positions (<30% diagram height)
+
+**AI Refinement**:
+- GPT-4o reviews computer vision results
+- Extracts component labels (CB-1, T1, M2, etc.)
+- Identifies voltage ratings and current ratings from text
+- Verifies component types match electrical conventions
+- Adds missing components that CV may have missed
 
 ### Feature 4: Bus Bar & Path Tracing
 - **Functionality**: Trace electrical connections and identify bus bar networks
