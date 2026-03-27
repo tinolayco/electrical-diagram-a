@@ -144,8 +144,8 @@ export function DiagramViewer({
                   const width = (comp.boundingBox.width / 100) * imageDimensions.width
                   const height = (comp.boundingBox.height / 100) * imageDimensions.height
 
-                  const labelWidth = 120
-                  const labelHeight = 28
+                  const labelWidth = 90
+                  const labelHeight = 22
 
                   return (
                     <g key={comp.id}>
@@ -183,19 +183,19 @@ export function DiagramViewer({
                         textAnchor="middle"
                         className="font-mono font-semibold pointer-events-none"
                         fill="white"
-                        style={{ fontSize: `${Math.max(14, imageDimensions.width / 60)}px` }}
+                        style={{ fontSize: `${Math.max(11, imageDimensions.width / 80)}px` }}
                       >
                         {comp.name}
                       </text>
                       {comp.confidence && (
                         <text
                           x={x + width / 2}
-                          y={y + height + 20}
+                          y={y + height + 16}
                           textAnchor="middle"
                           className="font-mono pointer-events-none"
                           fill={color}
                           style={{ 
-                            fontSize: `${Math.max(12, imageDimensions.width / 80)}px`,
+                            fontSize: `${Math.max(10, imageDimensions.width / 100)}px`,
                             fontWeight: '600'
                           }}
                         >

@@ -267,9 +267,9 @@ async function findSimilarComponents(
   const similarComponents: Component[] = []
   const templateWidth = template.width
   const templateHeight = template.height
-  const threshold = 0.75
+  const threshold = 0.92
   
-  const stepSize = Math.max(5, Math.floor(templateWidth / 4))
+  const stepSize = Math.max(10, Math.floor(templateWidth / 2))
   
   for (let y = 0; y < imageHeight - templateHeight; y += stepSize) {
     for (let x = 0; x < imageWidth - templateWidth; x += stepSize) {
@@ -295,21 +295,29 @@ async function findSimilarComponents(
           height: (templateHeight / imageHeight) * 100
         }
         
-        const confidence = Math.round(similarity * 100)
-        
-        similarComponents.push({
-          id: `comp-similar-${Date.now()}-${Math.random()}`,
-          type: componentType,
-          name: `${componentType.toUpperCase()}-auto`,
-          boundingBox: percentBox,
-          confidence,
-          connections: [],
-          metadata: { 
-            source: 'template-matching',
-            similarity: similarity.toFixed(3),
-            templateBased: 'true'
-          }
+        const hasOverlap = similarComponents.some(existing => {
+          const xOverlap = Math.abs(existing.boundingBox.x - percentBox.x) < 3
+          const yOverlap = Math.abs(existing.boundingBox.y - percentBox.y) < 3
+          return xOverlap && yOverlap
         })
+        
+        if (!hasOverlap && similarComponents.length < 50) {
+          const confidence = Math.round(similarity * 100)
+          
+          similarComponents.push({
+            id: `comp-similar-${Date.now()}-${Math.random()}`,
+            type: componentType,
+            name: `${componentType.toUpperCase()}-auto`,
+            boundingBox: percentBox,
+            confidence,
+            connections: [],
+            metadata: { 
+              source: 'template-matching',
+              similarity: similarity.toFixed(3),
+              templateBased: 'true'
+            }
+          })
+        }
       }
     }
   }
@@ -369,8 +377,8 @@ function deduplicateComponents(components: Component[]): Component[] {
   
   for (const comp of components) {
     const isDuplicate = deduplicated.some(existing => {
-      const xOverlap = Math.abs(existing.boundingBox.x - comp.boundingBox.x) < 2
-      const yOverlap = Math.abs(existing.boundingBox.y - comp.boundingBox.y) < 2
+      const xOverlap = Math.abs(existing.boundingBox.x - comp.boundingBox.x) < 1.5
+      const yOverlap = Math.abs(existing.boundingBox.y - comp.boundingBox.y) < 1.5
       const sameType = existing.type === comp.type
       
       return xOverlap && yOverlap && sameType
@@ -381,9 +389,15 @@ function deduplicateComponents(components: Component[]): Component[] {
     }
   }
   
+  const sorted = deduplicated.sort((a, b) => {
+    if (a.metadata?.userAnnotated === 'true' && b.metadata?.userAnnotated !== 'true') return -1
+    if (a.metadata?.userAnnotated !== 'true' && b.metadata?.userAnnotated === 'true') return 1
+    return (b.confidence || 0) - (a.confidence || 0)
+  })
+  
   const typeCounters: Record<string, number> = {}
   
-  return deduplicated.map(comp => {
+  return sorted.map(comp => {
     if (comp.metadata?.userAnnotated === 'true') {
       return comp
     }
