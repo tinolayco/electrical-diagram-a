@@ -115,9 +115,21 @@ function App() {
       updateCatalog(components)
       
       setAnalysisProgress(100)
+      
       const userAnnotated = components.filter(c => c.metadata?.userAnnotated === 'true').length
       const autoDetected = components.length - userAnnotated
-      toast.success(`Détection terminée! ${components.length} composants trouvés (${userAnnotated} annotés + ${autoDetected} similaires détectés) et ${paths.length} chemins électriques`, { duration: 5000 })
+      const filtered = components.filter(comp => {
+        if (comp.metadata?.userAnnotated === 'true') return true
+        return comp.confidence >= (confidenceThreshold || 97)
+      })
+      const belowThreshold = components.length - filtered.length
+      
+      toast.success(
+        `Détection terminée! ${components.length} composants trouvés (${userAnnotated} annotés + ${autoDetected} similaires détectés)\n` +
+        `Affichés avec seuil ${confidenceThreshold}%: ${filtered.length} composants (${belowThreshold} masqués)\n` +
+        `${paths.length} chemins électriques identifiés`,
+        { duration: 7000 }
+      )
     } catch (error) {
       console.error('Analysis failed:', error)
       toast.error('Échec de l\'analyse. Veuillez réessayer.')
