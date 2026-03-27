@@ -58,11 +58,11 @@ export function ComponentEditor({ component, open, onClose, onSave }: ComponentE
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Edit Component</DialogTitle>
+          <DialogTitle>Modifier le composant</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Component Name</Label>
+            <Label htmlFor="name">Nom du composant</Label>
             <Input
               id="name"
               value={editedComponent.name}
@@ -72,7 +72,7 @@ export function ComponentEditor({ component, open, onClose, onSave }: ComponentE
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="type">Component Type</Label>
+            <Label htmlFor="type">Type de composant</Label>
             <Select
               value={editedComponent.type}
               onValueChange={(value) =>
@@ -93,7 +93,7 @@ export function ComponentEditor({ component, open, onClose, onSave }: ComponentE
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="voltage">Voltage</Label>
+              <Label htmlFor="voltage">Tension</Label>
               <Input
                 id="voltage"
                 value={editedComponent.voltage || ''}
@@ -104,7 +104,7 @@ export function ComponentEditor({ component, open, onClose, onSave }: ComponentE
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="rating">Rating</Label>
+              <Label htmlFor="rating">Calibre</Label>
               <Input
                 id="rating"
                 value={editedComponent.rating || ''}
@@ -116,22 +116,22 @@ export function ComponentEditor({ component, open, onClose, onSave }: ComponentE
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="manufacturer">Manufacturer</Label>
+            <Label htmlFor="manufacturer">Fabricant</Label>
             <Input
               id="manufacturer"
               value={editedComponent.manufacturer || ''}
               onChange={(e) =>
                 setEditedComponent({ ...editedComponent, manufacturer: e.target.value })
               }
-              placeholder="e.g. Schneider Electric"
+              placeholder="ex. Schneider Electric"
             />
           </div>
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Annuler
           </Button>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button onClick={handleSave}>Sauvegarder</Button>
         </div>
       </DialogContent>
     </Dialog>

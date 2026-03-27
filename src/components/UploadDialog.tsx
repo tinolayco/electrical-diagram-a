@@ -76,7 +76,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Upload Electrical Schematic</DialogTitle>
+          <DialogTitle>Télécharger un schéma électrique</DialogTitle>
         </DialogHeader>
         <div
           className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
@@ -91,10 +91,10 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
         >
           <UploadSimple size={48} className="mx-auto mb-4 text-muted-foreground" weight="duotone" />
           <p className="text-sm font-medium mb-1">
-            Drop your schematic here or click to browse
+            Déposez votre schéma ici ou cliquez pour parcourir
           </p>
           <p className="text-xs text-muted-foreground">
-            Supports PNG, JPG, SVG (max 10MB)
+            Supporte PNG, JPG, SVG (max 10 Mo)
           </p>
           <input
             ref={fileInputRef}
@@ -105,11 +105,11 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
           />
         </div>
         <div className="bg-muted/50 rounded-lg p-4 text-xs text-muted-foreground">
-          <p className="font-medium mb-1">Tips for best results:</p>
+          <p className="font-medium mb-1">Conseils pour de meilleurs résultats :</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>Use high-resolution images (minimum 1000px width)</li>
-            <li>Ensure component labels are clearly visible</li>
-            <li>Single-line diagrams work best</li>
+            <li>Utilisez des images haute résolution (minimum 1000px de largeur)</li>
+            <li>Assurez-vous que les étiquettes des composants sont clairement visibles</li>
+            <li>Les schémas unifilaires fonctionnent le mieux</li>
           </ul>
         </div>
       </DialogContent>

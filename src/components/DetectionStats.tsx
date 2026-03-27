@@ -38,7 +38,7 @@ export function DetectionStats({ components, isAnalyzing }: DetectionStatsProps)
     <Card className="p-3">
       <div className="flex items-center gap-1.5 mb-2">
         <Target size={16} className="text-primary" weight="duotone" />
-        <h3 className="font-semibold text-sm">Detection Statistics</h3>
+        <h3 className="font-semibold text-sm">Statistiques de détection</h3>
       </div>
       
       <div className="space-y-2">
@@ -48,7 +48,7 @@ export function DetectionStats({ components, isAnalyzing }: DetectionStatsProps)
             <div className="font-mono text-lg font-bold">{components.length}</div>
           </div>
           <div className="space-y-0.5">
-            <span className="text-[10px] text-muted-foreground">Avg. Conf.</span>
+            <span className="text-[10px] text-muted-foreground">Conf. moy.</span>
             <div className="font-mono text-lg font-bold">{avgConfidence}%</div>
           </div>
         </div>
@@ -60,21 +60,21 @@ export function DetectionStats({ components, isAnalyzing }: DetectionStatsProps)
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5">
               <CheckCircle size={12} className="text-green-600" weight="fill" />
-              <span className="text-muted-foreground">High</span>
+              <span className="text-muted-foreground">Élevée</span>
             </div>
             <span className="font-mono text-[10px]">{highConfidence}</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5">
               <CheckCircle size={12} className="text-yellow-600" weight="fill" />
-              <span className="text-muted-foreground">Med</span>
+              <span className="text-muted-foreground">Moyenne</span>
             </div>
             <span className="font-mono text-[10px]">{mediumConfidence}</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5">
               <CheckCircle size={12} className="text-orange-600" weight="fill" />
-              <span className="text-muted-foreground">Low</span>
+              <span className="text-muted-foreground">Faible</span>
             </div>
             <span className="font-mono text-[10px]">{lowConfidence}</span>
           </div>
@@ -83,7 +83,7 @@ export function DetectionStats({ components, isAnalyzing }: DetectionStatsProps)
         <Separator />
 
         <div className="space-y-1">
-          <div className="text-[10px] font-medium text-muted-foreground mb-1">By Type</div>
+          <div className="text-[10px] font-medium text-muted-foreground mb-1">Par type</div>
           {Object.entries(componentsByType)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 4)

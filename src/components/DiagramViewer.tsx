@@ -121,7 +121,7 @@ export function DiagramViewer({
   if (!imageData) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg border-2 border-dashed border-border">
-        <p className="text-muted-foreground text-sm">No schematic loaded</p>
+        <p className="text-muted-foreground text-sm">Aucun schéma chargé</p>
       </div>
     )
   }
@@ -281,7 +281,7 @@ export function DiagramViewer({
       {components.length > 0 && (
         <div className="absolute bottom-4 left-4">
           <Badge variant="secondary" className="font-mono text-xs">
-            {components.length} components detected
+            {components.length} composants détectés
           </Badge>
         </div>
       )}

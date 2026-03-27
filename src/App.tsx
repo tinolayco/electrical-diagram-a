@@ -318,10 +318,10 @@ function App() {
               <Cpu size={28} weight="duotone" className="text-primary flex-shrink-0" />
               <div>
                 <h1 className="text-xl font-bold tracking-tight">
-                  Electrical Schematic Analyzer
+                  Analyseur de schémas électriques
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  {opencvReady ? '✓ OpenCV.js activé - Détection avancée' : 'AI-powered component recognition'}
+                  {opencvReady ? '✓ OpenCV.js activé - Détection avancée' : 'Reconnaissance de composants par IA'}
                 </p>
               </div>
             </div>
@@ -369,7 +369,7 @@ function App() {
                 onClick={handleLoadDemo}
               >
                 <Sparkle size={16} className="mr-1.5" weight="fill" />
-                Example
+                Exemple
               </Button>
               <Button
                 variant="outline"
@@ -377,7 +377,7 @@ function App() {
                 onClick={() => setUploadDialogOpen(true)}
               >
                 <UploadSimple size={16} className="mr-1.5" />
-                Upload
+                Télécharger
               </Button>
               <Button
                 size="sm"
@@ -442,15 +442,15 @@ function App() {
               <TabsList>
                 <TabsTrigger value="analysis" className="gap-1.5 text-xs">
                   <Lightning size={14} />
-                  Analysis
+                  Analyse
                 </TabsTrigger>
                 <TabsTrigger value="catalog" className="gap-1.5 text-xs">
                   <Cube size={14} />
-                  Catalog
+                  Catalogue
                 </TabsTrigger>
                 <TabsTrigger value="paths" className="gap-1.5 text-xs">
                   <GitBranch size={14} />
-                  Paths
+                  Chemins
                 </TabsTrigger>
               </TabsList>
 
@@ -503,7 +503,7 @@ function App() {
                   
                   <Card className="flex-1 flex flex-col overflow-hidden min-h-0">
                     <div className="p-3 border-b border-border flex items-center justify-between flex-shrink-0">
-                      <h3 className="font-semibold text-sm">Components</h3>
+                      <h3 className="font-semibold text-sm">Composants</h3>
                       {selectedComponent && (
                         <Button
                           size="sm"
@@ -512,7 +512,7 @@ function App() {
                           className="h-7 text-xs"
                         >
                           <PencilSimple size={14} className="mr-1" />
-                          Edit
+                          Modifier
                         </Button>
                       )}
                     </div>
@@ -528,12 +528,12 @@ function App() {
 
             <TabsContent value="catalog" className="flex-1 min-h-0 m-0">
               <Card className="p-4 h-full overflow-auto">
-                <h3 className="text-base font-semibold mb-3">Component Catalog</h3>
+                <h3 className="text-base font-semibold mb-3">Catalogue de composants</h3>
                 {!catalog || catalog.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Cube size={48} className="mx-auto mb-3" weight="duotone" />
-                    <p className="text-sm">No components in catalog yet</p>
-                    <p className="text-xs mt-1">Analyze schematics to build your catalog</p>
+                    <p className="text-sm">Aucun composant dans le catalogue</p>
+                    <p className="text-xs mt-1">Analysez des schémas pour construire votre catalogue</p>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -542,7 +542,7 @@ function App() {
                         <div className="font-medium text-xs mb-1">{entry.type}</div>
                         <div className="text-xl font-bold text-primary">{entry.count}</div>
                         <div className="text-[10px] text-muted-foreground mt-0.5">
-                          instances detected
+                          instances détectées
                         </div>
                       </Card>
                     ))}
@@ -553,12 +553,12 @@ function App() {
 
             <TabsContent value="paths" className="flex-1 min-h-0 m-0">
               <Card className="p-4 h-full overflow-auto">
-                <h3 className="text-base font-semibold mb-3">Electrical Paths</h3>
+                <h3 className="text-base font-semibold mb-3">Chemins électriques</h3>
                 {currentSchematic.paths.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <GitBranch size={48} className="mx-auto mb-3" weight="duotone" />
-                    <p className="text-sm">No electrical paths identified yet</p>
-                    <p className="text-xs mt-1">Analyze the schematic to identify connections</p>
+                    <p className="text-sm">Aucun chemin électrique identifié</p>
+                    <p className="text-xs mt-1">Analysez le schéma pour identifier les connexions</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -572,7 +572,7 @@ function App() {
                           <div className="flex-1">
                             <div className="font-medium text-sm mb-0.5">{path.description}</div>
                             <div className="text-xs text-muted-foreground">
-                              {path.components.length} components • {path.voltage}
+                              {path.components.length} composants • {path.voltage}
                             </div>
                           </div>
                           <GitBranch size={18} className="text-muted-foreground flex-shrink-0" />

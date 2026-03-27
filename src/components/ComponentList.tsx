@@ -20,8 +20,8 @@ export function ComponentList({
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
         <Cube size={48} className="text-muted-foreground mb-3" weight="duotone" />
-        <p className="text-sm text-muted-foreground">No components detected</p>
-        <p className="text-xs text-muted-foreground mt-1">Upload and analyze a schematic</p>
+        <p className="text-sm text-muted-foreground">Aucun composant détecté</p>
+        <p className="text-xs text-muted-foreground mt-1">Téléchargez et analysez un schéma</p>
       </div>
     )
   }
