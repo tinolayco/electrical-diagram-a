@@ -151,23 +151,33 @@ export function LibraryManager({
       return
     }
 
-    const exportData = {
-      version: '1.0',
-      exportedAt: Date.now(),
-      library: library
+    try {
+      const exportData = {
+        version: '1.0',
+        exportedAt: Date.now(),
+        library: library
+      }
+
+      const jsonString = JSON.stringify(exportData, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const safeFileName = library.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+      a.download = `bibliotheque_${safeFileName}_${Date.now()}.json`
+      document.body.appendChild(a)
+      a.click()
+      
+      setTimeout(() => {
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }, 100)
+
+      toast.success(`Bibliothèque "${library.name}" exportée avec succès`)
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Erreur lors de l\'exportation de la bibliothèque')
     }
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${library.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    toast.success('Bibliothèque exportée avec succès')
   }
 
   const handleImportLibrary = () => {
