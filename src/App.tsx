@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
-import type { Component, Schematic, CatalogEntry } from '@/lib/types'
+import type { Component, Schematic, CatalogEntry, TrainingAnnotation } from '@/lib/types'
 import { analyzeSchematic, identifyElectricalPaths } from '@/lib/analysis'
 import { loadDemoSchematic } from '@/lib/demo-data'
 import { DiagramViewer } from '@/components/DiagramViewer'
@@ -9,6 +9,7 @@ import { ComponentEditor } from '@/components/ComponentEditor'
 import { UploadDialog } from '@/components/UploadDialog'
 import { HelpDialog } from '@/components/HelpDialog'
 import { DetectionStats } from '@/components/DetectionStats'
+import { TrainingMode } from '@/components/TrainingMode'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -23,12 +24,14 @@ import {
   PencilSimple,
   Cpu,
   Question,
-  Sparkle
+  Sparkle,
+  GraduationCap
 } from '@phosphor-icons/react'
 
 function App() {
   const [schematics, setSchematics] = useKV<Schematic[]>('schematics', [])
   const [catalog, setCatalog] = useKV<CatalogEntry[]>('component-catalog', [])
+  const [trainingAnnotations, setTrainingAnnotations] = useKV<TrainingAnnotation[]>('training-annotations', [])
   const [currentSchematic, setCurrentSchematic] = useState<Schematic | null>(null)
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null)
   const [highlightedPath, setHighlightedPath] = useState<string[] | null>(null)
@@ -37,6 +40,7 @@ function App() {
   const [helpDialogOpen, setHelpDialogOpen] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState(0)
+  const [trainingMode, setTrainingMode] = useState(false)
 
   useEffect(() => {
     if (schematics && schematics.length > 0 && !currentSchematic) {
@@ -62,13 +66,22 @@ function App() {
   const handleAnalyze = async () => {
     if (!currentSchematic) return
 
+    if (currentSchematic.components.length === 0 && (!trainingAnnotations || trainingAnnotations.length === 0)) {
+      toast.info('Commençons par un entraînement supervisé')
+      setTrainingMode(true)
+      return
+    }
+
     setAnalyzing(true)
     setAnalysisProgress(0)
-    toast.info('Starting hybrid detection: Computer Vision + AI...', { duration: 3000 })
+    toast.info('Analyse en cours avec vos annotations d\'entraînement...', { duration: 3000 })
 
     try {
       setAnalysisProgress(30)
-      const components = await analyzeSchematic(currentSchematic.imageData)
+      const components = await analyzeSchematic(
+        currentSchematic.imageData,
+        trainingAnnotations && trainingAnnotations.length > 0 ? trainingAnnotations : undefined
+      )
       
       setAnalysisProgress(70)
       const paths = await identifyElectricalPaths(components)
@@ -89,14 +102,23 @@ function App() {
       updateCatalog(components)
       
       setAnalysisProgress(100)
-      toast.success(`Detection complete! Found ${components.length} components (${components.filter(c => c.confidence >= 85).length} high confidence) and ${paths.length} electrical paths`, { duration: 5000 })
+      toast.success(`Détection terminée! ${components.length} composants trouvés (${components.filter(c => c.confidence >= 85).length} haute confiance) et ${paths.length} chemins électriques`, { duration: 5000 })
     } catch (error) {
       console.error('Analysis failed:', error)
-      toast.error('Analysis failed. Please try again.')
+      toast.error('Échec de l\'analyse. Veuillez réessayer.')
     } finally {
       setAnalyzing(false)
       setTimeout(() => setAnalysisProgress(0), 1000)
     }
+  }
+
+  const handleTrainingComplete = async (annotations: TrainingAnnotation[]) => {
+    setTrainingAnnotations(currentAnnotations => [...(currentAnnotations || []), ...annotations])
+    setTrainingMode(false)
+    toast.success(`${annotations.length} annotations d'entraînement sauvegardées!`)
+    setTimeout(() => {
+      handleAnalyze()
+    }, 500)
   }
 
   const updateCatalog = (components: Component[]) => {
@@ -215,11 +237,20 @@ function App() {
               </Button>
               <Button
                 onClick={handleAnalyze}
-                disabled={!currentSchematic || analyzing || currentSchematic.components.length > 0}
+                disabled={!currentSchematic || analyzing}
               >
                 <Lightning size={18} className="mr-2" weight="fill" />
-                {analyzing ? 'Analyzing...' : 'Analyze'}
+                {analyzing ? 'Analyseencours...' : 'Analyser'}
               </Button>
+              {trainingAnnotations && trainingAnnotations.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setTrainingMode(true)}
+                >
+                  <GraduationCap size={18} className="mr-2" weight="duotone" />
+                  Entraîner ({trainingAnnotations.length})
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -235,24 +266,30 @@ function App() {
         {!currentSchematic ? (
           <Card className="p-12 text-center">
             <Cpu size={64} weight="duotone" className="mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-semibold mb-2">No Schematic Loaded</h2>
+            <h2 className="text-xl font-semibold mb-2">Aucun schéma chargé</h2>
             <p className="text-muted-foreground mb-6">
-              Upload a single-line electrical diagram to get started
+              Téléchargez un schéma électrique unifilaire pour commencer
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={() => setUploadDialogOpen(true)}>
                 <UploadSimple size={18} className="mr-2" />
-                Upload Schematic
+                Télécharger un schéma
               </Button>
               <Button variant="outline" onClick={handleLoadDemo}>
                 <Sparkle size={18} className="mr-2" weight="fill" />
-                Load Example
+                Charger un exemple
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-4">
-              Try the example to see how the AI analysis works
+              Essayez l'exemple pour voir comment fonctionne l'analyse IA
             </p>
           </Card>
+        ) : trainingMode ? (
+          <TrainingMode
+            imageData={currentSchematic.imageData}
+            onComplete={handleTrainingComplete}
+            onCancel={() => setTrainingMode(false)}
+          />
         ) : (
           <Tabs defaultValue="analysis" className="w-full">
             <TabsList className="grid w-full max-w-md grid-cols-3">

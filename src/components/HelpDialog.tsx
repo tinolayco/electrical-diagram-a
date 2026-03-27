@@ -17,7 +17,8 @@ import {
   Cpu,
   Eye,
   CheckCircle,
-  Sparkle
+  Sparkle,
+  GraduationCap
 } from '@phosphor-icons/react'
 
 interface HelpDialogProps {
@@ -91,6 +92,46 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="font-bold text-primary font-mono">2</span>
+                </div>
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <GraduationCap size={20} weight="duotone" className="text-accent" />
+                  Entraînement supervisé (Recommandé)
+                </h3>
+              </div>
+              <div className="ml-10 space-y-2 text-sm text-muted-foreground">
+                <p>
+                  Pour de meilleurs résultats, commencez par annoter manuellement quelques composants pour entraîner le système.
+                </p>
+                <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-md p-3 my-3">
+                  <p className="font-medium text-foreground flex items-center gap-2 mb-2">
+                    <CheckCircle size={16} weight="duotone" className="text-green-500" />
+                    Mode d'apprentissage guidé
+                  </p>
+                  <p className="text-xs text-green-950/80 dark:text-green-100/80">
+                    Lorsque vous cliquez sur <Badge variant="default" className="mx-1">Analyser</Badge> pour la première fois, 
+                    vous entrez en mode entraînement supervisé :
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 ml-2 mt-2 text-xs">
+                    <li><strong>Dessinez des boîtes :</strong> Cliquez et glissez autour des composants sur le schéma</li>
+                    <li><strong>Sélectionnez le type :</strong> Choisissez le type de composant correct (disjoncteur, transformateur, etc.)</li>
+                    <li><strong>Minimum 5 annotations :</strong> Annotez au moins 5 composants différents pour un bon entraînement</li>
+                    <li><strong>Entraîner :</strong> Le système utilisera vos annotations pour améliorer la détection automatique</li>
+                  </ul>
+                </div>
+                <div className="bg-accent/10 border border-accent/20 rounded-md p-3 mt-2">
+                  <p className="text-accent-foreground text-xs">
+                    <strong>Astuce :</strong> Plus vous annotez de composants variés, plus le système sera précis sur vos futurs schémas !
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <Separator />
+
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="font-bold text-primary font-mono">3</span>
                 </div>
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <Lightning size={20} weight="fill" className="text-accent" />

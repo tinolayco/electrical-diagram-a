@@ -1,8 +1,10 @@
-import type { Component, ComponentType } from './types'
+import type { Component, ComponentType, TrainingAnnotation } from './types'
 import { detectComponentsInImage } from './image-detection'
 
-export async function analyzeSchematic(imageData: string): Promise<Component[]> {
-  const imageDetectedComponents = await detectComponentsInImage(imageData)
+export async function analyzeSchematic(imageData: string, trainingAnnotations?: TrainingAnnotation[]): Promise<Component[]> {
+  const imageDetectedComponents = trainingAnnotations 
+    ? convertAnnotationsToComponents(trainingAnnotations)
+    : await detectComponentsInImage(imageData)
   
   const prompt = spark.llmPrompt`You are an expert electrical engineer analyzing a single-line electrical diagram.
 
@@ -166,4 +168,16 @@ export function getComponentLabel(type: ComponentType): string {
     'unknown': 'Unknown'
   }
   return labels[type] || labels.unknown
+}
+
+function convertAnnotationsToComponents(annotations: TrainingAnnotation[]): Component[] {
+  return annotations.map((annotation, index) => ({
+    id: annotation.id,
+    type: annotation.correctType,
+    name: `${annotation.correctType.toUpperCase()}-${index + 1}`,
+    boundingBox: annotation.boundingBox,
+    confidence: 100,
+    connections: [],
+    metadata: { userAnnotated: 'true' }
+  }))
 }

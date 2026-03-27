@@ -61,3 +61,12 @@ export interface CatalogEntry {
   }>
   lastUpdated: number
 }
+
+export interface TrainingAnnotation {
+  id: string
+  schematicId: string
+  boundingBox: BoundingBox
+  correctType: ComponentType
+  userVerified: boolean
+  createdAt: number
+}
