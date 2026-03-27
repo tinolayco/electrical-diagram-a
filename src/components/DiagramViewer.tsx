@@ -110,88 +110,104 @@ export function DiagramViewer({
             paddingTop: '2rem'
           }}
         >
-          <img
-            src={imageData}
-            alt="Electrical schematic"
-            className="max-w-full h-auto pointer-events-none select-none"
-            draggable={false}
-          />
+          <div className="relative inline-block">
+            <img
+              src={imageData}
+              alt="Electrical schematic"
+              className="max-w-full h-auto pointer-events-none select-none"
+              draggable={false}
+              onLoad={(e) => {
+                const img = e.currentTarget
+                setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight })
+              }}
+            />
 
-          <svg
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            {components.map(comp => {
-              const isSelected = comp.id === selectedComponent
-              const isInPath = highlightedPath?.includes(comp.id)
-              const color = getComponentColor(comp.type)
+            {imageDimensions.width > 0 && (
+              <svg
+                className="absolute inset-0 pointer-events-none"
+                viewBox={`0 0 ${imageDimensions.width} ${imageDimensions.height}`}
+                preserveAspectRatio="xMidYMid meet"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  top: 0,
+                  left: 0
+                }}
+              >
+                {components.map(comp => {
+                  const isSelected = comp.id === selectedComponent
+                  const isInPath = highlightedPath?.includes(comp.id)
+                  const color = getComponentColor(comp.type)
 
-              const scaleX = imageDimensions.width / 100
-              const scaleY = imageDimensions.height / 100
+                  const x = (comp.boundingBox.x / 100) * imageDimensions.width
+                  const y = (comp.boundingBox.y / 100) * imageDimensions.height
+                  const width = (comp.boundingBox.width / 100) * imageDimensions.width
+                  const height = (comp.boundingBox.height / 100) * imageDimensions.height
 
-              const x = comp.boundingBox.x * scaleX
-              const y = comp.boundingBox.y * scaleY
-              const width = comp.boundingBox.width * scaleX
-              const height = comp.boundingBox.height * scaleY
+                  const labelWidth = 120
+                  const labelHeight = 28
 
-              return (
-                <g key={comp.id}>
-                  <rect
-                    data-component={comp.id}
-                    x={x}
-                    y={y}
-                    width={width}
-                    height={height}
-                    fill={isSelected || isInPath ? color : 'none'}
-                    fillOpacity={isSelected ? 0.25 : isInPath ? 0.15 : 0}
-                    stroke={color}
-                    strokeWidth={isSelected ? 3 : isInPath ? 2 : 1.5}
-                    strokeDasharray={isInPath && !isSelected ? '5,5' : 'none'}
-                    className="cursor-pointer pointer-events-auto transition-all hover:stroke-[3] hover:fill-opacity-20"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onComponentSelect(comp.id)
-                    }}
-                    rx={4}
-                  />
-                  <rect
-                    x={x + width / 2 - 35}
-                    y={y - 30}
-                    width={70}
-                    height={22}
-                    fill={color}
-                    fillOpacity={0.95}
-                    rx={4}
-                    className="pointer-events-none"
-                  />
-                  <text
-                    x={x + width / 2}
-                    y={y - 14}
-                    textAnchor="middle"
-                    className="text-xs font-mono font-semibold pointer-events-none"
-                    fill="white"
-                    style={{ fontSize: '11px' }}
-                  >
-                    {comp.name}
-                  </text>
-                  {comp.confidence && (
-                    <text
-                      x={x + width / 2}
-                      y={y + height + 16}
-                      textAnchor="middle"
-                      className="text-[10px] font-mono pointer-events-none"
-                      fill={color}
-                    >
-                      {Math.round(comp.confidence)}%
-                    </text>
-                  )}
-                </g>
-              )
-            })}
-          </svg>
+                  return (
+                    <g key={comp.id}>
+                      <rect
+                        data-component={comp.id}
+                        x={x}
+                        y={y}
+                        width={width}
+                        height={height}
+                        fill={isSelected || isInPath ? color : 'none'}
+                        fillOpacity={isSelected ? 0.25 : isInPath ? 0.15 : 0}
+                        stroke={color}
+                        strokeWidth={isSelected ? 4 : isInPath ? 3 : 2}
+                        strokeDasharray={isInPath && !isSelected ? '8,8' : 'none'}
+                        className="cursor-pointer pointer-events-auto transition-all hover:stroke-[5] hover:fill-opacity-20"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onComponentSelect(comp.id)
+                        }}
+                        rx={6}
+                      />
+                      <rect
+                        x={x + width / 2 - labelWidth / 2}
+                        y={y - labelHeight - 8}
+                        width={labelWidth}
+                        height={labelHeight}
+                        fill={color}
+                        fillOpacity={0.95}
+                        rx={6}
+                        className="pointer-events-none"
+                      />
+                      <text
+                        x={x + width / 2}
+                        y={y - labelHeight / 2 - 4}
+                        textAnchor="middle"
+                        className="font-mono font-semibold pointer-events-none"
+                        fill="white"
+                        style={{ fontSize: `${Math.max(14, imageDimensions.width / 60)}px` }}
+                      >
+                        {comp.name}
+                      </text>
+                      {comp.confidence && (
+                        <text
+                          x={x + width / 2}
+                          y={y + height + 20}
+                          textAnchor="middle"
+                          className="font-mono pointer-events-none"
+                          fill={color}
+                          style={{ 
+                            fontSize: `${Math.max(12, imageDimensions.width / 80)}px`,
+                            fontWeight: '600'
+                          }}
+                        >
+                          {Math.round(comp.confidence)}%
+                        </text>
+                      )}
+                    </g>
+                  )
+                })}
+              </svg>
+            )}
+          </div>
         </div>
       </div>
 
