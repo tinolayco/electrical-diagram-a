@@ -319,13 +319,29 @@ export function LibraryManager({
         <Books size={16} className="text-muted-foreground flex-shrink-0" />
         <Select value={activeLibraryId || ''} onValueChange={onLibraryChange}>
           <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Sélectionner une bibliothèque" />
+            <SelectValue placeholder="Sélectionner une bibliothèque">
+              {activeLibrary && (
+                <div className="flex items-center gap-1.5">
+                  <span>{activeLibrary.name}</span>
+                  {activeLibrary.version && (
+                    <Badge variant="outline" className="text-[8px] px-1 py-0 font-mono">
+                      v{activeLibrary.version}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {libraries.map(library => (
               <SelectItem key={library.id} value={library.id}>
                 <div className="flex items-center gap-2">
                   <span>{library.name}</span>
+                  {library.version && (
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 font-mono">
+                      v{library.version}
+                    </Badge>
+                  )}
                   {library.isDefault && (
                     <Badge variant="secondary" className="text-[9px] px-1 py-0">
                       Défaut
