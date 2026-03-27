@@ -31,6 +31,7 @@ export interface Component {
   manufacturer?: string
   connections: string[]
   metadata?: Record<string, string>
+  breakerState?: 'closed' | 'open'
 }
 
 export interface ElectricalPath {

@@ -369,6 +369,41 @@ function App() {
     }
   }
 
+  const handleBreakerClick = (componentId: string) => {
+    if (!currentSchematic) return
+
+    const component = currentSchematic.components.find(c => c.id === componentId)
+    if (!component || component.type !== 'breaker') return
+
+    const currentState = component.breakerState
+    let newState: 'closed' | 'open'
+
+    if (!currentState) {
+      newState = 'closed'
+    } else if (currentState === 'closed') {
+      newState = 'open'
+    } else {
+      newState = 'closed'
+    }
+
+    const updatedComponents = currentSchematic.components.map(c =>
+      c.id === componentId ? { ...c, breakerState: newState } : c
+    )
+
+    const updatedSchematic: Schematic = {
+      ...currentSchematic,
+      components: updatedComponents
+    }
+
+    setSchematics(current =>
+      (current || []).map(s => s.id === currentSchematic.id ? updatedSchematic : s)
+    )
+    setCurrentSchematic(updatedSchematic)
+
+    const stateText = newState === 'closed' ? 'FERMÉ (vert)' : 'OUVERT (rouge)'
+    toast.success(`Disjoncteur ${component.name}: ${stateText}`)
+  }
+
   const handleLoadDemo = async () => {
     try {
       toast.info('Chargement de l\'exemple...')
@@ -822,6 +857,7 @@ function App() {
                       setSelectedComponent(id)
                       setHighlightedPath(null)
                     }}
+                    onBreakerClick={handleBreakerClick}
                   />
                 </Card>
 

@@ -353,3 +353,111 @@ export async function detectShapesWithOpenCV(imageData: string): Promise<Array<{
     return []
   }
 }
+
+export async function colorBreakerInterior(
+  imageData: string,
+  boundingBox: BoundingBox,
+  color: 'green' | 'red'
+): Promise<string> {
+  const ready = await waitForOpenCV()
+  if (!ready) {
+    console.warn('OpenCV not ready, cannot color breaker')
+    return imageData
+  }
+
+  const cv = window.cv
+
+  try {
+    const img = await loadImage(imageData)
+    const canvas = document.createElement('canvas')
+    canvas.width = img.width
+    canvas.height = img.height
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(img, 0, 0)
+
+    const src = cv.imread(canvas)
+
+    const x = Math.round((boundingBox.x / 100) * img.width)
+    const y = Math.round((boundingBox.y / 100) * img.height)
+    const width = Math.round((boundingBox.width / 100) * img.width)
+    const height = Math.round((boundingBox.height / 100) * img.height)
+
+    const rect = new cv.Rect(x, y, width, height)
+    const roi = src.roi(rect)
+
+    const gray = new cv.Mat()
+    cv.cvtColor(roi, gray, cv.COLOR_RGBA2GRAY)
+
+    const threshold = new cv.Mat()
+    cv.threshold(gray, threshold, 200, 255, cv.THRESH_BINARY)
+
+    const kernel = cv.Mat.ones(3, 3, cv.CV_8U)
+    cv.erode(threshold, threshold, kernel, new cv.Point(-1, -1), 2)
+    cv.dilate(threshold, threshold, kernel, new cv.Point(-1, -1), 2)
+
+    const contours = new cv.MatVector()
+    const hierarchy = new cv.Mat()
+    cv.findContours(threshold, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+    const colorValue = color === 'green' 
+      ? new cv.Scalar(100, 200, 100, 180)
+      : new cv.Scalar(200, 100, 100, 180)
+
+    if (contours.size() > 0) {
+      let largestContour = contours.get(0)
+      let maxArea = cv.contourArea(largestContour)
+
+      for (let i = 1; i < contours.size(); i++) {
+        const contour = contours.get(i)
+        const area = cv.contourArea(contour)
+        if (area > maxArea) {
+          maxArea = area
+          largestContour = contour
+        }
+      }
+
+      const mask = cv.Mat.zeros(roi.rows, roi.cols, cv.CV_8UC1)
+      cv.drawContours(mask, contours, -1, new cv.Scalar(255), -1)
+
+      const overlay = new cv.Mat(roi.rows, roi.cols, cv.CV_8UC4, colorValue)
+      overlay.copyTo(roi, mask)
+
+      mask.delete()
+      overlay.delete()
+    } else {
+      const padding = 4
+      const innerRect = new cv.Rect(
+        padding,
+        padding,
+        Math.max(1, width - padding * 2),
+        Math.max(1, height - padding * 2)
+      )
+      
+      cv.rectangle(roi, innerRect.tl(), innerRect.br(), colorValue, -1)
+    }
+
+    for (let i = 0; i < contours.size(); i++) {
+      contours.get(i).delete()
+    }
+    contours.delete()
+    hierarchy.delete()
+    gray.delete()
+    threshold.delete()
+    kernel.delete()
+    roi.delete()
+
+    const outputCanvas = document.createElement('canvas')
+    outputCanvas.width = img.width
+    outputCanvas.height = img.height
+    cv.imshow(outputCanvas, src)
+
+    const result = outputCanvas.toDataURL('image/png')
+
+    src.delete()
+
+    return result
+  } catch (error) {
+    console.error('Error coloring breaker interior:', error)
+    return imageData
+  }
+}

@@ -59,6 +59,18 @@ export function ComponentList({
                           style={{ backgroundColor: getComponentColor(comp.type) }}
                         />
                         <h4 className="font-medium text-xs truncate">{comp.name}</h4>
+                        {comp.type === 'breaker' && comp.breakerState && (
+                          <Badge 
+                            variant="secondary"
+                            className={`text-[7px] h-3 px-1 ${
+                              comp.breakerState === 'closed' 
+                                ? 'bg-green-500/20 text-green-700 border-green-500/30' 
+                                : 'bg-red-500/20 text-red-700 border-red-500/30'
+                            }`}
+                          >
+                            {comp.breakerState === 'closed' ? 'FERMÉ' : 'OUVERT'}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-[10px] text-muted-foreground">
                         {getComponentLabel(comp.type)}
@@ -104,6 +116,18 @@ export function ComponentList({
                           style={{ backgroundColor: getComponentColor(comp.type) }}
                         />
                         <h4 className="font-medium text-xs truncate">{comp.name}</h4>
+                        {comp.type === 'breaker' && comp.breakerState && (
+                          <Badge 
+                            variant="secondary"
+                            className={`text-[7px] h-3 px-1 ${
+                              comp.breakerState === 'closed' 
+                                ? 'bg-green-500/20 text-green-700 border-green-500/30' 
+                                : 'bg-red-500/20 text-red-700 border-red-500/30'
+                            }`}
+                          >
+                            {comp.breakerState === 'closed' ? 'FERMÉ' : 'OUVERT'}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-[10px] text-muted-foreground">
                         {getComponentLabel(comp.type)}

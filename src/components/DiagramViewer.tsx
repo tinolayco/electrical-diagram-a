@@ -11,6 +11,7 @@ interface DiagramViewerProps {
   selectedComponent: string | null
   highlightedPath: string[] | null
   onComponentSelect: (id: string) => void
+  onBreakerClick?: (componentId: string) => void
 }
 
 export function DiagramViewer({
@@ -18,7 +19,8 @@ export function DiagramViewer({
   components,
   selectedComponent,
   highlightedPath,
-  onComponentSelect
+  onComponentSelect,
+  onBreakerClick
 }: DiagramViewerProps) {
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -231,10 +233,24 @@ export function DiagramViewer({
                         className="cursor-pointer pointer-events-auto transition-all hover:stroke-[3] hover:fill-opacity-20"
                         onClick={(e) => {
                           e.stopPropagation()
+                          if (comp.type === 'breaker' && onBreakerClick) {
+                            onBreakerClick(comp.id)
+                          }
                           onComponentSelect(comp.id)
                         }}
                         rx={4}
                       />
+                      {comp.type === 'breaker' && comp.breakerState && (
+                        <rect
+                          x={x + 4}
+                          y={y + 4}
+                          width={width - 8}
+                          height={height - 8}
+                          fill={comp.breakerState === 'closed' ? 'rgba(100, 200, 100, 0.6)' : 'rgba(200, 100, 100, 0.6)'}
+                          className="pointer-events-none"
+                          rx={2}
+                        />
+                      )}
                       {(isSelected || zoom > 1.2) && (
                         <>
                           <rect
