@@ -133,7 +133,7 @@ function App() {
     
     setSchematics(current => [...(current || []), newSchematic])
     setCurrentSchematic(newSchematic)
-    toast.success('Schéma téléchargé avec succès')
+    toast.success('Schéma téléversé avec succès')
   }
 
   const handleAnalyze = async () => {
@@ -503,7 +503,7 @@ function App() {
                 onClick={() => setUploadDialogOpen(true)}
               >
                 <UploadSimple size={16} className="mr-1.5" />
-                Télécharger
+                Téléverser
               </Button>
               
               {canTrain && (
@@ -543,12 +543,12 @@ function App() {
             <Cpu size={64} weight="duotone" className="mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">Aucun schéma chargé</h2>
             <p className="text-muted-foreground mb-6">
-              Téléchargez un schéma électrique unifilaire pour commencer
+              Téléversez un schéma électrique unifilaire pour commencer
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={() => setUploadDialogOpen(true)}>
                 <UploadSimple size={18} className="mr-2" />
-                Télécharger un schéma
+                Téléverser un schéma
               </Button>
               <Button variant="outline" onClick={handleLoadDemo}>
                 <Sparkle size={18} className="mr-2" weight="fill" />

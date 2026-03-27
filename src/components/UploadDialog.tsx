@@ -76,7 +76,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Télécharger un schéma électrique</DialogTitle>
+          <DialogTitle>Téléverser un schéma électrique</DialogTitle>
         </DialogHeader>
         <div
           className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
