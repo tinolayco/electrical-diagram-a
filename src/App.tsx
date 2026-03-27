@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
-import type { Component, Schematic, CatalogEntry, TrainingAnnotation } from '@/lib/types'
+import type { Component, Schematic, CatalogEntry, ComponentLibrary, TrainingAnnotation } from '@/lib/types'
 import { analyzeSchematic, identifyElectricalPaths } from '@/lib/analysis'
 import { loadDemoSchematic } from '@/lib/demo-data'
-import { isOpenCVReady, waitForOpenCV } from '@/lib/opencv-detection'
+import { waitForOpenCV } from '@/lib/opencv-detection'
 import { DiagramViewer } from '@/components/DiagramViewer'
 import { ComponentList } from '@/components/ComponentList'
 import { ComponentEditor } from '@/components/ComponentEditor'
@@ -11,11 +11,11 @@ import { UploadDialog } from '@/components/UploadDialog'
 import { HelpDialog } from '@/components/HelpDialog'
 import { DetectionStats } from '@/components/DetectionStats'
 import { TrainingMode } from '@/components/TrainingMode'
+import { LibraryManager } from '@/components/LibraryManager'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { 
@@ -53,8 +53,10 @@ import {
 function App() {
   const [schematics, setSchematics] = useKV<Schematic[]>('schematics', [])
   const [catalog, setCatalog] = useKV<CatalogEntry[]>('component-catalog', [])
-  const [trainingAnnotations, setTrainingAnnotations] = useKV<TrainingAnnotation[]>('training-annotations', [])
+  const [libraries, setLibraries] = useKV<ComponentLibrary[]>('component-libraries', [])
+  const [activeLibraryId, setActiveLibraryId] = useKV<string | null>('active-library-id', null)
   const [confidenceThreshold, setConfidenceThreshold] = useKV<number>('confidence-threshold', 85)
+  
   const [currentSchematic, setCurrentSchematic] = useState<Schematic | null>(null)
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null)
   const [highlightedPath, setHighlightedPath] = useState<string[] | null>(null)
@@ -65,8 +67,29 @@ function App() {
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [trainingMode, setTrainingMode] = useState(false)
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
-  const [resetType, setResetType] = useState<'all' | 'training' | 'schematics' | null>(null)
+  const [resetType, setResetType] = useState<'all' | 'library' | 'schematics' | null>(null)
   const [opencvReady, setOpencvReady] = useState(false)
+
+  const activeLibrary = libraries?.find(lib => lib.id === activeLibraryId) || null
+
+  useEffect(() => {
+    if ((!libraries || libraries.length === 0)) {
+      const defaultLibrary: ComponentLibrary = {
+        id: 'default-library',
+        name: 'Bibliothèque par défaut',
+        description: 'Bibliothèque de composants pré-entraînés',
+        isDefault: true,
+        createdAt: Date.now(),
+        lastModified: Date.now(),
+        annotations: [],
+        componentCount: 0
+      }
+      setLibraries([defaultLibrary])
+      setActiveLibraryId('default-library')
+    } else if (!activeLibraryId && libraries && libraries.length > 0) {
+      setActiveLibraryId(libraries[0].id)
+    }
+  }, [libraries, activeLibraryId, setLibraries, setActiveLibraryId])
 
   useEffect(() => {
     waitForOpenCV(10000).then(ready => {
@@ -95,6 +118,9 @@ function App() {
     }
   }, [schematics, currentSchematic])
 
+  const canTrain = activeLibrary && !activeLibrary.isDefault
+  const canAnalyze = activeLibrary && (activeLibrary.isDefault || (activeLibrary.componentCount > 0))
+
   const handleUpload = async (imageData: string, fileName: string) => {
     const newSchematic: Schematic = {
       id: `schematic-${Date.now()}`,
@@ -107,29 +133,35 @@ function App() {
     
     setSchematics(current => [...(current || []), newSchematic])
     setCurrentSchematic(newSchematic)
-    toast.success('Schematic uploaded successfully')
+    toast.success('Schéma téléchargé avec succès')
   }
 
   const handleAnalyze = async () => {
     if (!currentSchematic) return
 
-    if (currentSchematic.components.length === 0 && (!trainingAnnotations || trainingAnnotations.length === 0)) {
-      toast.info('Commençons par un entraînement supervisé')
+    if (!canAnalyze) {
+      toast.error('Veuillez sélectionner une bibliothèque valide ou entraîner la bibliothèque personnalisée')
+      return
+    }
+
+    if (!activeLibrary?.isDefault && activeLibrary?.componentCount === 0) {
+      toast.info('Cette bibliothèque est vide. Commencez par l\'entraîner.')
       setTrainingMode(true)
       return
     }
 
     setAnalyzing(true)
     setAnalysisProgress(0)
-    toast.info('Analyse en cours - les composants s\'afficheront dès qu\'ils sont détectés...', { duration: 3000 })
+    toast.info('Analyse en cours...', { duration: 3000 })
 
     const detectedComponents: Component[] = []
 
     try {
       setAnalysisProgress(30)
+      const trainingAnnotations = activeLibrary?.annotations || []
       const components = await analyzeSchematic(
         currentSchematic.imageData,
-        trainingAnnotations && trainingAnnotations.length > 0 ? trainingAnnotations : undefined,
+        trainingAnnotations.length > 0 ? trainingAnnotations : undefined,
         confidenceThreshold !== undefined ? confidenceThreshold : 85,
         (newComponent: Component) => {
           detectedComponents.push(newComponent)
@@ -174,7 +206,7 @@ function App() {
       const belowThreshold = components.length - filtered.length
       
       toast.success(
-        `Détection terminée! ${components.length} composants trouvés (${userAnnotated} annotés + ${autoDetected} similaires détectés)\n` +
+        `Détection terminée! ${components.length} composants trouvés (${userAnnotated} annotés + ${autoDetected} similaires)\n` +
         `Affichés avec seuil ${currentThreshold}%: ${filtered.length} composants (${belowThreshold} masqués)\n` +
         `${paths.length} chemins électriques identifiés`,
         { duration: 7000 }
@@ -189,9 +221,22 @@ function App() {
   }
 
   const handleTrainingComplete = async (annotations: TrainingAnnotation[]) => {
-    setTrainingAnnotations(currentAnnotations => [...(currentAnnotations || []), ...annotations])
+    if (!activeLibrary) return
+
+    const updatedLibrary: ComponentLibrary = {
+      ...activeLibrary,
+      annotations: [...activeLibrary.annotations, ...annotations],
+      componentCount: activeLibrary.annotations.length + annotations.length,
+      lastModified: Date.now()
+    }
+
+    setLibraries(current =>
+      (current || []).map(lib => lib.id === activeLibrary.id ? updatedLibrary : lib)
+    )
+
     setTrainingMode(false)
-    toast.success(`${annotations.length} annotations d'entraînement sauvegardées!`)
+    toast.success(`${annotations.length} annotations ajoutées à la bibliothèque "${activeLibrary.name}"!`)
+    
     setTimeout(() => {
       handleAnalyze()
     }, 500)
@@ -238,14 +283,14 @@ function App() {
     )
     setCurrentSchematic(updatedSchematic)
     updateCatalog(updatedComponents)
-    toast.success('Component updated')
+    toast.success('Composant mis à jour')
   }
 
   const handlePathClick = (pathId: string) => {
     const path = currentSchematic?.paths.find(p => p.id === pathId)
     if (path) {
       setHighlightedPath(path.components)
-      toast.info(`Highlighting path: ${path.description}`)
+      toast.info(`Mise en évidence du chemin: ${path.description}`)
     }
   }
 
@@ -261,6 +306,11 @@ function App() {
       setCurrentSchematic(demoSchematic)
       updateCatalog(demoSchematic.components)
       
+      const defaultLib = libraries?.find(lib => lib.isDefault)
+      if (defaultLib) {
+        setActiveLibraryId(defaultLib.id)
+      }
+      
       toast.success('Exemple chargé avec succès! Explorez les onglets pour voir l\'analyse complète.')
     } catch (error) {
       console.error('Failed to load demo:', error)
@@ -268,7 +318,40 @@ function App() {
     }
   }
 
-  const handleResetClick = (type: 'all' | 'training' | 'schematics') => {
+  const handleLibraryCreate = (library: Omit<ComponentLibrary, 'id' | 'createdAt' | 'lastModified' | 'componentCount'>) => {
+    const newLibrary: ComponentLibrary = {
+      ...library,
+      id: `library-${Date.now()}`,
+      createdAt: Date.now(),
+      lastModified: Date.now(),
+      componentCount: library.annotations.length
+    }
+
+    setLibraries(current => [...(current || []), newLibrary])
+    setActiveLibraryId(newLibrary.id)
+  }
+
+  const handleLibraryUpdate = (libraryId: string, updates: Partial<ComponentLibrary>) => {
+    setLibraries(current =>
+      (current || []).map(lib => 
+        lib.id === libraryId 
+          ? { ...lib, ...updates, lastModified: Date.now() } 
+          : lib
+      )
+    )
+  }
+
+  const handleLibraryDelete = (libraryId: string) => {
+    setLibraries(current => {
+      const filtered = (current || []).filter(lib => lib.id !== libraryId)
+      if (activeLibraryId === libraryId && filtered.length > 0) {
+        setActiveLibraryId(filtered[0].id)
+      }
+      return filtered
+    })
+  }
+
+  const handleResetClick = (type: 'all' | 'library' | 'schematics') => {
     setResetType(type)
     setResetDialogOpen(true)
   }
@@ -280,16 +363,39 @@ function App() {
       case 'all':
         setSchematics([])
         setCatalog([])
-        setTrainingAnnotations([])
+        const defaultLib: ComponentLibrary = {
+          id: 'default-library',
+          name: 'Bibliothèque par défaut',
+          description: 'Bibliothèque de composants pré-entraînés',
+          isDefault: true,
+          createdAt: Date.now(),
+          lastModified: Date.now(),
+          annotations: [],
+          componentCount: 0
+        }
+        setLibraries([defaultLib])
+        setActiveLibraryId('default-library')
         setConfidenceThreshold(85)
         setCurrentSchematic(null)
         setSelectedComponent(null)
         setHighlightedPath(null)
         toast.success('Toutes les données ont été réinitialisées')
         break
-      case 'training':
-        setTrainingAnnotations([])
-        toast.success('Données d\'entraînement réinitialisées')
+      case 'library':
+        if (activeLibrary && !activeLibrary.isDefault) {
+          const resetLibrary: ComponentLibrary = {
+            ...activeLibrary,
+            annotations: [],
+            componentCount: 0,
+            lastModified: Date.now()
+          }
+          setLibraries(current =>
+            (current || []).map(lib => lib.id === activeLibrary.id ? resetLibrary : lib)
+          )
+          toast.success('Bibliothèque réinitialisée')
+        } else {
+          toast.error('Impossible de réinitialiser la bibliothèque par défaut')
+        }
         break
       case 'schematics':
         setSchematics([])
@@ -325,7 +431,16 @@ function App() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
+              <LibraryManager
+                libraries={libraries || []}
+                activeLibraryId={activeLibraryId || null}
+                onLibraryChange={setActiveLibraryId}
+                onLibraryCreate={handleLibraryCreate}
+                onLibraryUpdate={handleLibraryUpdate}
+                onLibraryDelete={handleLibraryDelete}
+              />
+              
               <Button
                 variant="ghost"
                 size="icon"
@@ -334,6 +449,7 @@ function App() {
               >
                 <Question size={18} weight="bold" />
               </Button>
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -345,10 +461,15 @@ function App() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => handleResetClick('training')}>
-                    <GraduationCap size={16} className="mr-2" />
-                    Réinitialiser l'entraînement
-                  </DropdownMenuItem>
+                  {activeLibrary && !activeLibrary.isDefault && (
+                    <>
+                      <DropdownMenuItem onClick={() => handleResetClick('library')}>
+                        <GraduationCap size={16} className="mr-2" />
+                        Réinitialiser la bibliothèque
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem onClick={() => handleResetClick('schematics')}>
                     <Cpu size={16} className="mr-2" />
                     Réinitialiser les schémas
@@ -363,6 +484,7 @@ function App() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              
               <Button
                 variant="outline"
                 size="sm"
@@ -371,6 +493,7 @@ function App() {
                 <Sparkle size={16} className="mr-1.5" weight="fill" />
                 Exemple
               </Button>
+              
               <Button
                 variant="outline"
                 size="sm"
@@ -379,24 +502,27 @@ function App() {
                 <UploadSimple size={16} className="mr-1.5" />
                 Télécharger
               </Button>
-              <Button
-                size="sm"
-                onClick={handleAnalyze}
-                disabled={!currentSchematic || analyzing}
-              >
-                <Lightning size={16} className="mr-1.5" weight="fill" />
-                {analyzing ? 'Analyse...' : 'Analyser'}
-              </Button>
-              {trainingAnnotations && trainingAnnotations.length > 0 && (
+              
+              {canTrain && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setTrainingMode(true)}
+                  disabled={!currentSchematic}
                 >
                   <GraduationCap size={16} className="mr-1.5" weight="duotone" />
-                  Entraîner ({trainingAnnotations.length})
+                  Entraîner {activeLibrary && activeLibrary.componentCount > 0 && `(${activeLibrary.componentCount})`}
                 </Button>
               )}
+              
+              <Button
+                size="sm"
+                onClick={handleAnalyze}
+                disabled={!currentSchematic || analyzing || !canAnalyze}
+              >
+                <Lightning size={16} className="mr-1.5" weight="fill" />
+                {analyzing ? 'Analyse...' : 'Analyser'}
+              </Button>
             </div>
           </div>
         </div>
@@ -610,16 +736,16 @@ function App() {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {resetType === 'all' && 'Réinitialiser toutes les données?'}
-              {resetType === 'training' && 'Réinitialiser l\'entraînement?'}
+              {resetType === 'library' && 'Réinitialiser la bibliothèque?'}
               {resetType === 'schematics' && 'Réinitialiser les schémas?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {resetType === 'all' && 
-                'Cette action supprimera tous les schémas, le catalogue de composants et les données d\'entraînement. Cette action est irréversible.'}
-              {resetType === 'training' && 
-                'Cette action supprimera toutes les annotations d\'entraînement. Vous devrez réentraîner le modèle pour détecter de nouveaux composants.'}
+                'Cette action supprimera tous les schémas, le catalogue de composants et toutes les bibliothèques sauf la bibliothèque par défaut. Cette action est irréversible.'}
+              {resetType === 'library' && 
+                `Cette action supprimera toutes les annotations d'entraînement de la bibliothèque "${activeLibrary?.name}". Cette action est irréversible.`}
               {resetType === 'schematics' && 
-                'Cette action supprimera tous les schémas et le catalogue de composants. Les données d\'entraînement seront conservées.'}
+                'Cette action supprimera tous les schémas et le catalogue de composants. Les bibliothèques seront conservées.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

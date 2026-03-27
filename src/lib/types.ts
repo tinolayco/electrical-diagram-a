@@ -69,3 +69,14 @@ export interface TrainingAnnotation {
   userVerified: boolean
   createdAt: number
 }
+
+export interface ComponentLibrary {
+  id: string
+  name: string
+  description: string
+  isDefault: boolean
+  createdAt: number
+  lastModified: number
+  annotations: TrainingAnnotation[]
+  componentCount: number
+}
