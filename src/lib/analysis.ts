@@ -1,5 +1,6 @@
 import type { Component, ComponentType, TrainingAnnotation, BoundingBox } from './types'
 import { detectComponentsInImage } from './image-detection'
+import { detectComponentsWithOpenCV, waitForOpenCV } from './opencv-detection'
 
 export async function analyzeSchematic(
   imageData: string, 
@@ -273,6 +274,58 @@ async function convertAnnotationsToComponents(
 }
 
 async function findSimilarComponents(
+  fullImage: ImageData,
+  template: ImageData,
+  originalBox: { x: number; y: number; width: number; height: number },
+  componentType: ComponentType,
+  imageWidth: number,
+  imageHeight: number,
+  confidenceThreshold: number = 85,
+  onComponentFound?: (component: Component) => void
+): Promise<Component[]> {
+  const opencvReady = await waitForOpenCV(5000)
+  
+  if (opencvReady) {
+    try {
+      const canvas = document.createElement('canvas')
+      canvas.width = imageWidth
+      canvas.height = imageHeight
+      const ctx = canvas.getContext('2d')!
+      ctx.putImageData(fullImage, 0, 0)
+      const fullImageData = canvas.toDataURL('image/png')
+      
+      const opencvComponents = await detectComponentsWithOpenCV(
+        fullImageData,
+        template,
+        originalBox,
+        componentType,
+        confidenceThreshold,
+        onComponentFound
+      )
+      
+      console.log(`OpenCV détection: ${opencvComponents.length} composants similaires trouvés pour ${componentType}`)
+      
+      return opencvComponents
+    } catch (error) {
+      console.warn('Erreur OpenCV, fallback vers détection basique:', error)
+    }
+  } else {
+    console.warn('OpenCV non disponible, utilisation de la détection basique')
+  }
+  
+  return findSimilarComponentsBasic(
+    fullImage,
+    template,
+    originalBox,
+    componentType,
+    imageWidth,
+    imageHeight,
+    confidenceThreshold,
+    onComponentFound
+  )
+}
+
+async function findSimilarComponentsBasic(
   fullImage: ImageData,
   template: ImageData,
   originalBox: { x: number; y: number; width: number; height: number },

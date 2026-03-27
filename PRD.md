@@ -26,12 +26,20 @@ This application requires multiple interconnected features: image upload and dis
 - **Progression**: Click upload → Select file → Preview thumbnail → Confirm → Display full diagram with zoom/pan controls
 - **Success Criteria**: Image displays clearly at various zoom levels, supports common electrical diagram formats
 
-### Feature 3: Hybrid Component Detection System
-- **Functionality**: Two-stage detection combining computer vision pattern matching with GPT-4o AI analysis
-- **Purpose**: Achieve maximum accuracy by leveraging both geometric detection and contextual AI understanding
+### Feature 3: Hybrid Component Detection System (OpenCV + AI)
+- **Functionality**: Three-stage detection combining OpenCV.js template matching with rotation detection and GPT-4o AI analysis
+- **Purpose**: Achieve maximum accuracy by leveraging computer vision (OpenCV), geometric pattern detection, and contextual AI understanding
 - **Trigger**: User clicks "Analyze" button after upload
-- **Progression**: Click analyze → Stage 1: Computer vision detects shapes (rectangles, circles, lines) and colors → Stage 2: AI refines results, extracts text labels, identifies ratings → Display components with confidence scores → Show detection statistics
-- **Success Criteria**: Detects L1BT breakers, bus bars, transformers, motors, and other standard symbols with >85% confidence; provides detailed statistics on detection quality
+- **Progression**: Click analyze → Stage 1: User annotates sample components → Stage 2: OpenCV template matching with 4-angle rotation (0°, 90°, 180°, 270°) → Real-time component display as detected → Stage 3: AI refines results, extracts text labels, identifies ratings → Display components with confidence scores → Show detection statistics
+- **Success Criteria**: Detects L1BT breakers, bus bars, transformers, motors, and other standard symbols with >85% confidence; handles rotated components automatically; provides detailed statistics on detection quality
+
+**OpenCV Detection Pipeline**:
+- **Template Extraction**: User-annotated regions extracted as templates
+- **Multi-Angle Matching**: Templates rotated (0°, 90°, 180°, 270°) using OpenCV rotation matrices
+- **TM_CCOEFF_NORMED**: Normalized cross-correlation template matching for robust detection
+- **Non-Maximum Suppression**: Eliminates overlapping detections within radius
+- **Confidence Filtering**: Only matches above threshold displayed
+- **Fallback Mode**: If OpenCV.js unavailable, uses basic pixel-by-pixel comparison
 
 **Detection Algorithms**:
 - **Breakers (L1BT, CB)**: Dark rectangular regions with white interior rectangles

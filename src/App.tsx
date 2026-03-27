@@ -3,6 +3,7 @@ import { useKV } from '@github/spark/hooks'
 import type { Component, Schematic, CatalogEntry, TrainingAnnotation } from '@/lib/types'
 import { analyzeSchematic, identifyElectricalPaths } from '@/lib/analysis'
 import { loadDemoSchematic } from '@/lib/demo-data'
+import { isOpenCVReady, waitForOpenCV } from '@/lib/opencv-detection'
 import { DiagramViewer } from '@/components/DiagramViewer'
 import { ComponentList } from '@/components/ComponentList'
 import { ComponentEditor } from '@/components/ComponentEditor'
@@ -65,6 +66,18 @@ function App() {
   const [trainingMode, setTrainingMode] = useState(false)
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const [resetType, setResetType] = useState<'all' | 'training' | 'schematics' | null>(null)
+  const [opencvReady, setOpencvReady] = useState(false)
+
+  useEffect(() => {
+    waitForOpenCV(10000).then(ready => {
+      setOpencvReady(ready)
+      if (ready) {
+        console.log('✅ OpenCV.js chargé et prêt pour la détection avancée')
+      } else {
+        console.warn('⚠️ OpenCV.js non disponible - utilisation de la détection basique')
+      }
+    })
+  }, [])
 
   const filteredComponents = useMemo(() => {
     if (!currentSchematic) return []
@@ -308,7 +321,7 @@ function App() {
                   Electrical Schematic Analyzer
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  AI-powered component recognition
+                  {opencvReady ? '✓ OpenCV.js activé - Détection avancée' : 'AI-powered component recognition'}
                 </p>
               </div>
             </div>
