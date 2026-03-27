@@ -36,6 +36,12 @@ export function DiagramViewer({
   }, [imageData])
 
   const handleWheel = (e: React.WheelEvent) => {
+    const target = e.target as HTMLElement
+    
+    if (target.closest('[data-allow-scroll]')) {
+      return
+    }
+    
     e.preventDefault()
     
     if (!containerRef.current) return

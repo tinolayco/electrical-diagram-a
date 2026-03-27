@@ -636,7 +636,7 @@ function App() {
                   />
                 </Card>
 
-                <div className="flex flex-col gap-3 min-h-0">
+                <div className="flex flex-col gap-3 min-h-0" data-allow-scroll>
                   {filteredComponents.length > 0 && (
                     <DetectionStats 
                       components={filteredComponents} 
