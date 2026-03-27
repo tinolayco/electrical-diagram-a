@@ -3,7 +3,7 @@ import type { Component } from '@/lib/types'
 import { getComponentColor } from '@/lib/analysis'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MagnifyingGlassMinus, MagnifyingGlassPlus } from '@phosphor-icons/react'
+import { MagnifyingGlassMinus, MagnifyingGlassPlus, ArrowsOut, Hand } from '@phosphor-icons/react'
 
 interface DiagramViewerProps {
   imageData: string
@@ -37,8 +37,26 @@ export function DiagramViewer({
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault()
+    
+    if (!containerRef.current) return
+    
+    const rect = containerRef.current.getBoundingClientRect()
+    const mouseX = e.clientX - rect.left
+    const mouseY = e.clientY - rect.top
+    
     const delta = e.deltaY > 0 ? 0.9 : 1.1
-    setZoom(prev => Math.max(0.5, Math.min(3, prev * delta)))
+    const newZoom = Math.max(0.5, Math.min(5, zoom * delta))
+    
+    const zoomPointX = (mouseX - pan.x) / zoom
+    const zoomPointY = (mouseY - pan.y) / zoom
+    
+    const newPan = {
+      x: mouseX - zoomPointX * newZoom,
+      y: mouseY - zoomPointY * newZoom
+    }
+    
+    setZoom(newZoom)
+    setPan(newPan)
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -61,8 +79,40 @@ export function DiagramViewer({
     setIsDragging(false)
   }
 
-  const zoomIn = () => setZoom(prev => Math.min(3, prev * 1.2))
-  const zoomOut = () => setZoom(prev => Math.max(0.5, prev / 1.2))
+  const zoomIn = () => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    
+    const newZoom = Math.min(5, zoom * 1.2)
+    const zoomPointX = (centerX - pan.x) / zoom
+    const zoomPointY = (centerY - pan.y) / zoom
+    
+    setPan({
+      x: centerX - zoomPointX * newZoom,
+      y: centerY - zoomPointY * newZoom
+    })
+    setZoom(newZoom)
+  }
+  
+  const zoomOut = () => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    
+    const newZoom = Math.max(0.5, zoom / 1.2)
+    const zoomPointX = (centerX - pan.x) / zoom
+    const zoomPointY = (centerY - pan.y) / zoom
+    
+    setPan({
+      x: centerX - zoomPointX * newZoom,
+      y: centerY - zoomPointY * newZoom
+    })
+    setZoom(newZoom)
+  }
+  
   const resetView = () => {
     setZoom(1)
     setPan({ x: 0, y: 0 })
@@ -79,20 +129,30 @@ export function DiagramViewer({
   return (
     <div className="relative w-full h-full bg-muted/30 rounded-lg overflow-hidden">
       <div className="absolute top-4 right-4 z-10 flex gap-2">
-        <Button size="sm" variant="secondary" onClick={zoomOut}>
+        <Button size="sm" variant="secondary" onClick={zoomOut} title="Zoom arrière">
           <MagnifyingGlassMinus size={16} />
         </Button>
-        <Button size="sm" variant="secondary" onClick={resetView}>
+        <Button size="sm" variant="secondary" onClick={resetView} title="Réinitialiser la vue">
+          <ArrowsOut size={16} className="mr-1" />
           <span className="font-mono text-xs">{Math.round(zoom * 100)}%</span>
         </Button>
-        <Button size="sm" variant="secondary" onClick={zoomIn}>
+        <Button size="sm" variant="secondary" onClick={zoomIn} title="Zoom avant">
           <MagnifyingGlassPlus size={16} />
         </Button>
       </div>
 
+      {isDragging && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+          <Badge variant="secondary" className="gap-2 shadow-lg">
+            <Hand size={16} weight="fill" />
+            <span className="font-mono text-xs">Pan actif</span>
+          </Badge>
+        </div>
+      )}
+
       <div
         ref={containerRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className={isDragging ? "w-full h-full cursor-grabbing" : "w-full h-full cursor-grab"}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
