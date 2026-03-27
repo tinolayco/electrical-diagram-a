@@ -15,23 +15,23 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-primary: oklch(0.98 0 0);
-            --bg-secondary: oklch(1 0 0);
-            --fg-primary: oklch(0.2 0.02 255);
-            --fg-muted: oklch(0.5 0.02 255);
-            --accent: oklch(0.68 0.18 45);
+            --b
+            --fg-muted: oklch(0.5 0.02 255
             --accent-fg: oklch(0.98 0 0);
-            --primary: oklch(0.45 0.15 250);
             --primary-fg: oklch(0.98 0 0);
-            --border: oklch(0.88 0.01 255);
             --success: oklch(0.6 0.15 145);
-            --danger: oklch(0.577 0.245 27.325);
             --radius: 8px;
+
+            font-family: 'Space Grotesk', sa
+            color: var(--fg-primary);
+            display: flex;
+        }
+        .header {
+            border-bottom:
         }
 
-        body {
-            font-family: 'Space Grotesk', sans-serif;
+            al
+            gap: 1rem;
             background: var(--bg-primary);
             color: var(--fg-primary);
             min-height: 100vh;
@@ -66,769 +66,769 @@
             border-radius: 6px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: var(--primary-fg);
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .logo-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .logo-text p {
-            font-size: 0.875rem;
-            color: var(--fg-muted);
-        }
-
-        .controls {
-            display: flex;
             gap: 0.5rem;
-            flex-wrap: wrap;
         }
-
         .btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--bg-secondary);
-            color: var(--fg-primary);
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+            border: 1px soli
+         
 
-        .btn:hover {
-            background: var(--bg-primary);
-            transform: translateY(-1px);
+            font-weight
+            transition: all 0.
+            align-items: cent
         }
+        .
 
-        .btn-primary {
-            background: var(--primary);
-            color: var(--primary-fg);
-            border-color: var(--primary);
-        }
 
-        .btn-primary:hover {
-            background: oklch(0.4 0.15 250);
-        }
+            background: var(--pr
+            border-color: var(--pri
 
-        .btn-accent {
-            background: var(--accent);
-            color: var(--accent-fg);
-            border-color: var(--accent);
-        }
 
-        .btn-accent:hover {
-            background: oklch(0.63 0.18 45);
-        }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            background: va
+            border-color
+
+         
+
+            op
             transform: none;
-        }
 
-        .main-content {
             flex: 1;
-            padding: 1.5rem;
             display: flex;
-            gap: 1rem;
             min-height: 0;
-        }
 
-        .canvas-container {
             flex: 1;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            position: relative;
-            overflow: hidden;
+            border: 1px solid
+            position: relati
             display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+            justify-conten
 
-        .canvas-container.drag-active {
-            border-color: var(--primary);
-            border-width: 2px;
-            border-style: dashed;
-            background: oklch(0.95 0.02 250);
-        }
+            border-color
+         
 
-        #diagram-canvas {
-            max-width: 100%;
+        #diagram-can
             max-height: 100%;
-            object-fit: contain;
         }
+        .
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--fg-muted);
         }
-
         .empty-state-icon {
-            font-size: 3rem;
             margin-bottom: 1rem;
-        }
 
-        .sidebar {
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+         
 
+        }
         .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem;
-        }
+         
 
-        .card-header {
+
             font-weight: 600;
-            margin-bottom: 0.75rem;
             padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border);
         }
+        .
 
-        .component-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            max-height: 400px;
-            overflow-y: auto;
+            max-height: 400
         }
+        .
 
-        .component-item {
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
+            cursor: poi
+            display: flex
             align-items: center;
-        }
 
-        .component-item:hover {
-            border-color: var(--primary);
-            background: var(--bg-primary);
-        }
+         
 
-        .component-item.selected {
-            border-color: var(--primary);
-            background: oklch(0.95 0.02 250);
-        }
+        .component-item
+            backgrou
 
-        .component-name {
-            font-weight: 500;
-            font-size: 0.875rem;
+            font-weight: 5
         }
-
         .component-type {
-            font-size: 0.75rem;
-            color: var(--fg-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
+         
 
         .confidence-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
+            padding:
+            font-family: 'JetBrains Mono', m
         }
-
         .confidence-high {
-            background: oklch(0.9 0.1 145);
-            color: var(--success);
-        }
+            color: var(--succes
 
-        .confidence-medium {
-            background: oklch(0.95 0.08 45);
-            color: var(--accent);
+            background: ok
         }
-
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-        }
+         
 
         .stat-item {
-            text-align: center;
             padding: 0.75rem;
-            background: var(--bg-primary);
-            border-radius: 6px;
-        }
+            border-radius: 6px
 
-        .stat-value {
             font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
+         
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--fg-muted);
-            margin-top: 0.25rem;
-        }
+            font-size: 0.
+            margin-top: 0.25
 
-        .progress-bar {
             width: 100%;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
+         
 
+        }
         .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s;
+            background: va
         }
-
-        .slider-container {
-            margin: 1rem 0;
-        }
+        .
 
         .slider-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--fg-muted);
-            margin-bottom: 0.5rem;
+            justify-content:
+            color: var(--fg-mute
         }
 
-        .slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--border);
-            outline: none;
-            -webkit-appearance: none;
-        }
+            height
+            background: v
+            -webkit-appear
 
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
+            -webkit-ap
+         
+
+            cur
+
             width: 16px;
-            height: 16px;
             border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
+            cursor: pointe
         }
 
-        .slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            border: none;
         }
-
-        .hidden {
-            display: none !important;
-        }
-
         .modal {
-            position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
             display: flex;
-            align-items: center;
             justify-content: center;
-            z-index: 1000;
-            padding: 1rem;
-        }
+         
 
-        .modal-content {
-            background: var(--bg-secondary);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            max-width: 500px;
+            background: v
+            padding: 1.5re
             width: 100%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
-
         .modal-header {
-            font-size: 1.25rem;
             font-weight: 700;
-            margin-bottom: 1rem;
         }
 
-        .modal-footer {
-            display: flex;
             gap: 0.5rem;
-            justify-content: flex-end;
-            margin-top: 1.5rem;
-        }
+            margin-top: 1.5re
 
-        .file-input {
             display: none;
-        }
 
-        .drag-overlay {
             position: fixed;
-            inset: 0;
-            background: rgba(69, 91, 219, 0.1);
-            border: 4px dashed var(--primary);
+            background: rg
             display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            pointer-events: none;
-        }
+            justify-content: cen
+         
 
-        .drag-overlay-content {
-            background: var(--bg-secondary);
-            padding: 2rem;
+            background: var(--b
             border-radius: var(--radius);
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
+            box-shadow: 0 10px 40px rgba(0
 
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
+
             }
-            .sidebar {
                 width: 100%;
-            }
         }
-    </style>
 </head>
-<body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">iS</div>
-                <div class="logo-text">
-                    <h1>iSchémateur</h1>
-                    <p>Analyseur de schémas électriques</p>
-                </div>
-            </div>
-            <div class="controls">
-                <button class="btn btn-accent" id="btn-example">
-                    ✨ Exemple
-                </button>
-                <button class="btn" id="btn-upload">
-                    📤 Téléverser
-                </button>
-                <button class="btn btn-primary" id="btn-analyze" disabled>
-                    ⚡ Analyser
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <div id="progress-container" class="hidden">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
-        </div>
-    </div>
+            <div class="l
+                <div class="l
+                    <p>Analyseur
+         
 
-    <main class="main-content">
-        <div class="canvas-container" id="canvas-container">
-            <div class="empty-state" id="empty-state">
-                <div class="empty-state-icon">📋</div>
-                <h2>Aucun schéma chargé</h2>
-                <p>Téléversez un schéma électrique pour commencer</p>
-            </div>
-            <canvas id="diagram-canvas" class="hidden"></canvas>
+                </button>
+                    📤 Télévers
+                <button class="btn 
+                </button>
+        <
+
+        <div class="progres
         </div>
 
-        <aside class="sidebar">
-            <div class="card" id="stats-card" class="hidden">
-                <div class="card-header">Statistiques</div>
+        <div class="canvas-cont
+                <div class="empty-state-icon">📋</div
+                <p>Téléversez
+         
+
+            <div class="ca
                 <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat-total">0</div>
-                        <div class="stat-label">Composants</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat-types">0</div>
-                        <div class="stat-label">Types</div>
-                    </div>
-                </div>
-            </div>
+                        <div class
+         
 
-            <div class="card">
-                <div class="card-header">Seuil de confiance</div>
-                <div class="slider-container">
-                    <div class="slider-label">
-                        <span>Confiance minimale</span>
-                        <span id="threshold-value">85%</span>
                     </div>
-                    <input type="range" class="slider" id="confidence-slider" 
-                           min="80" max="99" value="85">
-                </div>
             </div>
+            <div class="card">
+         
 
-            <div class="card">
-                <div class="card-header">Composants détectés</div>
-                <div class="component-list" id="component-list">
-                    <div style="text-align: center; color: var(--fg-muted); padding: 2rem;">
-                        Aucun composant détecté
-                    </div>
-                </div>
+                    <
+                          
             </div>
+            <div class="c
+         
+
+                </di
         </aside>
-    </main>
 
-    <div id="drag-overlay" class="drag-overlay hidden">
         <div class="drag-overlay-content">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
-            <h2>Déposez votre schéma ici</h2>
-            <p style="color: var(--fg-muted); margin-top: 0.5rem;">
-                Formats supportés: PNG, JPG, SVG
-            </p>
-        </div>
-    </div>
+            <h2>Déposez votre s
+         
 
-    <input type="file" id="file-input" class="file-input" accept="image/*">
 
-    <script>
+
         const state = {
-            currentImage: null,
             components: [],
-            confidenceThreshold: 85,
-            selectedComponent: null,
-            analyzing: false
-        };
+         
 
-        const elements = {
-            fileInput: document.getElementById('file-input'),
-            btnUpload: document.getElementById('btn-upload'),
-            btnAnalyze: document.getElementById('btn-analyze'),
-            btnExample: document.getElementById('btn-example'),
-            canvas: document.getElementById('diagram-canvas'),
-            canvasContainer: document.getElementById('canvas-container'),
-            emptyState: document.getElementById('empty-state'),
-            componentList: document.getElementById('component-list'),
-            confidenceSlider: document.getElementById('confidence-slider'),
-            thresholdValue: document.getElementById('threshold-value'),
-            statTotal: document.getElementById('stat-total'),
-            statTypes: document.getElementById('stat-types'),
-            statsCard: document.getElementById('stats-card'),
-            progressContainer: document.getElementById('progress-container'),
-            progressFill: document.getElementById('progress-fill'),
-            dragOverlay: document.getElementById('drag-overlay')
-        };
+        const element
+            btnUpload: document
+            btnExample: document.ge
+            canvasContainer: doc
+         
 
-        elements.btnUpload.addEventListener('click', () => {
-            elements.fileInput.click();
-        });
+            statTypes: 
+            progressCont
+            dragOverlay:
 
-        elements.fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                handleFile(file);
-            }
-        });
+            elements.fileInput.
 
-        elements.btnAnalyze.addEventListener('click', analyzeSchematic);
-        elements.btnExample.addEventListener('click', loadExample);
+            const file = e.ta
+         
 
-        elements.confidenceSlider.addEventListener('input', (e) => {
-            state.confidenceThreshold = parseInt(e.target.value);
-            elements.thresholdValue.textContent = `${state.confidenceThreshold}%`;
+        elements.btnAnal
+
+            state.confidenceThreshold =
             renderComponents();
-        });
 
-        ['dragover', 'dragenter'].forEach(eventName => {
-            document.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.dataTransfer.types.includes('Files')) {
-                    elements.dragOverlay.classList.remove('hidden');
-                }
+
+                e.stopPropa
+                    element
+         
+
+            document.ad
+                e.stopProp
             });
-        });
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            document.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                elements.dragOverlay.classList.add('hidden');
-            });
-        });
-
-        document.addEventListener('drop', (e) => {
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        });
-
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Veuillez sélectionner un fichier image');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                loadImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
+            const files = e.dataTra
+                handleFile(files[0
         }
 
-        function loadImage(dataUrl) {
+                a
+            }
+            const reader
+                loadImage(e.tar
+            reader.readAsDataURL(file)
+
             const img = new Image();
-            img.onload = () => {
-                state.currentImage = img;
-                drawImage(img);
-                elements.emptyState.classList.add('hidden');
-                elements.canvas.classList.remove('hidden');
-                elements.btnAnalyze.disabled = false;
-                showNotification('Schéma chargé avec succès', 'success');
+         
+
+                elements.btnAnalyze.dis
             };
-            img.src = dataUrl;
         }
+        function drawIma
+            const ctx = c
+            const containerWidt
+            
+                containerWid
+         
 
-        function drawImage(img) {
-            const canvas = elements.canvas;
-            const ctx = canvas.getContext('2d');
+            canvas.height = img.hei
+            ctx.clearRec
             
-            const containerWidth = elements.canvasContainer.offsetWidth;
-            const containerHeight = elements.canvasContainer.offsetHeight;
-            
-            const scale = Math.min(
-                containerWidth / img.width,
-                containerHeight / img.height,
-                1
-            );
-            
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            drawComponents(ctx);
         }
-
         function drawComponents(ctx) {
-            if (!ctx) ctx = elements.canvas.getContext('2d');
             
-            const filteredComponents = state.components.filter(c => 
-                c.confidence >= state.confidenceThreshold
-            );
-            
-            filteredComponents.forEach(comp => {
-                ctx.strokeStyle = comp.id === state.selectedComponent ? '#E8965A' : '#455BDB';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(comp.x, comp.y, comp.width, comp.height);
-                
-                ctx.fillStyle = comp.id === state.selectedComponent ? '#E8965A' : '#455BDB';
-                ctx.font = '12px Space Grotesk';
-                const text = `${comp.name} (${comp.confidence}%)`;
-                const textWidth = ctx.measureText(text).width;
-                
-                ctx.fillRect(comp.x, comp.y - 20, textWidth + 8, 20);
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillText(text, comp.x + 4, comp.y - 6);
-            });
-        }
+                c.confide
+         
 
-        async function analyzeSchematic() {
-            if (!state.currentImage || state.analyzing) return;
+                c
+                ctx.fillStyle = comp.
+         
+
+                
+            });
+
+            if (!state.currentImage || stat
+            state.analyzin
+            elements.btnAnalyze.
             
-            state.analyzing = true;
-            elements.btnAnalyze.disabled = true;
-            elements.btnAnalyze.textContent = '⚡ Analyse...';
-            elements.progressContainer.classList.remove('hidden');
             
-            setProgress(10);
+            setProgress(30
+         
+
             
-            await sleep(300);
-            setProgress(30);
             
-            const detectedComponents = await detectComponents(state.currentImage);
-            
-            setProgress(70);
-            await sleep(300);
-            
-            state.components = detectedComponents;
-            
-            setProgress(90);
             await sleep(200);
+            renderComponents
             
-            renderComponents();
-            updateStats();
+                drawImag
             
-            if (state.currentImage) {
-                drawImage(state.currentImage);
-            }
-            
-            setProgress(100);
-            await sleep(500);
-            
-            elements.progressContainer.classList.add('hidden');
-            setProgress(0);
-            
-            state.analyzing = false;
-            elements.btnAnalyze.disabled = false;
-            elements.btnAnalyze.textContent = '⚡ Analyser';
-            
-            showNotification(`${detectedComponents.length} composants détectés`, 'success');
-        }
+         
 
-        async function detectComponents(img) {
-            const components = [];
-            const types = ['breaker', 'transformer', 'meter', 'generator', 'load', 'switch', 'fuse'];
-            const names = {
-                breaker: 'Disjoncteur',
-                transformer: 'Transformateur',
-                meter: 'Compteur',
-                generator: 'Générateur',
-                load: 'Charge',
-                switch: 'Interrupteur',
+            
+            elements.btnAnalyze
+            
+        }
+        a
+
+                breaker
+                meter: 'Co
+                load: 'C
                 fuse: 'Fusible'
-            };
             
-            const numComponents = Math.floor(Math.random() * 8) + 5;
+         
+
             
-            const canvas = elements.canvas;
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            
-            for (let i = 0; i < numComponents; i++) {
-                const type = types[Math.floor(Math.random() * types.length)];
-                const width = 60 + Math.random() * 40;
-                const height = 40 + Math.random() * 30;
-                const x = Math.random() * (canvasWidth - width);
-                const y = Math.random() * (canvasHeight - height);
-                const confidence = 80 + Math.random() * 19;
+                const type
+         
+
                 
-                components.push({
-                    id: `comp-${Date.now()}-${i}`,
-                    type: type,
-                    name: `${names[type]} ${i + 1}`,
-                    x: x,
+                    id: `com
+                    n
                     y: y,
-                    width: width,
                     height: height,
-                    confidence: Math.round(confidence)
                 });
-                
                 await sleep(50);
-            }
             
-            return components;
         }
+        function renderComponents
+         
 
-        function renderComponents() {
-            const filtered = state.components.filter(c => 
-                c.confidence >= state.confidenceThreshold
-            );
-            
-            if (filtered.length === 0) {
-                elements.componentList.innerHTML = `
-                    <div style="text-align: center; color: var(--fg-muted); padding: 2rem;">
-                        Aucun composant au-dessus du seuil
-                    </div>
+                elements.compon
+                        Aucun composant au-d
                 `;
-                return;
             }
-            
-            elements.componentList.innerHTML = filtered.map(comp => `
-                <div class="component-item ${comp.id === state.selectedComponent ? 'selected' : ''}" 
+            elements.componentL
                      data-id="${comp.id}">
-                    <div>
-                        <div class="component-name">${comp.name}</div>
-                        <div class="component-type">${comp.type}</div>
-                    </div>
-                    <div class="confidence-badge ${comp.confidence >= 90 ? 'confidence-high' : 'confidence-medium'}">
-                        ${comp.confidence}%
-                    </div>
+         
+
+                        ${comp.conf
                 </div>
-            `).join('');
             
-            document.querySelectorAll('.component-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const id = item.dataset.id;
-                    state.selectedComponent = id === state.selectedComponent ? null : id;
-                    renderComponents();
-                    if (state.currentImage) {
-                        drawImage(state.currentImage);
-                    }
-                });
-            });
-        }
+             
+                    st
+                    if (stat
+             
+         
 
-        function updateStats() {
-            const filtered = state.components.filter(c => 
-                c.confidence >= state.confidenceThreshold
-            );
-            
-            const types = new Set(filtered.map(c => c.type));
-            
-            elements.statTotal.textContent = filtered.length;
-            elements.statTypes.textContent = types.size;
-            elements.statsCard.classList.remove('hidden');
-        }
+       
+      
+            const types = n
+            elements.statTotal.textC
+            elements.statsCard
 
-        function setProgress(value) {
-            elements.progressFill.style.width = `${value}%`;
-        }
+            elements.progressFill.style
 
-        function showNotification(message, type = 'info') {
-            console.log(`[${type.toUpperCase()}] ${message}`);
-        }
+            console.log(`[${type.toUpperCase()}] ${message}
 
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
+            return
 
-        async function loadExample() {
             const exampleSvg = `
-                <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="800" height="600" fill="#f8f8f8"/>
-                    <line x1="100" y1="100" x2="700" y2="100" stroke="#333" stroke-width="3"/>
-                    <rect x="80" y="80" width="40" height="40" fill="#455BDB" stroke="#333" stroke-width="2"/>
-                    <text x="100" y="150" text-anchor="middle" font-family="Arial" font-size="12">Source</text>
-                    <rect x="200" y="80" width="60" height="40" fill="#E8965A" stroke="#333" stroke-width="2"/>
-                    <text x="230" y="150" text-anchor="middle" font-family="Arial" font-size="12">Disjoncteur</text>
-                    <circle cx="400" cy="100" r="30" fill="#68B984" stroke="#333" stroke-width="2"/>
-                    <text x="400" y="160" text-anchor="middle" font-family="Arial" font-size="12">Transformateur</text>
-                    <rect x="520" y="80" width="50" height="40" fill="#9B87F5" stroke="#333" stroke-width="2"/>
-                    <text x="545" y="150" text-anchor="middle" font-family="Arial" font-size="12">Compteur</text>
-                    <rect x="640" y="80" width="60" height="40" fill="#F97316" stroke="#333" stroke-width="2"/>
-                    <text x="670" y="150" text-anchor="middle" font-family="Arial" font-size="12">Charge</text>
-                    <line x1="100" y1="300" x2="700" y2="300" stroke="#333" stroke-width="3"/>
-                    <rect x="180" y="280" width="60" height="40" fill="#E8965A" stroke="#333" stroke-width="2"/>
-                    <text x="210" y="350" text-anchor="middle" font-family="Arial" font-size="12">Fusible</text>
-                    <rect x="320" y="280" width="60" height="40" fill="#455BDB" stroke="#333" stroke-width="2"/>
-                    <text x="350" y="350" text-anchor="middle" font-family="Arial" font-size="12">Interrupteur</text>
-                    <circle cx="500" cy="300" r="25" fill="#68B984" stroke="#333" stroke-width="2"/>
-                    <text x="500" y="355" text-anchor="middle" font-family="Arial" font-size="12">Générateur</text>
-                </svg>
-            `;
-            
-            const svgBlob = new Blob([exampleSvg], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(svgBlob);
-            
-            loadImage(url);
-            
-            await sleep(500);
-            analyzeSchematic();
-        }
+                    <rect wid
+                    <rect
+                    <rect x="200" y="80" width="60" 
+                    <circle cx="4
+                    <rect
+                    <rect x="640" y="80" width="60" height="40" fill="#F97
+                    <line x1="
+                    <text
+                  
+              
+            `
 
-        console.log('✅ iSchémateur chargé - par Normand Rocheleau');
-    </script>
-</body>
-</html>
+            
+            
+            analyzeSchematic();
+
+    </scri
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
