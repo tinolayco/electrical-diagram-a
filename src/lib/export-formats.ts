@@ -670,6 +670,114 @@ export function exportCatalogToCSV(catalog: CatalogEntry[]): string {
   return lines.join('\n')
 }
 
+export function importCatalogFromCSV(csvContent: string): CatalogEntry[] | null {
+  try {
+    const lines = csvContent.split('\n').filter(line => line.trim())
+    
+    if (lines.length < 2) {
+      throw new Error('Fichier CSV invalide: trop peu de lignes')
+    }
+    
+    const catalog: CatalogEntry[] = []
+    
+    let detailsStartIndex = -1
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (line.includes('N°,Type de composant,Nombre') || line.includes('Type,Count')) {
+        detailsStartIndex = i + 1
+        break
+      }
+    }
+    
+    if (detailsStartIndex !== -1) {
+      for (let i = detailsStartIndex; i < lines.length; i++) {
+        const line = lines[i].trim()
+        if (!line || line.startsWith('===')) continue
+        
+        const values = parseCSVLine(line)
+        if (values.length >= 3) {
+          let typeIndex = 0
+          let countIndex = 1
+          
+          if (line.match(/^\d+,/)) {
+            typeIndex = 1
+            countIndex = 2
+          }
+          
+          let componentType = values[typeIndex] as ComponentType
+          const typeMap: Record<string, ComponentType> = {
+            'Disjoncteur': 'breaker',
+            'Transformateur': 'transformer',
+            'Barre omnibus': 'bus-bar',
+            'Interrupteur': 'switch',
+            'Fusible': 'fuse',
+            'Relais': 'relay',
+            'Compteur': 'meter',
+            'Condensateur': 'capacitor',
+            'Inductance': 'inductor',
+            'Générateur': 'generator',
+            'Moteur': 'motor',
+            'Charge': 'load',
+            'Inconnu': 'unknown'
+          }
+          
+          if (typeMap[componentType]) {
+            componentType = typeMap[componentType]
+          }
+          
+          const count = parseInt(values[countIndex]) || 0
+          
+          if (count > 0) {
+            const entry: CatalogEntry = {
+              id: `catalog-${componentType}-${Date.now()}`,
+              type: componentType,
+              count,
+              examples: [],
+              lastUpdated: Date.now(),
+            }
+            catalog.push(entry)
+          }
+        }
+      }
+    }
+    
+    return catalog.length > 0 ? catalog : null
+  } catch (error) {
+    console.error('Erreur lors de l\'import du catalogue CSV:', error)
+    return null
+  }
+}
+
+export async function uploadFile(accept: string): Promise<{ content: string; fileName: string } | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = accept
+    
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) {
+        resolve(null)
+        return
+      }
+      
+      try {
+        const content = await file.text()
+        resolve({ content, fileName: file.name })
+      } catch (error) {
+        console.error('Erreur lors de la lecture du fichier:', error)
+        resolve(null)
+      }
+    }
+    
+    input.oncancel = () => {
+      resolve(null)
+    }
+    
+    input.click()
+  })
+}
+
 export async function downloadFile(content: string, fileName: string, mimeType: string): Promise<void> {
   const blob = new Blob([content], { type: mimeType })
   

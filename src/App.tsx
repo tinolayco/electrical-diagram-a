@@ -48,9 +48,10 @@ import {
   GraduationCap,
   Sliders,
   TrashSimple,
-  FileCsv
+  FileCsv,
+  Download
 } from '@phosphor-icons/react'
-import { exportSchematicToCSV, exportCatalogToCSV, downloadFile } from '@/lib/export-formats'
+import { exportSchematicToCSV, exportCatalogToCSV, downloadFile, uploadFile, importCatalogFromCSV } from '@/lib/export-formats'
 
 function App() {
   const [schematics, setSchematics] = useKV<Schematic[]>('schematics', [])
@@ -470,6 +471,48 @@ function App() {
     }
   }
 
+  const handleImportCatalogCSV = async () => {
+    try {
+      const result = await uploadFile('.csv')
+      
+      if (!result) {
+        toast.info('Import annulé')
+        return
+      }
+      
+      const importedCatalog = importCatalogFromCSV(result.content)
+      
+      if (!importedCatalog || importedCatalog.length === 0) {
+        toast.error('Fichier CSV invalide ou aucune donnée trouvée')
+        return
+      }
+      
+      setCatalog(currentCatalog => {
+        const catalogMap = new Map((currentCatalog || []).map(entry => [entry.type, entry]))
+        
+        importedCatalog.forEach(entry => {
+          const existing = catalogMap.get(entry.type)
+          if (existing) {
+            existing.count += entry.count
+            existing.lastUpdated = Date.now()
+          } else {
+            catalogMap.set(entry.type, {
+              ...entry,
+              lastUpdated: Date.now()
+            })
+          }
+        })
+        
+        return Array.from(catalogMap.values())
+      })
+      
+      toast.success(`Catalogue importé avec succès! ${importedCatalog.length} types de composants ajoutés.`)
+    } catch (error) {
+      console.error('Import error:', error)
+      toast.error('Erreur lors de l\'importation du catalogue')
+    }
+  }
+
   const selectedComponentData = filteredComponents.find(
     c => c.id === selectedComponent
   )
@@ -748,23 +791,35 @@ function App() {
               <Card className="p-4 h-full overflow-auto">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-base font-semibold">Catalogue de composants</h3>
-                  {catalog && catalog.length > 0 && (
+                  <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleExportCatalogCSV}
+                      onClick={handleImportCatalogCSV}
                       className="h-8 text-xs"
                     >
-                      <FileCsv size={14} className="mr-1.5" />
-                      Exporter CSV
+                      <Download size={14} className="mr-1.5" />
+                      Importer CSV
                     </Button>
-                  )}
+                    {catalog && catalog.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExportCatalogCSV}
+                        className="h-8 text-xs"
+                      >
+                        <FileCsv size={14} className="mr-1.5" />
+                        Exporter CSV
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 {!catalog || catalog.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Cube size={48} className="mx-auto mb-3" weight="duotone" />
                     <p className="text-sm">Aucun composant dans le catalogue</p>
                     <p className="text-xs mt-1">Analysez des schémas pour construire votre catalogue</p>
+                    <p className="text-xs mt-1">ou importez un catalogue CSV existant</p>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
