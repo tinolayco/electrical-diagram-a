@@ -2,6 +2,11 @@
 declare const GITHUB_RUNTIME_PERMANENT_NAME: string
 declare const BASE_KV_SERVICE_URL: string
 
+declare module '*.svg' {
+  const content: string
+  export default content
+}
+
 interface SparkAPI {
   llmPrompt: (strings: TemplateStringsArray, ...values: unknown[]) => string
   llm: (prompt: string, modelName?: string, jsonMode?: boolean) => Promise<string>

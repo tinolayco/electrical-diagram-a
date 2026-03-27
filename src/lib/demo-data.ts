@@ -1,10 +1,10 @@
 import type { Schematic, Component, ElectricalPath } from './types'
+import demoSchematicSvg from '@/assets/demo-schematic.svg'
 
 export async function loadDemoSchematic(): Promise<Schematic> {
-  const demoImageUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Single-line_diagram_of_an_electrical_substation.svg/800px-Single-line_diagram_of_an_electrical_substation.svg.png'
-  
-  const response = await fetch(demoImageUrl)
-  const blob = await response.blob()
+  const response = await fetch(demoSchematicSvg)
+  const svgText = await response.text()
+  const blob = new Blob([svgText], { type: 'image/svg+xml' })
   
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
