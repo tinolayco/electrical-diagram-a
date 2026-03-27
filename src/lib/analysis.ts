@@ -1,4 +1,4 @@
-import type { Component, ComponentType, TrainingAnnotation } from './types'
+import type { Component, ComponentType, TrainingAnnotation, BoundingBox } from './types'
 import { detectComponentsInImage } from './image-detection'
 
 export async function analyzeSchematic(imageData: string, trainingAnnotations?: TrainingAnnotation[]): Promise<Component[]> {
@@ -6,46 +6,50 @@ export async function analyzeSchematic(imageData: string, trainingAnnotations?: 
     ? convertAnnotationsToComponents(trainingAnnotations)
     : await detectComponentsInImage(imageData)
   
+  if (imageDetectedComponents.length === 0) {
+    return []
+  }
+  
   const prompt = spark.llmPrompt`You are an expert electrical engineer analyzing a single-line electrical diagram.
 
-Analyze this electrical schematic image and identify all electrical components visible in the diagram.
-
-We have already performed computer vision analysis and detected these components:
+We have performed computer vision analysis and detected these components with their visual locations:
 ${JSON.stringify(imageDetectedComponents.map(c => ({
+  id: c.id,
   type: c.type,
   name: c.name,
-  position: c.boundingBox,
+  boundingBox: c.boundingBox,
   confidence: c.confidence
-})))}
+})), null, 2)}
+
+IMPORTANT: The boundingBox coordinates are already correct percentages (0-100) of image dimensions.
 
 Your task is to:
-1. Verify and refine the detected components
-2. Add any missing components that computer vision missed
-3. Extract text labels (component names like CB-1, M1, T1, etc.)
-4. Identify voltage and current ratings from visible text
-5. Identify manufacturer information if visible
+1. Keep the exact same boundingBox coordinates from the computer vision analysis
+2. Improve the component names by analyzing text in the image (e.g., "CB-1", "T1", "M1")
+3. Identify voltage ratings from visible text
+4. Identify current ratings from visible text
+5. Add manufacturer info if visible
 
-For each component, return:
+CRITICAL: You must preserve the exact boundingBox from the input. Do not change or estimate new positions.
+
+Return a JSON object with a single property "components" containing the refined array.
+
+Example output format:
 {
-  "type": "breaker",
-  "name": "CB-1",
-  "boundingBox": {
-    "x": 10,
-    "y": 20,
-    "width": 5,
-    "height": 8
-  },
-  "confidence": 85,
-  "voltage": "480V",
-  "rating": "100A",
-  "manufacturer": "Schneider Electric"
+  "components": [
+    {
+      "id": "comp-123",
+      "type": "breaker",
+      "name": "CB-1",
+      "boundingBox": {"x": 22.5, "y": 72, "width": 4, "height": 6},
+      "confidence": 95,
+      "voltage": "480V",
+      "rating": "400A"
+    }
+  ]
 }
 
-The boundingBox coordinates should be percentages (0-100) of the image width and height.
-
-Return a JSON object with a single property "components" containing an array of all component objects.
-
-Image data: ${imageData.substring(0, 200)}...`
+Image (base64): ${imageData.substring(0, 300)}...`
 
   try {
     const response = await spark.llm(prompt, 'gpt-4o', true)
@@ -55,23 +59,41 @@ Image data: ${imageData.substring(0, 200)}...`
       return imageDetectedComponents
     }
     
-    const refinedComponents = parsed.components.map((comp: any, index: number) => ({
-      id: `comp-${Date.now()}-${index}`,
-      type: (comp.type || 'unknown') as ComponentType,
-      name: comp.name || `Component ${index + 1}`,
-      boundingBox: comp.boundingBox || { x: 0, y: 0, width: 10, height: 10 },
-      confidence: comp.confidence || 50,
-      voltage: comp.voltage,
-      rating: comp.rating,
-      manufacturer: comp.manufacturer,
-      connections: [],
-      metadata: comp.metadata || {}
-    }))
+    const componentMap = new Map(imageDetectedComponents.map(c => [c.id, c]))
+    
+    const refinedComponents = parsed.components
+      .map((comp: any) => {
+        const original = componentMap.get(comp.id)
+        if (!original) return null
+        
+        return {
+          id: comp.id,
+          type: (comp.type || original.type) as ComponentType,
+          name: comp.name || original.name,
+          boundingBox: validateBoundingBox(comp.boundingBox || original.boundingBox),
+          confidence: Math.min(100, Math.max(0, comp.confidence || original.confidence)),
+          voltage: comp.voltage || original.voltage,
+          rating: comp.rating || original.rating,
+          manufacturer: comp.manufacturer || original.manufacturer,
+          connections: [],
+          metadata: { ...original.metadata, ...comp.metadata }
+        }
+      })
+      .filter((c: any) => c !== null)
     
     return refinedComponents.length > 0 ? refinedComponents : imageDetectedComponents
   } catch (error) {
     console.error('Failed to analyze schematic:', error)
     return imageDetectedComponents
+  }
+}
+
+function validateBoundingBox(box: any): BoundingBox {
+  return {
+    x: Math.max(0, Math.min(100, Number(box.x) || 0)),
+    y: Math.max(0, Math.min(100, Number(box.y) || 0)),
+    width: Math.max(0.1, Math.min(100, Number(box.width) || 5)),
+    height: Math.max(0.1, Math.min(100, Number(box.height) || 5))
   }
 }
 
