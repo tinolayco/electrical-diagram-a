@@ -423,9 +423,12 @@ function App() {
             <div className="flex items-center gap-2.5">
               <Cpu size={28} weight="duotone" className="text-primary flex-shrink-0" />
               <div>
-                <h1 className="text-xl font-bold tracking-tight">
-                  Analyseur de schémas électriques
+                <h1 className="text-2xl font-bold tracking-tight">
+                  iSchémateur
                 </h1>
+                <p className="text-sm text-muted-foreground">
+                  Analyseur de schémas électriques
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {opencvReady ? '✓ OpenCV.js activé - Détection avancée' : 'Reconnaissance de composants par IA'}
                 </p>
