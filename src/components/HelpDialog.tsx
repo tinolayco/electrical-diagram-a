@@ -39,6 +39,8 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
           </DialogTitle>
           <DialogDescription>
             Guide complet pour analyser vos schémas électriques unifilaires avec l'IA
+            <br />
+            <span className="text-xs text-muted-foreground mt-1 inline-block">Par Normand Rocheleau</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -388,8 +390,8 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                 <div className="flex gap-3">
                   <div className="w-1 bg-primary rounded-full flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">OpenCV.js - Détection multi-angles</p>
-                    <p className="text-xs">Détection automatique des composants avec rotation (0°, 90°, 180°, 270°) via template matching OpenCV. Méthode TM_CCOEFF_NORMED pour une corrélation normalisée optimale.</p>
+                    <p className="font-medium text-foreground">par Normand Rocheleau - Détection multi-angles</p>
+                    <p className="text-xs">Détection automatique des composants avec rotation (0°, 90°, 180°, 270°) via template matching par Normand Rocheleau. Méthode TM_CCOEFF_NORMED pour une corrélation normalisée optimale.</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -414,6 +416,20 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
                   </div>
                 </div>
               </div>
+            </section>
+
+            <Separator />
+
+            <section className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-lg p-4 text-center">
+              <p className="text-sm font-semibold text-foreground mb-1">
+                iSchémateur - Analyseur de schémas électriques
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Développé par <strong className="text-foreground">Normand Rocheleau</strong>
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-2">
+                Vision par ordinateur • Intelligence artificielle • Apprentissage supervisé
+              </p>
             </section>
           </div>
         </ScrollArea>
