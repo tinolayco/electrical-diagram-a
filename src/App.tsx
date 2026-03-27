@@ -512,6 +512,7 @@ function App() {
                   size="sm"
                   onClick={() => setTrainingMode(true)}
                   disabled={!currentSchematic}
+                  title={!currentSchematic ? 'Téléversez un schéma pour commencer l\'entraînement' : 'Entraîner la bibliothèque avec de nouveaux composants'}
                 >
                   <GraduationCap size={16} className="mr-1.5" weight="duotone" />
                   Entraîner {activeLibrary && activeLibrary.componentCount > 0 && `(${activeLibrary.componentCount})`}
