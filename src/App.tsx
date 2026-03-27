@@ -6,6 +6,7 @@ import { DiagramViewer } from '@/components/DiagramViewer'
 import { ComponentList } from '@/components/ComponentList'
 import { ComponentEditor } from '@/components/ComponentEditor'
 import { UploadDialog } from '@/components/UploadDialog'
+import { HelpDialog } from '@/components/HelpDialog'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -18,7 +19,8 @@ import {
   Cube, 
   GitBranch,
   PencilSimple,
-  Cpu
+  Cpu,
+  Question
 } from '@phosphor-icons/react'
 
 function App() {
@@ -29,6 +31,7 @@ function App() {
   const [highlightedPath, setHighlightedPath] = useState<string[] | null>(null)
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState(0)
 
@@ -166,6 +169,14 @@ function App() {
               </div>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setHelpDialogOpen(true)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Question size={20} weight="bold" />
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => setUploadDialogOpen(true)}
@@ -333,6 +344,11 @@ function App() {
         open={editorOpen}
         onClose={() => setEditorOpen(false)}
         onSave={handleComponentSave}
+      />
+
+      <HelpDialog
+        open={helpDialogOpen}
+        onClose={() => setHelpDialogOpen(false)}
       />
     </div>
   )
