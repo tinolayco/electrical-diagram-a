@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<head>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wgh
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iSchémateur - Analyseur de schémas électriques</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="console.log('par Normand Rocheleau ing.')"></script>
+    <style>
         * {
+            margin: 0;
             padding: 0;
-    
-        bod
-           
-            overflow: 
-        }
-        .container {
+            box-sizing: border-box;
         }
 
         body {
@@ -20,1511 +19,832 @@
             color: #1a1a1a;
             overflow: hidden;
             height: 100vh;
-        }
-
-
             display: flex;
             flex-direction: column;
         }
-        }
 
+        header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 12px 24px;
+            flex-shrink: 0;
         }
-        .logo-icon {
-            height: 40px;
-            border-radius: 8px;
-            align-items: ce
-         
 
         .header-content {
             display: flex;
             justify-content: space-between;
-
-            font-size:
+            align-items: center;
+            gap: 16px;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            display: f
+            gap: 12px;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
-            font-size: 14px;
-            transition: all 0.2
+            width: 32px;
+            height: 32px;
+            background: #4f46e5;
+            color: white;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-        button:disabled {
-            cursor: not-allowe
-            font-size: 16px;
+            font-weight: bold;
         }
 
-        }
-        button.primary:hover
+        .logo-text h1 {
+            font-size: 20px;
             font-weight: 700;
-        select {
-         
-
-            backgro
-        }
-        main {
-            padding: 16px 24
         }
 
-        .canvas-containe
-            background: whit
-            border: 1px sol
-            position: relati
-
-
+        .logo-text p {
+            font-size: 12px;
+            color: #666;
         }
+
+        .header-actions {
             display: flex;
-            flex-wrap: wrap;
-            border-ra
+            gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
-            padd
-            font-weight: 600;
-        }
-        .sidebar-content {
-            overflow-y: auto;
-        }
-        .component-item {
+        button {
+            padding: 8px 16px;
+            border: 1px solid #e5e5e5;
+            background: white;
+            border-radius: 6px;
             cursor: pointer;
-        }
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .component-item.selected {
+        button:hover {
+            background: #f5f5f5;
+        }
+
+        button.primary {
+            background: #4f46e5;
+            color: white;
             border-color: #4f46e5;
-
-         
-
         }
+
+        button.primary:hover {
+            background: #4338ca;
+        }
+
+        button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-            color: #666;
-
-            text-align: c
-            color: #666;
-        }
-
-        }
-        .modal {
-        }
-
-            bott
-            align-items: cente
-            z-index: 1000;
-
-            display: flex;
-
+        select {
+            padding: 8px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            font-size: 14px;
             background: white;
-            cursor: pointer;
-         
+        }
 
-
+        main {
             flex: 1;
-            margin-bottom: 16px
-
+            padding: 16px 24px;
             display: flex;
-
+            gap: 16px;
+            min-height: 0;
         }
 
         .canvas-container {
             flex: 1;
-            max-width: 100%;
-        }
-        .annotation-list {
-            overflow: hidden;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
             position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-            padd
-            border-radius: 
+        canvas {
+            display: block;
+            cursor: grab;
         }
-        i
+
+        canvas:active {
+            cursor: grabbing;
+        }
 
         .sidebar {
             width: 360px;
-        }
-        label {
-            font-size: 14px;
             display: flex;
             flex-direction: column;
-        .threshold-control {
-        }
-
-            border-radius
-        }
-        .threshold-label {
-            font-weight: 600;
-
-        }
-
-            font-family: '
-            color: #
+            gap: 16px;
+            flex-shrink: 0;
             overflow-y: auto;
+        }
 
+        .card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .component-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .component-item {
-
-            padding: 12px 16px;
-            background: none;
+            padding: 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
             cursor: pointer;
-            border-bottom: 2px solid tra
-        }
+            transition: all 0.2s;
         }
 
         .component-item:hover {
-            display: none;
+            border-color: #4f46e5;
+            background: #f9fafb;
         }
 
         .component-item.selected {
-            height: 4px;
-            overflow: hidden;
+            border-color: #4f46e5;
+            background: #eef2ff;
         }
 
         .component-type {
-            width: 0%;
             font-weight: 600;
-            display: none;
-            top: 0;
+            font-size: 13px;
+            margin-bottom: 4px;
         }
 
-            z-index: 999;
-            justify-content:
-
-            display: flex;
-        }
-
-            border-radius: 12px
-            text-align: cent
-        }
-        }
-
-        }
-        .stat-card {
-            padding: 12px;
-            text-align: 
-        }
-
-            color: #4f46e5;
-
+        .component-confidence {
             font-size: 11px;
+            color: #666;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .threshold-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .threshold-control input[type="range"] {
+            flex: 1;
+        }
+
+        .threshold-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            min-width: 45px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
 
         .modal {
             display: none;
             position: fixed;
-                opa
-        }
-        @keyframes sl
-                transf
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             align-items: center;
             justify-content: center;
-            }
         }
 
-                <div cl
+        .modal.active {
             display: flex;
         }
 
         .modal-content {
-                        <optio
-                    <button oncl
-                    <butto
-                    <button i
+            background: white;
+            border-radius: 12px;
+            max-width: 500px;
             width: 90%;
-            </div>
-
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .modal-header {
-            <button class="t
-
-            <div id="analysisTab
+            padding: 20px;
+            border-bottom: 1px solid #e5e5e5;
+            font-weight: 600;
+            font-size: 18px;
         }
 
         .modal-body {
-                            <spa
+            padding: 20px;
         }
 
         .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e5e5e5;
             display: flex;
             justify-content: flex-end;
-                     
+            gap: 8px;
         }
 
-            </div>
-            <div id="catalogTab" class
-                    <div class
-                            
-                         
-        }
-
-                        <d
-                            <
-                    </div>
-            </div>
-        }
-
-                        <d
-                          
-                    </div>
+        .drag-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(79, 70, 229, 0.1);
+            border: 4px dashed #4f46e5;
+            z-index: 999;
             align-items: center;
-    </div>
-    <div class="drag-overlay" id
-            <div style="font-si
-            <div style="font-si
+            justify-content: center;
+            pointer-events: none;
         }
 
-            <div class="modal-header">Mode Entra
-                <p style
-                </p>
-                <div style="margin-top
-                    <input type
-                <div class="annotation-list" id="anno
-            <div class="moda
-                <button class="p
+        .drag-overlay.active {
+            display: flex;
         }
 
-        <div cl
-            <div class="mod
-                <p><strong>1
-                    <li>Créez
-                    <li>Exporte
-                <p><stro
+        .drag-message {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 2px solid #4f46e5;
         }
 
-                </ul>
-                <ul style=
-                    <li>Cliquez 
-                    <l
-                <p><strong
-                    <li>Clique
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 12px;
+            background: #f9fafb;
             border-radius: 6px;
-                    <strong>Conception
+            text-align: center;
         }
 
-            </div>
-    </div>
-    <input type="file" id="fileI
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4f46e5;
         }
 
-            currentSchemati
-            componen
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
         }
 
-            panY: 0,
-            lastX: 0,
-            opencvReady: fal
-            trainingAnno
-            trainingStart: n
-            init() {
-        }
-
-               
-            display: flex;
-                const
-                        this
-                            '✅ par Normand Ro
-                    }
-        }
-
-              
-                    }
-            },
-            setupCanvas() {
-                const contai
-                canvas.width 
-
-                    e.preventDefault();
-            cursor: pointer;
-        }
-
-                    c
-                    
-                    this.panY = mouseY - 
-        }
-
-                canvas
-                    this.i
-        }
-
-                canvas.addEve
-            display: flex;
-        }
-
-                       
-                });
-                canvas.addEventL
-                    canvas.st
+        input[type="file"] {
             display: none;
         }
 
-                    cons
-                    this.
-                            y >=
-                                com
-                      
-        }
-
-                });
+        .progress-bar {
+            height: 4px;
+            background: #e5e5e5;
+            border-radius: 2px;
+            overflow: hidden;
             display: none;
-                const overla
-                doc
-                    
-                    }
-
-                    if (e.target === document.b
-                    }
-
-                    e.preventDef
-                    
         }
 
-                        } else
-                        }
+        .progress-bar.active {
+            display: block;
         }
 
-                const s
-                    const data
-                    this.c
-                }
-                if (this.libraries.length === 0) {
-                        id: 'de
-                        isDefault: tru
-        }
-
-                this.
-
-                localStorage.setItem('iSchemateur', JSON.stringify({
-                    ca
-                }));
-        }
-
-                
-                    const option
-                    option
-                        option.
-                    select.appe
-        }
-
-                };
-
-                const trainBt
-                
-        }
-
-                analy
-
-                const na
-                    const ne
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
+        .progress-fill {
+            height: 100%;
+            background: #4f46e5;
+            transition: width 0.3s;
         }
     </style>
 </head>
 <body>
-                        dat
-                
-                    this.paths = [];
-                    this.updateBut
-                };
-            },
-            loadImage(dataUrl) {
-                img.onload = () => {
-                    this.resetView();
-                };
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">iS</div>
+                <div class="logo-text">
+                    <h1>iSchémateur</h1>
+                    <p>Analyseur de schémas électriques</p>
                 </div>
-            resetView() {
-                const canvas = document.getElementById('mainCanvas');
-
-                    const sca
-                    this.zoom = Math.min(scaleX, scaleY, 1) * 0.95;
-                    this.panX = (container.clientWidth - this.currentImage.width * this.zoom) / 2;
-                }
-
-                const canvas = document.getElementById('mainCanvas');
-                
-                
-                    ct
             </div>
-                 
+            <div class="header-actions">
+                <select id="librarySelect">
+                    <option value="default">Bibliothèque par défaut</option>
+                </select>
+                <button id="uploadBtn">📤 Téléverser</button>
+                <button id="trainBtn" disabled>🎓 Entraîner</button>
+                <button id="analyzeBtn" class="primary" disabled>⚡ Analyser</button>
+                <button id="resetBtn">🗑️ Réinitialiser</button>
+            </div>
+        </div>
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </header>
 
-                        .forEach(comp => {
-                                comp.type.toLowerCase().include
-              
+    <main>
+        <div class="canvas-container">
+            <canvas id="mainCanvas"></canvas>
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-icon">📊</div>
+                <h2>Aucun schéma chargé</h2>
+                <p style="margin: 12px 0; color: #999;">Téléversez un schéma électrique pour commencer</p>
+                <button id="uploadBtn2">📤 Téléverser un schéma</button>
+            </div>
+        </div>
 
-                          
-                                }
-                            }
-                            ctx.strokeStyle = comp.selected ? '#22c55e' : '#4f46e5';
-              
-
-              
-                            const metrics = ctx.measureText(t
-                            
-                                comp.x,
+        <div class="sidebar">
+            <div class="card">
+                <div class="card-title">Seuil de confiance</div>
+                <div class="threshold-control">
+                    <label style="font-size: 12px;">Seuil:</label>
+                    <input type="range" id="thresholdSlider" min="80" max="99" value="85">
+                    <span class="threshold-value" id="thresholdValue">85%</span>
                 </div>
-
-                            ctx.fillS
-                        });
-                    ctx.restore();
-            },
-            async analyze() {
-                
-                this.showToast('Analyse en cours...');
-                setTimeout(() => {
-                    this.detectComponents();
-                    setTimeout(() => {
-                        this.ident
-                        </div>
-                    </div>
-                            this.render();
-                            setTimeout(() => {
-                                const filtered = this.components.f
-                                );
-                                    `Détection terminée! ${this.components.length} composants trouvés, ` +
-                        </div>
-                    </div>
+                <div style="margin-top: 8px; font-size: 11px; color: #666;">
+                    <span id="filteredCount">0</span>/<span id="totalCount">0</span> composants affichés
                 </div>
             </div>
 
-                
-                    this.detectDefaultComponents();
-                    annotations.forEach((ann, in
-                            const similarComponents = this.findSimilarComponents(ann, angle);
-                        }
-                }
-                this.components.forEach((comp, i) => {
-                    comp.name = `${comp.type}-${i + 1}`;
-            },
-                        </div>
-                if (!this.
-                const count = Math.floor(Math.random() * 8) + 5;
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📦</div>
-                    const w = 40 + Math.random() * 60;
-                        </div>
+            <div class="card" id="statsCard" style="display: none;">
+                <div class="card-title">Statistiques</div>
+                <div class="stats-grid" id="statsGrid"></div>
+            </div>
+
+            <div class="card" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div class="card-title">Composants détectés</div>
+                <div class="component-list" id="componentList">
+                    <div style="text-align: center; padding: 24px; color: #999;">
+                        <p>Aucun composant détecté</p>
+                        <p style="font-size: 12px; margin-top: 8px;">Analysez un schéma pour voir les résultats</p>
                     </div>
                 </div>
             </div>
+        </div>
+    </main>
 
-                        state: 'unknown'
-                }
+    <input type="file" id="fileInput" accept="image/*">
 
-                const similar = [];
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🔀</div>
-                    const x = Math.random() * (this.currentImage.width -
-                        </div>
-                    </div>
-                </div>
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">Téléverser un schéma</div>
+            <div class="modal-body">
+                <p>Sélectionnez une image de schéma électrique (PNG, JPG, SVG)</p>
+                <button onclick="document.getElementById('fileInput').click()" style="margin-top: 16px; width: 100%;">
+                    Choisir un fichier
+                </button>
             </div>
-               
-          
+            <div class="modal-footer">
+                <button onclick="app.closeModal('uploadModal')">Annuler</button>
+            </div>
+        </div>
+    </div>
 
     <div class="drag-overlay" id="dragOverlay">
-            identifyPaths() {
-                
-                
-                for (let i = 0; i < pathCount; i++) {
+        <div class="drag-message">
+            <div style="font-size: 48px; margin-bottom: 16px;">📤</div>
+            <h3>Déposez votre schéma ici</h3>
+            <p style="color: #666; margin-top: 8px;">Formats: PNG, JPG, SVG (max 10 Mo)</p>
         </div>
     </div>
-
-                        }
-        <div class="modal-content">
-                        this.paths.push({
-            <div class="modal-body">
-                            voltage: ['120V', '240V', '480V', '600V'][Math.flo
-                    }
-                </p>
-            },
-            updateComponentList() {
-                const filtered = this.components.fil
-                );
-                </div>
-                        <div class="empty-state">
-            </div>
-            <div class="modal-footer">
-                            </div>
-                    `;
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="helpModal">
-                        </div>
-                `).join('');
-
-                this.components.forEach(comp => {
-                        this.catalog[comp.type] = 0;
-                    this.catalog[comp.type]++;
-                
-                this.updateCatalogView();
-
-                const
-                
-                    content.innerHTML = `
-                            <div class="empty-state-icon">📦</
-                        </div>
-                    return;
-                
-                    <
-                            <div class="stat-card"
-                                <div class="stat-label">${type}</div
-                        `).join('')}
-                    <li>Cliquez sur "Analyser" pour détecter les composants</li>
-
-                const content = document.getElementById('pathsCont
-                if (t
-                        <div class="empty-state">
-                            <div>Aucun chemin électrique identifié</
-                    `;
-                }
-                conte
-                        <div class="component-type">${path.description}</div>
-                        <div class="component-confidence">${path.voltage}</div>
-                `).join('');
-                </p>
-            </div>
-            <div class="modal-footer">
-
-            </div>
-        </div>
-    </div>
-
-            },
 
     <script>
-                this.
-            },
-            openTrainingMode() {
-                
+        const app = {
+            currentSchematic: null,
             currentImage: null,
             components: [],
-            paths: [],
-            catalog: {},
+            selectedComponent: null,
+            libraries: [],
+            activeLibraryId: 'default',
             confidenceThreshold: 85,
-                    
+            zoom: 1,
+            panX: 0,
+            panY: 0,
+            isDragging: false,
+            lastX: 0,
+            lastY: 0,
 
-                    
-                        const 
-                     
-                    }
-                    canvas.onmo
-                        const rect =
-                        const curren
-                        ctx.cl
-                        
+            init() {
+                this.loadData();
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.updateUI();
+            },
 
-                    
-                        
-                        ctx.lineWid
-                    };
-                    canvas.onmouseup 
-                        isDrawing = f
-                        const rect = 
-              
+            loadData() {
+                const saved = localStorage.getItem('iSchemateur');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.components = data.components || [];
+                    this.libraries = data.libraries || [];
+                    this.activeLibraryId = data.activeLibraryId || 'default';
+                    this.confidenceThreshold = data.confidenceThreshold || 85;
+                }
 
-                        
-                            const type = document.g
-                            const scaleY = img.heigh
-                            this.trainingAnnotat
-                                x: Math.min(startX, endX) * scaleX,
-                                width: width * scaleX,
-                            });
-                     
-                        
-
-                    };
-                img.src = this.currentSchema
-                modal.classList.add('active');
-
-                const list = document.getElementById('annotationLi
-                    <
-                        <b
-              
-
-                this.traini
-                
-                const ctx = canvas.getContext('2d');
-                
-                    ctx.drawImage(img, 0, 0, canvas.w
-                    const scaleX = canvas.width / img.w
-
-                        ctx.strokeStyle = '#4f46e5';
-                        ctx.strokeRect(
+                if (this.libraries.length === 0) {
+                    this.libraries.push({
+                        id: 'default',
+                        name: 'Bibliothèque par défaut',
+                        isDefault: true,
+                        annotations: [],
+                        componentCount: 0
                     });
-                img.src = this.currentSchematic.data;
-
-                if (
-                    return;
-                
-                
-                this.saveToStorage();
-                this.updateButtons();
-                this
+                }
             },
-            cancelTraining() {
-                this.trainingAnnotations
-                docu
 
+            saveData() {
+                localStorage.setItem('iSchemateur', JSON.stringify({
+                    components: this.components,
+                    libraries: this.libraries,
+                    activeLibraryId: this.activeLibraryId,
+                    confidenceThreshold: this.confidenceThreshold
+                }));
+            },
+
+            setupCanvas() {
+                const canvas = document.getElementById('mainCanvas');
+                const container = canvas.parentElement;
+
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+
+                canvas.addEventListener('wheel', (e) => {
+                    if (!this.currentImage) return;
+                    e.preventDefault();
+
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                    const newZoom = Math.max(0.1, Math.min(5, this.zoom * delta));
+
+                    const zoomPointX = (mouseX - this.panX) / this.zoom;
+                    const zoomPointY = (mouseY - this.panY) / this.zoom;
+
+                    this.zoom = newZoom;
+                    this.panX = mouseX - zoomPointX * this.zoom;
+                    this.panY = mouseY - zoomPointY * this.zoom;
+
+                    this.render();
                 });
 
-                        <rect x="180" y="80" width="40" heigh
-                        <rect x="380" y="80" wid
-                        <rect x="580" y="80
-                        <line x1="200" y1="
-                        <text x="200" y="26
-                        <circle cx="400" cy="220" r="
-                   
+                canvas.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    this.lastX = e.clientX;
+                    this.lastY = e.clientY;
+                });
 
-                const url = URL.createObjectURL(blob);
-                this.currentSchematic = {
-                    data: url,
-                };
-                this.loadImage(url);
-                this.showToast('Schéma d
+                canvas.addEventListener('mousemove', (e) => {
+                    if (!this.isDragging) return;
 
-                document.querySelectorAll('.tab
-                
-                docum
+                    const dx = e.clientX - this.lastX;
+                    const dy = e.clientY - this.lastY;
 
+                    this.panX += dx;
+                    this.panY += dy;
 
+                    this.lastX = e.clientX;
+                    this.lastY = e.clientY;
 
-                document.getElementById('hel
+                    this.render();
+                });
 
-                if 
+                canvas.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                });
 
-                    name: 'Bibliothèque par défaut',
-                    annotations: [],
-                }];
-                this.catalog = {};
-                this.paths = [];
-                this
-                this.saveToStorage();
-                this.updateButtons();
-                this.updateCatalogView();
-                this.render();
-                this.showToast('Toutes les données ont été réinitialisées');
+                canvas.addEventListener('mouseleave', () => {
+                    this.isDragging = false;
+                });
 
-                const csv = ['Type,Quantité'];
-                    csv.push(`"${type}",${coun
-                
-                this.showToas
+                canvas.addEventListener('click', (e) => {
+                    if (!this.currentImage) return;
 
-                const i
-                inp
-              
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left - this.panX) / this.zoom;
+                    const y = (e.clientY - rect.top - this.panY) / this.zoom;
 
-                        lines
-                            if (type && count) {
+                    const clicked = this.getFilteredComponents().find(comp => {
+                        return x >= comp.x && x <= comp.x + comp.width &&
+                               y >= comp.y && y <= comp.y + comp.height;
+                    });
 
-                        this.saveToStorage();
-                        this.showToast(
-                    reader.readAsText(file);
-                input.click();
+                    this.selectedComponent = clicked ? clicked.id : null;
+                    this.updateComponentList();
+                    this.render();
+                });
+            },
+
+            setupEventListeners() {
+                document.getElementById('uploadBtn').addEventListener('click', () => {
+                    document.getElementById('fileInput').click();
+                });
+
+                document.getElementById('uploadBtn2').addEventListener('click', () => {
+                    document.getElementById('fileInput').click();
+                });
+
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) this.handleFile(file);
+                });
+
+                document.getElementById('analyzeBtn').addEventListener('click', () => {
+                    this.analyze();
+                });
+
+                document.getElementById('thresholdSlider').addEventListener('input', (e) => {
+                    this.confidenceThreshold = parseInt(e.target.value);
+                    document.getElementById('thresholdValue').textContent = this.confidenceThreshold + '%';
+                    this.updateComponentList();
+                    this.render();
+                    this.saveData();
+                });
+
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    if (confirm('Réinitialiser toutes les données ?')) {
+                        this.reset();
                     }
-                con
-
-                a.download = filename;
-            },
-            showProgress(show) {
-                if (!
-                }
-
-                document.getElementById('progressFill').st
-
-                const existing = document.querySelector
-                
-                toast.className = 'toast';
-                toast.style.cssText = `
-                    bottom: 24px;
-                    background: #1a1a1a;
-                    padding: 12px 20px;
-                    font-size: 1
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                `;
-                docum
-                   
-              
-
-        window.addEventListener
-</body>
-
-
-
-
-
-                }
-
-
-
-
-
-
-
-
-
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="component-type">${comp.type}</div>
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
+                ['dragover', 'dragenter'].forEach(eventName => {
+                    document.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        document.getElementById('dragOverlay').classList.add('active');
+                    });
                 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                `;
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                ['dragleave', 'dragend'].forEach(eventName => {
+                    document.addEventListener(eventName, (e) => {
+                        if (e.target === document.body) {
+                            document.getElementById('dragOverlay').classList.remove('active');
                         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     });
+                });
+
+                document.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById('dragOverlay').classList.remove('active');
+
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        this.handleFile(file);
+                    }
+                });
+            },
+
+            handleFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.loadImage(e.target.result);
                 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                reader.readAsDataURL(file);
+            },
+
+            loadImage(dataUrl) {
+                const img = new Image();
+                img.onload = () => {
+                    this.currentImage = img;
+                    this.currentSchematic = {
+                        id: 'schematic-' + Date.now(),
+                        name: 'Schéma',
+                        imageData: dataUrl
+                    };
+                    this.resetView();
+                    this.updateUI();
+                    document.getElementById('emptyState').style.display = 'none';
+                };
+                img.src = dataUrl;
+            },
+
+            resetView() {
+                const canvas = document.getElementById('mainCanvas');
+                const container = canvas.parentElement;
+
+                if (this.currentImage) {
+                    const scaleX = container.clientWidth / this.currentImage.width;
+                    const scaleY = container.clientHeight / this.currentImage.height;
+                    this.zoom = Math.min(scaleX, scaleY, 1) * 0.95;
+                    this.panX = (container.clientWidth - this.currentImage.width * this.zoom) / 2;
+                    this.panY = (container.clientHeight - this.currentImage.height * this.zoom) / 2;
+                }
+
+                this.render();
+            },
+
+            render() {
+                const canvas = document.getElementById('mainCanvas');
+                const ctx = canvas.getContext('2d');
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (!this.currentImage) return;
+
+                ctx.save();
+                ctx.translate(this.panX, this.panY);
+                ctx.scale(this.zoom, this.zoom);
+
+                ctx.drawImage(this.currentImage, 0, 0);
+
+                this.getFilteredComponents().forEach(comp => {
+                    const isSelected = comp.id === this.selectedComponent;
+                    
+                    ctx.strokeStyle = isSelected ? '#22c55e' : '#4f46e5';
+                    ctx.lineWidth = 2 / this.zoom;
+                    ctx.strokeRect(comp.x, comp.y, comp.width, comp.height);
+
+                    ctx.fillStyle = isSelected ? '#22c55e' : '#4f46e5';
+                    ctx.font = `${12 / this.zoom}px 'JetBrains Mono'`;
+                    
+                    const label = `${comp.type} ${Math.round(comp.confidence)}%`;
+                    const metrics = ctx.measureText(label);
+                    const padding = 4 / this.zoom;
+
+                    ctx.fillRect(
+                        comp.x,
+                        comp.y - (16 / this.zoom),
+                        metrics.width + padding * 2,
+                        16 / this.zoom
+                    );
+
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(label, comp.x + padding, comp.y - (4 / this.zoom));
+                });
+
+                ctx.restore();
+            },
+
+            analyze() {
+                document.getElementById('progressBar').classList.add('active');
+                document.getElementById('progressFill').style.width = '0%';
+
+                setTimeout(() => {
+                    document.getElementById('progressFill').style.width = '30%';
+                }, 100);
+
+                setTimeout(() => {
+                    this.components = this.simulateDetection();
+                    document.getElementById('progressFill').style.width = '70%';
+                }, 500);
+
+                setTimeout(() => {
+                    document.getElementById('progressFill').style.width = '100%';
+                    this.updateUI();
+                    this.render();
+                    this.saveData();
+
+                    setTimeout(() => {
+                        document.getElementById('progressBar').classList.remove('active');
+                    }, 500);
+
+                    alert(`Analyse terminée! ${this.components.length} composants détectés`);
+                }, 1000);
+            },
+
+            simulateDetection() {
+                const types = ['CB', 'Transformateur', 'Relais', 'Fusible', 'Contacteur'];
+                const count = Math.floor(Math.random() * 15) + 5;
+                const components = [];
+
+                for (let i = 0; i < count; i++) {
+                    components.push({
+                        id: 'comp-' + i,
+                        type: types[Math.floor(Math.random() * types.length)],
+                        x: Math.random() * (this.currentImage.width - 100),
+                        y: Math.random() * (this.currentImage.height - 100),
+                        width: 80 + Math.random() * 40,
+                        height: 80 + Math.random() * 40,
+                        confidence: 80 + Math.random() * 19
+                    });
+                }
+
+                return components;
+            },
+
+            getFilteredComponents() {
+                return this.components.filter(c => c.confidence >= this.confidenceThreshold);
+            },
+
+            updateComponentList() {
+                const list = document.getElementById('componentList');
+                const filtered = this.getFilteredComponents();
+
+                if (filtered.length === 0) {
+                    list.innerHTML = `
+                        <div style="text-align: center; padding: 24px; color: #999;">
+                            <p>Aucun composant détecté</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.innerHTML = filtered.map(comp => `
+                    <div class="component-item ${comp.id === this.selectedComponent ? 'selected' : ''}"
+                         onclick="app.selectComponent('${comp.id}')">
+                        <div class="component-type">${comp.type}</div>
+                        <div class="component-confidence">Confiance: ${Math.round(comp.confidence)}%</div>
+                    </div>
+                `).join('');
+
+                document.getElementById('filteredCount').textContent = filtered.length;
+                document.getElementById('totalCount').textContent = this.components.length;
+            },
+
+            selectComponent(id) {
+                this.selectedComponent = id;
+                this.updateComponentList();
+                this.render();
+            },
+
+            updateUI() {
+                const hasSchematic = !!this.currentSchematic;
+                const hasComponents = this.components.length > 0;
+
+                document.getElementById('analyzeBtn').disabled = !hasSchematic;
+                document.getElementById('statsCard').style.display = hasComponents ? 'block' : 'none';
+
+                if (hasComponents) {
+                    this.updateStats();
+                }
+
+                this.updateComponentList();
+            },
+
+            updateStats() {
+                const stats = {};
+                this.getFilteredComponents().forEach(comp => {
+                    stats[comp.type] = (stats[comp.type] || 0) + 1;
+                });
+
+                const grid = document.getElementById('statsGrid');
+                grid.innerHTML = Object.entries(stats).map(([type, count]) => `
+                    <div class="stat-card">
+                        <div class="stat-value">${count}</div>
+                        <div class="stat-label">${type}</div>
+                    </div>
+                `).join('');
+            },
+
+            reset() {
+                this.currentSchematic = null;
+                this.currentImage = null;
+                this.components = [];
+                this.selectedComponent = null;
+                this.zoom = 1;
+                this.panX = 0;
+                this.panY = 0;
+
+                localStorage.removeItem('iSchemateur');
+
+                document.getElementById('emptyState').style.display = 'flex';
+                this.updateUI();
+                this.render();
+            },
+
+            closeModal(id) {
+                document.getElementById(id).classList.remove('active');
             }
+        };
 
-
-
+        window.addEventListener('load', () => {
+            app.init();
+        });
     </script>
 </body>
 </html>
