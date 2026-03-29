@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iSchémateur Flask</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Version Flask Python</p>
+        <h1>iSchémateur</h1>
+        <p class="subhead">Analyseur de schémas électriques avec entraînement supervisé et build standalone.</p>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-group library-group">
+          <label for="librarySelect">Bibliothèque</label>
+          <select id="librarySelect"></select>
+          <button id="newLibraryBtn" class="secondary">Nouvelle</button>
+          <button id="editLibraryBtn" class="secondary">Modifier</button>
+          <button id="importLibraryBtn" class="secondary">Importer</button>
+          <button id="exportLibraryBtn" class="secondary">Exporter</button>
+          <button id="deleteLibraryBtn" class="danger-outline">Supprimer</button>
+        </div>
+        <div class="toolbar-group">
+          <button id="demoBtn" class="secondary">Exemple</button>
+          <button id="uploadBtn" class="secondary">Téléverser</button>
+          <button id="analyzeBtn" class="primary">Analyser</button>
+          <button id="resetBtn" class="danger-outline">Réinitialiser</button>
+        </div>
+      </div>
+    </header>
+
+    <label class="hidden" for="schematicFileInput">Téléverser un schéma</label>
+    <input id="schematicFileInput" type="file" accept=".png,.jpg,.jpeg,.bmp,.webp" title="Téléverser un schéma">
+    <label class="hidden" for="libraryFileInput">Importer une bibliothèque</label>
+    <input id="libraryFileInput" type="file" accept=".json,.csv,.xml" title="Importer une bibliothèque">
+
+    <main class="workspace">
+      <section class="viewer-column">
+        <div id="emptyState" class="empty-state hidden">
+          <div class="empty-card">
+            <p class="eyebrow">Aucun schéma</p>
+            <h2>Téléversez un schéma ou chargez l’exemple intégré</h2>
+            <p>La version Flask reprend le flux principal de l’application React dans un projet Python séparé.</p>
+            <div class="empty-actions">
+              <button id="emptyUploadBtn" class="primary">Téléverser</button>
+              <button id="emptyDemoBtn" class="secondary">Charger l’exemple</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="mainContent" class="hidden fill-column">
+          <div id="mainTabbar" class="tabbar">
+            <button id="analysisTabBtn" class="tab active" data-tab="analysis">Analyse</button>
+            <button id="catalogTabBtn" class="tab" data-tab="catalog">Catalogue</button>
+            <button id="pathsTabBtn" class="tab" data-tab="paths">Chemins</button>
+            <div class="spacer"></div>
+            <div class="compact-control">
+              <label for="thresholdRange">Seuil</label>
+              <input id="thresholdRange" type="range" min="80" max="99" step="1">
+              <strong id="thresholdLabel">85%</strong>
+            </div>
+            <button id="exportSchematicBtn" class="secondary">Exporter schéma CSV</button>
+            <button id="exportCatalogBtn" class="secondary">Exporter catalogue CSV</button>
+          </div>
+
+          <section class="panel active" data-panel="analysis">
+            <div id="analysisLayout" class="analysis-layout">
+              <div class="viewer-panel card">
+                <div class="viewer-toolbar">
+                  <div>
+                    <h2 id="schematicTitle">Schéma</h2>
+                    <p id="schematicMeta" class="muted"></p>
+                  </div>
+                  <div class="viewer-actions">
+                    <button id="drawBtn" class="secondary">✏️ Dessiner</button>
+                    <select id="drawTypeSelect" title="Type de composant">
+                      {% for component_type in component_types %}
+                      {% if component_type != 'unknown' %}
+                      <option value="{{ component_type }}">{{ component_type }}</option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                    <button id="clearRectsBtn" class="danger-outline hidden">Effacer</button>
+                    <button id="saveMatchesBtn" class="primary hidden">Sauvegarder dans la bibliothèque</button>
+                    <span class="toolbar-spacer"></span>
+                    <button id="zoomOutBtn" class="secondary">-</button>
+                    <button id="resetViewBtn" class="secondary">Réinitialiser vue</button>
+                    <button id="zoomInBtn" class="secondary">+</button>
+                  </div>
+                </div>
+                <div id="dragOverlay" class="drag-overlay hidden">
+                  <div>
+                    <strong>Déposez votre schéma ici</strong>
+                    <p>PNG, JPG, BMP ou WEBP</p>
+                  </div>
+                </div>
+                <div id="viewerWrap" class="viewer-wrap">
+                  <canvas id="viewerCanvas"></canvas>
+                </div>
+              </div>
+
+              <aside class="side-column">
+                <section class="card stats-card">
+                  <div class="section-head">
+                    <h3>Statistiques</h3>
+                    <span id="componentCountBadge" class="badge">0 composant</span>
+                  </div>
+                  <div id="statsGrid" class="stats-grid"></div>
+                </section>
+
+                <section class="card list-card">
+                  <div class="section-head">
+                    <h3>Composants</h3>
+                    <span id="componentFilterLabel" class="muted">0 / 0</span>
+                  </div>
+                  <div id="componentList" class="component-list"></div>
+                </section>
+
+                <section class="card editor-card">
+                  <div class="section-head">
+                    <h3>Édition</h3>
+                    <button id="toggleBreakerBtn" class="secondary small hidden">Basculer disjoncteur</button>
+                  </div>
+                  <form id="componentEditorForm" class="editor-form">
+                    <label>
+                      <span>Nom</span>
+                      <input id="componentName" name="name" type="text">
+                    </label>
+                    <label>
+                      <span>Type</span>
+                      <select id="componentType" name="type">
+                        {% for component_type in component_types %}
+                        <option value="{{ component_type }}">{{ component_type }}</option>
+                        {% endfor %}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Tension</span>
+                      <input id="componentVoltage" name="voltage" type="text" placeholder="480V">
+                    </label>
+                    <label>
+                      <span>Calibre</span>
+                      <input id="componentRating" name="rating" type="text" placeholder="100A">
+                    </label>
+                    <label>
+                      <span>Fabricant</span>
+                      <input id="componentManufacturer" name="manufacturer" type="text" placeholder="ABB">
+                    </label>
+                    <button id="saveComponentBtn" type="submit" class="primary">Sauvegarder</button>
+                  </form>
+                </section>
+
+                <section class="card list-card">
+                  <div class="section-head">
+                    <h3>Bibliothèque</h3>
+                    <span id="libraryCountBadge" class="badge">0 templates</span>
+                  </div>
+                  <div id="libraryEntries" class="component-list"></div>
+                </section>
+              </aside>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="catalog">
+            <div class="card table-card">
+              <div class="section-head">
+                <h3>Catalogue de composants</h3>
+                <p class="muted">Agrégation des analyses réalisées.</p>
+              </div>
+              <div id="catalogTableWrap" class="table-wrap"></div>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="paths">
+            <div class="card paths-card">
+              <div class="section-head">
+                <h3>Chemins électriques</h3>
+                <p class="muted">Cliquez sur un chemin pour le mettre en évidence dans le schéma.</p>
+              </div>
+              <div id="pathsList" class="paths-list"></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="libraryDialog" class="modal">
+    <form method="dialog" class="modal-card" id="libraryForm">
+      <div class="modal-head">
+        <h3 id="libraryDialogTitle">Nouvelle bibliothèque</h3>
+        <button type="button" class="icon-close" data-close-dialog="libraryDialog">×</button>
+      </div>
+      <div class="modal-body">
+        <label>
+          <span>Nom</span>
+          <input id="libraryName" type="text" required>
+        </label>
+        <label>
+          <span>Description</span>
+          <textarea id="libraryDescription" rows="3"></textarea>
+        </label>
+        <label>
+          <span>Auteur</span>
+          <input id="libraryAuthor" type="text">
+        </label>
+        <label>
+          <span>Tags séparés par virgules</span>
+          <input id="libraryTags" type="text">
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" data-close-dialog="libraryDialog">Annuler</button>
+        <button id="saveLibraryBtn" type="submit" class="primary">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toastRegion" class="toast-region"></div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
